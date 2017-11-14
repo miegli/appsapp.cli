@@ -1,6 +1,6 @@
 {
-  "name": "appsapp",
-  "version": "1.0.1",
+  "name": "appsapp-cli",
+  "version": "1.0.2",
   "main": "index.js",
   "license": "MIT",
   "dependencies": {
@@ -19,10 +19,26 @@
     "replace-in-file": "^3.0.0",
     "sha1": "^1.1.1",
     "simple-git": "^1.81.1",
-    "touch": "^3.1.0"
+    "touch": "^3.1.0",
+    "appsapp-module": "^0.6.0"
   },
   "preferGlobal": false,
   "bin": {
     "appsapp": "./index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/miegli/appsapps.cli"
+  },
+  "author": {
+    "name": "Michael Egli",
+    "email": "michael.egli@appsapp.io"
+  },
+  "keywords": [
+    "angular", "ionic"
+  ],
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/miegli/appsapps.cli/issues"
   }
 }
