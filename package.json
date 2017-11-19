@@ -4,7 +4,7 @@
   "main": "index.js",
   "license": "MIT",
   "scripts": {
-    "p": "git add . && git commit -m 'new release' && git push && npm i && npm run build && npm publish dist && rm -rf ./node_modules"
+    "p": "git add . && git commit -m 'new release' && git push && npm i && npm publish && rm -rf ./node_modules"
   },
   "dependencies": {
     "chalk": "^2.3.0",
