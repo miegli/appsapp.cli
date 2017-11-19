@@ -12,7 +12,9 @@ var sha1 = require('sha1');
 var admin = require("firebase-admin");
 var encryption = require("./actions/encrypt");
 var build = require("./actions/build");
+var compile = require("./actions/compile");
 var Observable = require('rxjs/Observable').Observable;
+
 
 clear();
 console.log(
@@ -34,13 +36,17 @@ admin.initializeApp({
 });
 
 
+
+
+
 var execute = function () {
 
     return new Observable(function (observer) {
 
         let jobs = {
-            encryption: encryption,
-            build: build
+            //encryption: encryption,
+            //build: build,
+            compile: compile
         }
 
         let successCount = 0;
