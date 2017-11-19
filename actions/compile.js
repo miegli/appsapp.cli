@@ -9,7 +9,7 @@ var replace = require('replace-in-file');
 var chalk = require('chalk');
 var admin = require("firebase-admin");
 var tsProject = ts.createProject("tsconfig.json", {target: 'node', module: "commonjs", noExternalResolve: false});
-
+var Observable = require('rxjs/Observable').Observable;
 
 build = function () {
 
@@ -77,12 +77,33 @@ findModels = function () {
             });
 
             var db = admin.database();
-            var ref = db.ref('_model');
-            ref.set(build).then(() => {
+            let counter = 0;
+            let queue = new Observable(function (observer) {
+
+                Object.keys(build).forEach((model) => {
+                    var ref = db.ref('_config/'+model+'/constructor');
+                    ref.set(build[model]).then(() => {
+                        counter++;
+                        console.log(counter);
+                        if (counter >=  Object.keys(build).length) {
+                            observer.complete();
+                        } else {
+                            observer.next();
+                        }
+
+                    });
+                });
+
+            });
+
+            queue.subscribe((next) => {}, (err) => {}, (complete) => {
+
                 fs.unlink("./_tmpdist",function() {
                     status.stop();
                     resolve(chalk.green('Model constructors sucessfully uploaded.'));
                 });
+
+
             });
 
 
