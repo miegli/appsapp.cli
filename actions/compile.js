@@ -66,7 +66,7 @@ findModels = function () {
                         var match2 = regex2.exec(match[0]);
                         if (match2 && match2.length == 2) {
                             var classname = match2[1];
-                           build[classname] = wrapModelContructorFunction(match[0],classname);
+                           build[classname] = JSON.stringify(wrapModelContructorFunction(match[0],classname));
                         }
                     }
 

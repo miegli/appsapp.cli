@@ -1,8 +1,11 @@
 {
   "name": "appsapp-cli",
-  "version": "1.0.7",
+  "version": "1.0.8",
   "main": "index.js",
   "license": "MIT",
+  "scripts": {
+    "p": "git add . && git commit -m 'new release' && git push && npm i && npm run build && npm publish dist && rm -rf ./node_modules"
+  },
   "dependencies": {
     "chalk": "^2.3.0",
     "clear": "0.0.1",
