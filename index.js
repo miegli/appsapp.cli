@@ -11,7 +11,6 @@ var replace = require('replace-in-file');
 var sha1 = require('sha1');
 var admin = require("firebase-admin");
 var encryption = require("./actions/encrypt");
-var build = require("./actions/build");
 var compile = require("./actions/compile");
 var Observable = require('rxjs/Observable').Observable;
 
@@ -44,9 +43,8 @@ var execute = function () {
     return new Observable(function (observer) {
 
         let jobs = {
-            //encryption: encryption,
-            //build: build,
-            compile: compile
+            compile: compile,
+            encryption: encryption
         }
 
         let successCount = 0;
