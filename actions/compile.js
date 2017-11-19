@@ -10,6 +10,7 @@ var chalk = require('chalk');
 var admin = require("firebase-admin");
 var tsProject = ts.createProject("tsconfig.json", {target: 'node', module: "commonjs", noExternalResolve: false});
 var Observable = require('rxjs/Observable').Observable;
+const base64 = require('base-64');
 
 build = function () {
 
@@ -66,7 +67,7 @@ findModels = function () {
                         var match2 = regex2.exec(match[0]);
                         if (match2 && match2.length == 2) {
                             var classname = match2[1];
-                           build[classname] = JSON.stringify(wrapModelContructorFunction(match[0],classname));
+                           build[classname] = base64.encode(match[0].replace("var "+classname+ " =","global."+classname+ " ="));
                         }
                     }
 
@@ -113,15 +114,6 @@ findModels = function () {
 
 }
 
-wrapModelContructorFunction = function (string, classname) {
 
-    var output = 'if ('+classname+' == undefined) {';
-
-    output = output + '\n' + string + '\n }';
-
-    return output;
-
-
-}
 
 module.exports = build;
