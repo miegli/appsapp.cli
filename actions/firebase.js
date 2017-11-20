@@ -12,6 +12,10 @@ firebase = function (program) {
 
         var workingDir = path.dirname(fs.realpathSync(__filename));
 
+
+
+
+
         var status = new Spinner('Deploying firebase functions, please wait...');
         status.start();
 
@@ -21,11 +25,17 @@ firebase = function (program) {
             }
 
             var firebaserc = JSON.parse(data);
+
+
             if (program.project || (firebaserc.projects && firebaserc.projects.default)) {
 
                 cmd.get(
-                    'cd '+workingDir+'/.. &&  firebase use '+program.project ? program.project : firebaserc.projects.default+' && firebase deploy --only functions && cd '+files.getCurrentDirectory(),
+                    'cd '+workingDir+'/.. && firebase use '+(program && program.project ? program.project : firebaserc.projects.default)+' && firebase deploy --only functions && cd '+files.getCurrentDirectory(),
                     function(err, data, stderr){
+                        console.log(err);
+                        console.log(data);
+                        console.log(stderr);
+
                         status.stop();
                         if (err) {
                             reject(err);

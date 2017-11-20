@@ -53,8 +53,8 @@ var execute = function () {
     return new Observable(function (observer) {
 
         let jobs = {
-            compile: compile,
-            encryption: encryption,
+            //compile: compile,
+            //encryption: encryption,
             firebase: firebase
         }
 
@@ -84,8 +84,6 @@ var execute = function () {
 
 
 if (program.watch) {
-
-
 
 
     encryption(program).then((next) => {

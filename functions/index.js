@@ -217,8 +217,17 @@ exports.connectEvents = functions.database.ref('_events/{actionid}').onCreate(ev
       });
       resolve(data);
     }).catch((error) => {
-      console.log(error);
-      reject(error);
+
+        admin.database().ref('_events/' + identifier).remove().then(function () {
+            if (actiondata.target !== undefined && actiondata.target) {
+                admin.database().ref(actiondata.target + "/action/" + actiondata.actionid).set({state: 'error', message: 'Validation error, please try again. If this error persists, please contact the system administrator.'}).then(function () {
+                    reject(error);
+                });
+            } else {
+                reject(error);
+            }
+        });
+
     });
 
   });
@@ -272,7 +281,7 @@ function call(action, data) {
                 });
 
               }).catch((err) => {
-                reject(err);
+                  reject(err);
               });
 
             });
