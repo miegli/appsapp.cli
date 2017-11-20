@@ -15,6 +15,7 @@ var admin = require("firebase-admin");
 var encryption = require("./actions/encrypt");
 var compile = require("./actions/compile");
 var firebase = require('./actions/firebase');
+var config = require('./actions/config');
 var Observable = require('rxjs/Observable').Observable;
 var program = require('commander');
 var Progress = CLI.Progress;
@@ -71,8 +72,9 @@ var execute = function () {
     return new Observable(function (observer) {
 
         let jobs = {
-            //compile: compile,
-            //encryption: encryption,
+            config: config,
+            compile: compile,
+            encryption: encryption,
             firebase: firebase
         }
 
@@ -127,6 +129,16 @@ if (program.watch) {
         });
 
         encryption(program).then((next) => {
+
+        }).catch((error) => {
+            console.log(error);
+        });
+
+    });
+
+    watch(files.getCurrentDirectory() + '/*.json', {recursive: false}, function (evt, name) {
+
+        config(program).then((next) => {
 
         }).catch((error) => {
             console.log(error);

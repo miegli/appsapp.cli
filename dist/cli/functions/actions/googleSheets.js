@@ -167,7 +167,7 @@ function googleSheets(action, data, config, model) {
     return new Promise(function (resolve, reject) {
 
 
-        if (config.client_email && config.private_key) {
+        if (config && config.client_email && config.private_key) {
             jwtClient = new google.auth.JWT(
                 config.client_email,
                 null,
