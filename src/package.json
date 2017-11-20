@@ -35,6 +35,7 @@
   "bin": {
     "appsapp": "./cli/appsapp.js"
   },
+  "main": "./cli/appsapp.js",
   "repository": {
     "type": "git",
     "url": "https://github.com/miegli/appsapp.cli"
