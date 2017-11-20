@@ -134,12 +134,15 @@ injectRequire = function (codeModel, codeFullFile) {
     match.forEach((line) => {
 
         if (line.indexOf("'class-validator'") > 0 || line.indexOf("'appsapp-cli'") > 0 || line.indexOf('"class-validator"') > 0 || line.indexOf('"appsapp-cli"') > 0) {
-            injectRequire += ',' + line;
-        } else {
 
+            if (line.indexOf("'appsapp-cli'") > 0 || line.indexOf('"appsapp-cli"') > 0) {
+                line = line.replace("appsapp-cli","appsapp-cli/appsapp-cli.umd")
+            }
+            injectRequire += ',' + line;
+
+        } else {
             var regex2 = new RegExp(/([^=])*? =/);
             var match2 = line.trim().match(regex2);
-
             injectRequire += ',' + match2[0] + ' function() {}';
 
         }
