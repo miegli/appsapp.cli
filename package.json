@@ -1,6 +1,6 @@
 {
   "name": "appsapp-cli",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "main": "appsapp.js",
   "license": "MIT",
   "scripts": {
