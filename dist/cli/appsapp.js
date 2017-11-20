@@ -27,11 +27,6 @@ console.log(
 );
 
 
-program
-    .version(package.version)
-    .option('-p, --project [project]', 'set firebase project/id to use')
-    .option('-w, --watch', 'watch for changes in source files and deploy backend functions automatically')
-    .parse(process.argv);
 
 
 if (!files.fileExists(files.getCurrentDirectory() + "/serviceAccountKey.json")) {
@@ -52,6 +47,13 @@ if (!files.fileExists(files.getCurrentDirectory()+'/.firebaserc')) {
 } else {
     var package = require(files.getCurrentDirectory()+'/package.json');
 }
+
+
+program
+    .version(package.version)
+    .option('-p, --project [project]', 'set firebase project/id to use')
+    .option('-w, --watch', 'watch for changes in source files and deploy backend functions automatically')
+    .parse(process.argv);
 
 
 var serviceAccount = require(files.getCurrentDirectory() + "/serviceAccountKey.json");
