@@ -12,11 +12,9 @@ var tsProject = ts.createProject("tsconfig.json", {target: 'node', module: "comm
 var Observable = require('rxjs/Observable').Observable;
 const base64 = require('base-64');
 
-build = function () {
+build = function (program) {
 
     return new Promise(function (resolve, reject) {
-
-
 
 
         gulp.task("compile", function () {
@@ -100,7 +98,7 @@ findModels = function () {
 
                 fs.unlink("./_tmpdist",function() {
                     status.stop();
-                    resolve(chalk.green('Model constructors sucessfully uploaded.'));
+                    resolve(chalk.green('Backend functions successfully updated.'));
                 });
 
 

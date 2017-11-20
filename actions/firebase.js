@@ -6,7 +6,7 @@ var path = require('path');
 var files = require('../lib/files');
 var chalk = require('chalk');
 
-firebase = function () {
+firebase = function (program) {
 
     return new Promise(function (resolve, reject) {
 
@@ -21,10 +21,10 @@ firebase = function () {
             }
 
             var firebaserc = JSON.parse(data);
-            if (firebaserc.projects && firebaserc.projects.default) {
+            if (program.project || (firebaserc.projects && firebaserc.projects.default)) {
 
                 cmd.get(
-                    'cd '+workingDir+'/.. &&  firebase use '+firebaserc.projects.default+' && firebase deploy --only functions && cd '+files.getCurrentDirectory(),
+                    'cd '+workingDir+'/.. &&  firebase use '+program.project ? program.project : firebaserc.projects.default+' && firebase deploy --only functions && cd '+files.getCurrentDirectory(),
                     function(err, data, stderr){
                         status.stop();
                         if (err) {

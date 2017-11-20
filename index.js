@@ -3,6 +3,7 @@ var chalk = require('chalk');
 var clear = require('clear');
 var CLI = require('clui');
 var figlet = require('figlet');
+var gulp = require('gulp');
 var Spinner = CLI.Spinner;
 var fs = require('fs');
 var glob = require('glob');
@@ -14,8 +15,10 @@ var encryption = require("./actions/encrypt");
 var compile = require("./actions/compile");
 var firebase = require('./actions/firebase');
 var Observable = require('rxjs/Observable').Observable;
-
-
+var program = require('commander');
+var package = require('./package.json');
+var Progress = CLI.Progress;
+var watch = require('node-watch');
 
 clear();
 console.log(
@@ -23,6 +26,14 @@ console.log(
         figlet.textSync('appsApp', {horizontalLayout: 'full'})
     )
 );
+
+
+program
+    .version(package.version)
+    .option('-p, --project [project]', 'set firebase project/id to use')
+    .option('-w, --watch', 'watch for changes in source files and deploy backend functions automatically')
+    .parse(process.argv);
+
 
 if (!files.fileExists(files.getCurrentDirectory() + "/serviceAccountKey.json")) {
     console.log(chalk.red('Error: ') + chalk('/serviceAccountKey.json not found. Please add firebase credential file in ') + chalk.yellow(files.getCurrentDirectory()));
@@ -37,9 +48,6 @@ admin.initializeApp({
 });
 
 
-
-
-
 var execute = function () {
 
     return new Observable(function (observer) {
@@ -52,12 +60,12 @@ var execute = function () {
 
         let successCount = 0;
 
-
         Object.keys(jobs).forEach((job) => {
             "use strict";
 
-            jobs[job]().then((next) => {
+            jobs[job](program).then((next) => {
                 successCount++;
+
                 observer.next(next);
                 if (Object.keys(jobs).length == successCount) {
                     observer.complete();
@@ -74,21 +82,56 @@ var execute = function () {
 
 };
 
-//
-execute().subscribe((next) => {
-   console.log(next);
-}, (err) => {
-    console.log(chalk.green(err));
-}, (done) => {
-    console.log(chalk.green('Done. '));
-    process.exit();
-});
+
+if (program.watch) {
+
+
+
+
+    encryption(program).then((next) => {
+
+        compile(program).then((next) => {
+            console.log('Is watching now ..'+ files.getCurrentDirectory() + '/www/build/main.js');
+        }).catch((error) => {
+            console.log(error);
+        });
+
+    }).catch((error) => {
+        console.log(error);
+    });
+
+
+    watch(files.getCurrentDirectory() + '/www/build/main.js', {recursive: true}, function (evt, name) {
+
+        compile(program).then((next) => {
+
+        }).catch((error) => {
+            console.log(error);
+        });
+
+        encryption(program).then((next) => {
+
+        }).catch((error) => {
+            console.log(error);
+        });
+
+    });
+
+} else {
+
+    execute().subscribe((next) => {
+      console.log(next);
+    }, (err) => {
+        console.log(err);
+    }, (done) => {
+        process.exit();
+    });
+
+}
 
 
 // set firebase config
 // firebase functions:config:set slack.url=https://hooks.slack.com/services/XXX
-
-// firebase deploy --only functions
 
 
 
