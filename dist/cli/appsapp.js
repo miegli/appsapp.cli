@@ -1,4 +1,5 @@
-#!/usr/bin/env node
+#!/usr/bin/env node --harmony
+
 var chalk = require('chalk');
 var clear = require('clear');
 var CLI = require('clui');

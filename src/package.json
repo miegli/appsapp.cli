@@ -1,6 +1,6 @@
 {
   "name": "appsapp-cli",
-  "version": "1.2.9",
+  "version": "1.3.0",
   "license": "MIT",
   "dependencies": {
     "chalk": "^2.3.0",
@@ -33,8 +33,9 @@
   },
   "preferGlobal": true,
   "bin": {
-    "appsapp": "cli/appsapp.js"
+    "appsapp": "./cli/appsapp.js"
   },
+  "main": "index.js",
   "repository": {
     "type": "git",
     "url": "https://github.com/miegli/appsapp.cli"

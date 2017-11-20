@@ -1,6 +1,6 @@
 {
   "name": "appsapp-cli",
-  "version": "1.2.9",
+  "version": "1.3.0",
   "license": "MIT",
   "scripts": {
     "build": "gulp build",
@@ -89,6 +89,7 @@
   "bin": {
     "appsapp": "cli/appsapp.js"
   },
+  "main": "index.js",
   "repository": {
     "type": "git",
     "url": "https://github.com/miegli/appsapp.cli"
