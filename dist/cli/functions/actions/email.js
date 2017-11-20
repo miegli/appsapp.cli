@@ -2,15 +2,15 @@ let nodemailer = require('nodemailer');
 let aws = require('aws-sdk');
 
 
-function email(action, data) {
+function email(action, data, config) {
   return new Promise(function (resolve, reject) {
 
 
     // configure AWS SDK
     aws.config.update({
-      "accessKeyId": 'AKIAIXHD4TILQQGMDFTQ',
-      "secretAccessKey": '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',
-      "region": "eu-west-1"
+      "accessKeyId": config.accessKeyId,
+      "secretAccessKey": config.secretAccessKey,
+      "region": config.region
     });
 
 // create Nodemailer SES transporter
@@ -41,21 +41,3 @@ function email(action, data) {
 }
 
 module.exports = email;
-
-//
-// email({
-//   date: 1510911736140,
-//   project: 'project',
-//   object: 'Test',
-//   objectid: '059b3129-4953-1a00-816e-c26aa442c715',
-//   user: 'U3vMSLbEneW6WUBCEIqOo7YpV0B2',
-//   action:
-//     {
-//       data: {to: 'michael.egli@phlu.ch', subject: 'testmail', from:'info@appsapp.io'},
-//       name: 'email',
-//       state: 'requested'
-//     },
-//   actionid: '55e3725ebb6bce9e52c3d30070941c782d974dfb',
-//   source: 'database',
-//   target: 'session/U3vMSLbEneW6WUBCEIqOo7YpV0B2/project/Test/059b3129-4953-1a00-816e-c26aa442c715'
-// }, {anrede: 'fff'});

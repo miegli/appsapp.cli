@@ -2,6 +2,7 @@
 var chalk = require('chalk');
 var clear = require('clear');
 var CLI = require('clui');
+var path = require('path');
 var figlet = require('figlet');
 var gulp = require('gulp');
 var Spinner = CLI.Spinner;
@@ -45,7 +46,8 @@ if (!files.fileExists(files.getCurrentDirectory()+'/.firebaserc')) {
     console.log(chalk.red('Error: ') + chalk('.firebaserc not found. Please run "firebase init" first and set a default project.'));
     process.exit(1);
 } else {
-    var package = require(files.getCurrentDirectory()+'/package.json');
+    var workingDir = path.dirname(fs.realpathSync(__filename));
+    var package = require(workingDir+'/package.json');
 }
 
 
