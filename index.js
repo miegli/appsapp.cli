@@ -12,7 +12,9 @@ var sha1 = require('sha1');
 var admin = require("firebase-admin");
 var encryption = require("./actions/encrypt");
 var compile = require("./actions/compile");
+var firebase = require('./actions/firebase');
 var Observable = require('rxjs/Observable').Observable;
+
 
 
 clear();
@@ -44,7 +46,8 @@ var execute = function () {
 
         let jobs = {
             compile: compile,
-            encryption: encryption
+            encryption: encryption,
+            firebase: firebase
         }
 
         let successCount = 0;
@@ -71,7 +74,7 @@ var execute = function () {
 
 };
 
-
+//
 execute().subscribe((next) => {
    console.log(next);
 }, (err) => {
@@ -84,3 +87,8 @@ execute().subscribe((next) => {
 
 // set firebase config
 // firebase functions:config:set slack.url=https://hooks.slack.com/services/XXX
+
+// firebase deploy --only functions
+
+
+

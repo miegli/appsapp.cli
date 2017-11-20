@@ -85,7 +85,6 @@ findModels = function () {
                     var ref = db.ref('_config/'+model+'/constructor');
                     ref.set(build[model]).then(() => {
                         counter++;
-                        console.log(counter);
                         if (counter >=  Object.keys(build).length) {
                             observer.complete();
                         } else {
