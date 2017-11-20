@@ -140,7 +140,7 @@ gulp.task('rollup:umd', function () {
       }
 
     }))
-    .pipe(rename('appsapp-module.umd.js'))
+    .pipe(rename('appsapp-cli.umd.js'))
     .pipe(gulp.dest(distFolder));
 });
 
