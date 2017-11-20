@@ -7,18 +7,7 @@ import {AngularFireAuth} from "angularfire2/auth";
 import {getFromContainer} from "class-validator";
 import {MetadataStorage} from "class-validator";
 import {UUID} from "angular2-uuid";
-
-export interface AppsappModuleProviderMessages {
-  saved: string,
-  processing: string,
-  wait: string,
-  done: string,
-  submitted: string,
-  submittedInBackground: string,
-  disconnected: string,
-  connected: string,
-  error: string
-};
+import {AppsappModuleProviderMessages} from "../interfaces/messages";
 
 
 export interface actionEmail {
