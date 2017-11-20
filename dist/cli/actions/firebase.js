@@ -29,19 +29,40 @@ firebase = function (program) {
 
             if (program.project || (firebaserc.projects && firebaserc.projects.default)) {
 
-                cmd.get(
-                    'cd '+workingDir+'/.. && firebase use '+(program && program.project ? program.project : firebaserc.projects.default)+' && firebase deploy --only functions && cd '+files.getCurrentDirectory(),
-                    function(err, data, stderr){
-                        status.stop();
-                        if (err) {
-                            reject(err);
-                        } else {
-                            resolve(chalk.green('Deploy complete!'));
+
+                let firebasejson = {
+                        "functions": {
+                            "source": workingDir + "/../functions"
                         }
-
-
                     }
-                );
+                ;
+
+
+                fs.writeFile(files.getCurrentDirectory()+'/firebase.json',JSON.stringify(firebasejson),function(err) {
+
+                    if (!err) {
+                        cmd.get(
+                            'firebase use '+(program && program.project ? program.project : firebaserc.projects.default)+' && firebase deploy --only functions',
+                            function(err, data, stderr){
+                                status.stop();
+                                if (err) {
+                                    reject(err);
+                                } else {
+                                    resolve(chalk.green('Deploy complete!'));
+                                }
+
+
+                            }
+                        );
+                    } else {
+                        reject(err);
+                    }
+
+
+                });
+
+
+
             } else {
                 reject('no default firebase project provided. please run firebase init first.');
             }

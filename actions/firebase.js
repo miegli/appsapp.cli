@@ -30,19 +30,11 @@ firebase = function (program) {
             if (program.project || (firebaserc.projects && firebaserc.projects.default)) {
 
 
-                let firebasejson = {
-                        "functions": {
-                            "source": workingDir + "/../functions"
-                        }
-                    }
-                ;
-
-
-                fs.writeFile(files.getCurrentDirectory()+'/firebase.json',JSON.stringify(firebasejson),function(err) {
+                fs.copy(workingDir + "/../functions",files.getCurrentDirectory()+"/functions",function(err) {
 
                     if (!err) {
                         cmd.get(
-                            'firebase use '+(program && program.project ? program.project : firebaserc.projects.default)+' && firebase deploy --only functions',
+                            'cd functions && npm install && cd ../ && firebase use '+(program && program.project ? program.project : firebaserc.projects.default)+' && firebase deploy --only functions',
                             function(err, data, stderr){
                                 status.stop();
                                 if (err) {
