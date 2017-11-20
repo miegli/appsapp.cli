@@ -176,9 +176,6 @@ function googleSheets(action, data, config, model) {
     return new Promise(function (resolve, reject) {
 
 
-
-        if (jwtClient) {
-
             getSpreadsheet(config && config.spreadsheet && config.spreadsheet.spreadsheetId ? config.spreadsheet.spreadsheetId : 'newsheet', 'unbekannt', data).then((response) => {
 
                 let res = response;
@@ -209,9 +206,7 @@ function googleSheets(action, data, config, model) {
                 console.log(err);
             });
 
-        } else {
-            reject('missing config.client_email & config.private_key for google auth jwt.');
-        }
+
 
 
     });
