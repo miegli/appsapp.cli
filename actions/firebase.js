@@ -32,10 +32,6 @@ firebase = function (program) {
                 cmd.get(
                     'cd '+workingDir+'/.. && firebase use '+(program && program.project ? program.project : firebaserc.projects.default)+' && firebase deploy --only functions && cd '+files.getCurrentDirectory(),
                     function(err, data, stderr){
-                        console.log(err);
-                        console.log(data);
-                        console.log(stderr);
-
                         status.stop();
                         if (err) {
                             reject(err);
