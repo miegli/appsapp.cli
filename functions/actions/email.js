@@ -8,8 +8,8 @@ function email(action, data, config) {
 
     // configure AWS SDK
     aws.config.update({
-      "accessKeyId": functions.config().amazon.accessKeyId,
-      "secretAccessKey": functions.config().amazon.secretAccessKey,
+      "accessKeyId": functions.config().amazon.accesskeyid,
+      "secretAccessKey": functions.config().amazon.secretaccesskey,
       "region": functions.config().amazon.region
     });
 

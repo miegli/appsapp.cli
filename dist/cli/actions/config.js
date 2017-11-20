@@ -39,7 +39,7 @@ config = function (program) {
                 var amazon = require(files.getCurrentDirectory() + "/amazonAccessKey.json");
                 jobCount++;
                 cmd.get(
-                    'firebase functions:config:set amazon.key="' + amazon.accessKeyId + '" amazon.secret="' + amazon.secretAccessKey + '" amazon.region="' + amazon.region + '" ',
+                    'firebase functions:config:set amazon.accessKeyId="' + amazon.accessKeyId + '" amazon.secretAccessKey="' + amazon.secretAccessKey + '" amazon.region="' + amazon.region + '" ',
                     function (err, data, stderr) {
                         if (err) {
                             reject(err);
@@ -58,7 +58,7 @@ config = function (program) {
             counter++;
             if (counter >= jobCount) {
                 status.stop();
-                resolve('configuration updated');
+                resolve(chalk.green('Configuration successfully updated.'));
             }
         }, (err) => {
         }, (complete) => {
