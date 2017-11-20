@@ -1,6 +1,6 @@
 {
   "name": "appsapp-cli",
-  "version": "1.2.2",
+  "version": "1.2.3",
   "main": "appsapp.js",
   "license": "MIT",
   "scripts": {
@@ -15,7 +15,7 @@
     "playground:build": "tsc -p playground -w",
     "playground": "concurrently \"npm run build:watch\" \"npm run playground:build\" \"npm run lite\"",
     "test": "tsc && karma start",
-    "p": "git add . && git commit -m 'new release' && git push && npm i && npm run build && npm publish"
+    "p": "git add . && git commit -m 'new release' && git push && npm i && npm run build && npm publish dist"
   },
   "devDependencies": {
     "@angular/common": "^4.0.0",

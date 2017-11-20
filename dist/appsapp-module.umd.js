@@ -1,7 +1,7 @@
 (function (global, factory) {
 	typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports, require('rxjs/Observable'), require('class-validator'), require('class-transformer'), require('angular2-uuid')) :
 	typeof define === 'function' && define.amd ? define(['exports', 'rxjs/Observable', 'class-validator', 'class-transformer', 'angular2-uuid'], factory) :
-	(factory((global['appsapp-module'] = {}),global.Observable,global.classValidator,global.classTransformer,global.angular2Uuid));
+	(factory((global['appsapp-cli'] = {}),global.Observable,global.classValidator,global.classTransformer,global.angular2Uuid));
 }(this, (function (exports,Observable,classValidator,classTransformer,angular2Uuid) { 'use strict';
 
 /**

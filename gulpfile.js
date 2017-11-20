@@ -13,6 +13,7 @@ const srcFolder = path.join(rootFolder, 'src');
 const tmpFolder = path.join(rootFolder, '.tmp');
 const buildFolder = path.join(rootFolder, 'build');
 const distFolder = path.join(rootFolder, 'dist');
+const distFolderCLI = path.join(rootFolder, 'dist/cli');
 
 /**
  * 1. Delete /dist folder
@@ -131,7 +132,7 @@ gulp.task('rollup:umd', function () {
       // The name to use for the module for UMD/IIFE bundles
       // (required for bundles with exports)
       // See "name" in https://rollupjs.org/#core-functionality
-      name: 'appsapp-module',
+      name: 'appsapp-cli',
 
       // See "globals" in https://rollupjs.org/#core-functionality
       globals: {
@@ -151,6 +152,14 @@ gulp.task('rollup:umd', function () {
 gulp.task('copy:build', function () {
   return gulp.src([`${buildFolder}/**/*`, `!${buildFolder}/**/*.js`])
     .pipe(gulp.dest(distFolder));
+});
+
+/**
+ * 7A. Copy all CLI build
+ */
+gulp.task('copy:buildCLI', function () {
+  return gulp.src([`${rootFolder}/actions/**/*`, `${rootFolder}/functions/**/*`, `${rootFolder}/lib/**/*`, `${rootFolder}/appsapp.js`], { base: rootFolder})
+    .pipe(gulp.dest(distFolderCLI));
 });
 
 /**
@@ -192,6 +201,7 @@ gulp.task('compile', function () {
     'rollup:fesm',
     'rollup:umd',
     'copy:build',
+    'copy:buildCLI',
     'copy:manifest',
     'copy:readme',
     'clean:build',
