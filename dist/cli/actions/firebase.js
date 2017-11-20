@@ -1,7 +1,7 @@
 var CLI = require('clui');
 var cmd=require('node-cmd');
 var Spinner = CLI.Spinner;
-var fs = require('fs');
+const fs = require('fs-extra')
 var path = require('path');
 var files = require('../lib/files');
 var chalk = require('chalk');
