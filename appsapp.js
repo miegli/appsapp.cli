@@ -136,7 +136,17 @@ if (program.watch) {
 
     });
 
-    watch(files.getCurrentDirectory() + '/*.json', {recursive: false}, function (evt, name) {
+    watch(files.getCurrentDirectory() + '/amazonAccessKey.json', {recursive: false}, function (evt, name) {
+
+        config(program).then((next) => {
+
+        }).catch((error) => {
+            console.log(error);
+        });
+
+    });
+
+    watch(files.getCurrentDirectory() + '/serviceAccountKey.json', {recursive: false}, function (evt, name) {
 
         config(program).then((next) => {
 

@@ -5,11 +5,20 @@ var sheets = google.sheets('v4');
 var drive = google.drive('v3');
 var email = require('./email');
 var jwtClient =null;
-
+const functions = require('firebase-functions');
 
 
 function authorize() {
     return new Promise(function (resolve, reject) {
+
+        jwtClient = new google.auth.JWT(
+            functions.config().google.client_email,
+            null,
+            functions.config().google.private_key,
+            ['https://www.googleapis.com/auth/spreadsheets', 'https://www.googleapis.com/auth/drive'], // an array of auth scopes
+            null
+        );
+
 
         jwtClient.authorize(function (err, tokens) {
 
@@ -167,15 +176,6 @@ function googleSheets(action, data, config, model) {
     return new Promise(function (resolve, reject) {
 
 
-        if (config && config.client_email && config.private_key) {
-            jwtClient = new google.auth.JWT(
-                config.client_email,
-                null,
-                config.private_key,
-                ['https://www.googleapis.com/auth/spreadsheets', 'https://www.googleapis.com/auth/drive'], // an array of auth scopes
-                null
-            );
-        }
 
         if (jwtClient) {
 

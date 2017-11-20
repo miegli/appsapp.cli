@@ -14,30 +14,52 @@ config = function (program) {
         var status = new Spinner('Updating configuration, please wait...');
         status.start();
 
+        var o = new Observable(function (observer) {
+        var jobCount = 0;
 
-        if (files.fileExists(files.getCurrentDirectory() + "/serviceAccountKey.json")) {
-            var google = require(files.getCurrentDirectory() + "/serviceAccountKey.json");
-            cmd.get(
-                'firebase functions:config:set google.client_email="'+google.client_email+'" google.private_key="'+google.private_key+'" ',
-                function(err, data, stderr){
-                    if (err) {
-                        reject(err);
+            if (files.fileExists(files.getCurrentDirectory() + "/serviceAccountKey.json")) {
+                var google = require(files.getCurrentDirectory() + "/serviceAccountKey.json");
+                jobCount++;
+                cmd.get(
+                    'firebase functions:config:set google.client_email="' + google.client_email + '" google.private_key="' + google.private_key + '" ',
+                    function (err, data, stderr) {
+                        if (err) {
+                            reject(err);
+                        } else {
+                            observer.next();
+                        }
                     }
-                }
-            );
+                );
+            }
+
+            if (files.fileExists(files.getCurrentDirectory() + "/amazonAccessKey.json")) {
+                var amazon = require(files.getCurrentDirectory() + "/amazonAccessKey.json");
+                jobCount++;
+                cmd.get(
+                    'firebase functions:config:set amazon.key="' + amazon.accessKeyId + '" amazon.secret="' + amazon.secretAccessKey + '" amazon.region="' + amazon.region + '" ',
+                    function (err, data, stderr) {
+                        if (err) {
+                            reject(err);
+                        } else {
+                            observer.next();
+                        }
+                    }
+                );
+            }
         }
 
-        if (files.fileExists(files.getCurrentDirectory() + "/amazonAccessKey.json")) {
-            var amazon = require(files.getCurrentDirectory() + "/amazonAccessKey.json");
-            cmd.get(
-                'firebase functions:config:set amazon.key="'+amazon.accessKeyId+'" amazon.secret="'+amazon.secretAccessKey+'" amazon.region="'+amazon.region+'" ',
-                function(err, data, stderr){
-                    if (err) {
-                        reject(err);
-                    }
-                }
-            );
-        }
+        var counter = 0;
+        o.subscribe((next) => {
+            "use strict";
+            counter++;
+            if (counter >= jobCount) {
+                resolve('configuration updated');
+            }
+        }, (err) => {}, (complete) => {
+            "use strict";
+            resolve('configuration updated');
+        });
+
 
 
 

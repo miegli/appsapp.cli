@@ -1,6 +1,6 @@
 let nodemailer = require('nodemailer');
 let aws = require('aws-sdk');
-
+const functions = require('firebase-functions');
 
 function email(action, data, config) {
   return new Promise(function (resolve, reject) {
@@ -8,9 +8,9 @@ function email(action, data, config) {
 
     // configure AWS SDK
     aws.config.update({
-      "accessKeyId": config.accessKeyId,
-      "secretAccessKey": config.secretAccessKey,
-      "region": config.region
+      "accessKeyId": functions.config().amazon.accessKeyId,
+      "secretAccessKey": functions.config().amazon.secretAccessKey,
+      "region": functions.config().amazon.region
     });
 
 // create Nodemailer SES transporter
