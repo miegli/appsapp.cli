@@ -16,7 +16,7 @@ var compile = require("./actions/compile");
 var firebase = require('./actions/firebase');
 var Observable = require('rxjs/Observable').Observable;
 var program = require('commander');
-var package = require('./package.json');
+var package = require(files.getCurrentDirectory()+'/package.json');
 var Progress = CLI.Progress;
 var watch = require('node-watch');
 
