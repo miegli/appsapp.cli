@@ -127,7 +127,7 @@ injectRequire = function (codeModel, codeFullFile) {
 
     match.forEach((line) => {
 
-        if (line.indexOf("'class-validator'") > 0 || line.indexOf("'appsapp-module'") > 0 || line.indexOf('"class-validator"') > 0 || line.indexOf('"appsapp-module"') > 0) {
+        if (line.indexOf("'class-validator'") > 0 || line.indexOf("'appsapp-cli'") > 0 || line.indexOf('"class-validator"') > 0 || line.indexOf('"appsapp-cli"') > 0) {
             injectRequire += ',' + line;
         } else {
 
