@@ -29,12 +29,7 @@ const admin = require('firebase-admin');
 admin.initializeApp(functions.config().firebase);
 const uuidV1 = require('uuid/v1');
 const request = require('request-promise');
-var classValidator = require("class-validator");
-var appsappcli = require("appsapp-cli");
-const persistable_1 = require("appsapp-cli/functions/models/persistable");
-const class_validator_1 = classValidator;
 const base64 = require('base-64');
-
 
 /**
  * load action modules
@@ -315,4 +310,7 @@ function decrypt(data) {
   });
 
 }
+
+
+
 
