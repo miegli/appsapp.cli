@@ -16,7 +16,6 @@ var compile = require("./actions/compile");
 var firebase = require('./actions/firebase');
 var Observable = require('rxjs/Observable').Observable;
 var program = require('commander');
-var package = require(files.getCurrentDirectory()+'/package.json');
 var Progress = CLI.Progress;
 var watch = require('node-watch');
 
@@ -36,9 +35,24 @@ program
 
 
 if (!files.fileExists(files.getCurrentDirectory() + "/serviceAccountKey.json")) {
-    console.log(chalk.red('Error: ') + chalk('/serviceAccountKey.json not found. Please add firebase credential file in ') + chalk.yellow(files.getCurrentDirectory()));
+    console.log(chalk.red('Error: ') + chalk('serviceAccountKey.json not found. Please add firebase credential file in ') + chalk.yellow(files.getCurrentDirectory()));
     process.exit(1);
 }
+
+if (!files.fileExists(files.getCurrentDirectory()+'/package.json')) {
+    console.log(chalk.red('Error: ') + chalk('package.json not found. Please run appsapp from your project root directoriy.'));
+    process.exit(1);
+} else {
+    var package = require(files.getCurrentDirectory()+'/package.json');
+}
+
+if (!files.fileExists(files.getCurrentDirectory()+'/.firebaserc')) {
+    console.log(chalk.red('Error: ') + chalk('.firebaserc not found. Please run "firebase init" first and set a default project.'));
+    process.exit(1);
+} else {
+    var package = require(files.getCurrentDirectory()+'/package.json');
+}
+
 
 var serviceAccount = require(files.getCurrentDirectory() + "/serviceAccountKey.json");
 
