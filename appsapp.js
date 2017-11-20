@@ -47,7 +47,7 @@ if (!files.fileExists(files.getCurrentDirectory()+'/.firebaserc')) {
     process.exit(1);
 } else {
     var workingDir = path.dirname(fs.realpathSync(__filename));
-    var package = require(workingDir+'/package.json');
+    var package = require(workingDir+'/../package.json');
 }
 
 

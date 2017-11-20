@@ -58,10 +58,11 @@ findModels = function () {
 
                 result.forEach((line) => {
 
-                    var regex = /var ([\w])+? = \/\*\* @class \*\/ [^]+?PersistableModel\)\);/g;
+
+                    var regex = /var ([\w])+? = [^]+?PersistableModel\)\);/g;
                     var match = regex.exec(line);
                     if (match) {
-                        var regex2 = /^var (\w+?) = \/\*\* @class \*\//gm;
+                        var regex2 = /^var (\w+?) =/gm;
                         var match2 = regex2.exec(match[0]);
                         if (match2 && match2.length == 2) {
                             var classname = match2[1];
@@ -73,6 +74,7 @@ findModels = function () {
                 });
 
 
+
             });
 
 
@@ -81,6 +83,10 @@ findModels = function () {
             var db = admin.database();
             let counter = 0;
             let queue = new Observable(function (observer) {
+
+                if (Object.keys(build).length == 0) {
+                    observer.complete();
+                }
 
                 Object.keys(build).forEach((model) => {
                     var ref = db.ref('_config/' + model + '/constructor');

@@ -43,7 +43,7 @@ findModels = function () {
         status.start();
 
         var buildFiles = function (src, callback) {
-            glob('./_tmpdist/pages/home/*.js', callback);
+            glob('./_tmpdist/**/*.js', callback);
         };
 
         buildFiles(files.getCurrentDirectory(), function (err, res) {
