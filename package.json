@@ -1,7 +1,7 @@
 {
   "name": "appsapp-cli",
-  "version": "1.1.6",
-  "main": "index.js",
+  "version": "1.2.0",
+  "main": "appsapp.js",
   "license": "MIT",
   "scripts": {
     "p": "git add . && git commit -m 'new release' && git push && npm i && npm publish"
@@ -28,11 +28,16 @@
     "rxjs": "^5.5.2",
     "base-64": "^0.1.0",
     "node-cmd": "^3.0.0",
-    "node-watch": "^0.5.5"
+    "node-watch": "^0.5.5",
+    "angular2-uuid": "^1.1.1",
+    "angularfire2": "=5.0.0-rc.0",
+    "class-transformer": "^0.1.8",
+    "class-validator": "^0.7.3",
+    "firebase": "^4.6.1"
   },
   "preferGlobal": false,
   "bin": {
-    "appsapp": "./index.js"
+    "appsapp": "./appsapp.js"
   },
   "repository": {
     "type": "git",

@@ -30,7 +30,8 @@ admin.initializeApp(functions.config().firebase);
 const uuidV1 = require('uuid/v1');
 const request = require('request-promise');
 var classValidator = require("class-validator");
-const persistable_1 = require('./models/persistable');
+var appsappcli = require("appsapp-cli");
+const persistable_1 = require("appsapp-cli/functions/models/persistable");
 const class_validator_1 = classValidator;
 const base64 = require('base-64');
 
@@ -251,7 +252,7 @@ function call(action, data) {
         admin.database().ref('_config/' + action.object).once('value', (snapshot) => {
 
           let config = snapshot.val();
-          let configAction = config[action.action.name] !== undefined ? config[action.action.name] : null;
+          let configAction = config && config[action.action.name] !== undefined ? config[action.action.name] : null;
 
           let model = false;
 

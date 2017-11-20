@@ -23,7 +23,7 @@ build = function (program) {
                 .js.pipe(gulp.dest("_tmpdist"));
         });
 
-        gulp.start('compile',function() {
+        gulp.start('compile', function () {
 
             findModels().then((next) => {
                 resolve(next);
@@ -50,9 +50,9 @@ findModels = function () {
             "use strict";
             let build = {};
 
+
             res.forEach((file) => {
 
-                // build[files.getBaseName(file).replace(".", "")] = fs.readFileSync(file).toString();
                 var string = fs.readFileSync(file).toString();
                 var result = string.split(/exports\.+[\w]+? = [\w]+?;/g); // String.prototype.split calls re[@@split].
 
@@ -65,7 +65,7 @@ findModels = function () {
                         var match2 = regex2.exec(match[0]);
                         if (match2 && match2.length == 2) {
                             var classname = match2[1];
-                           build[classname] = base64.encode(match[0].replace("var "+classname+ " =","global."+classname+ " ="));
+                            build[classname] = base64.encode(injectRequire(match[0].replace("var " + classname + " =", "global." + classname + " ="), string));
                         }
                     }
 
@@ -75,15 +75,18 @@ findModels = function () {
 
             });
 
+
+
+
             var db = admin.database();
             let counter = 0;
             let queue = new Observable(function (observer) {
 
                 Object.keys(build).forEach((model) => {
-                    var ref = db.ref('_config/'+model+'/constructor');
+                    var ref = db.ref('_config/' + model + '/constructor');
                     ref.set(build[model]).then(() => {
                         counter++;
-                        if (counter >=  Object.keys(build).length) {
+                        if (counter >= Object.keys(build).length) {
                             observer.complete();
                         } else {
                             observer.next();
@@ -94,9 +97,11 @@ findModels = function () {
 
             });
 
-            queue.subscribe((next) => {}, (err) => {}, (complete) => {
+            queue.subscribe((next) => {
+            }, (err) => {
+            }, (complete) => {
 
-                fs.unlink("./_tmpdist",function() {
+                fs.unlink("./_tmpdist", function () {
                     status.stop();
                     resolve(chalk.green('Backend functions successfully updated.'));
                 });
@@ -111,6 +116,36 @@ findModels = function () {
 
 }
 
+injectRequire = function (codeModel, codeFullFile) {
+    "use strict";
+
+    var injectRequire = 'var t=null';
+
+    var regex = new RegExp(/ ([\w_0-9])*? = require\(["|']([^\)]*?)["|']\)/g);
+    var match = codeFullFile.match(regex);
+
+
+    match.forEach((line) => {
+
+        if (line.indexOf("'class-validator'") > 0 || line.indexOf("'appsapp-module'") > 0 || line.indexOf('"class-validator"') > 0 || line.indexOf('"appsapp-module"') > 0) {
+            injectRequire += ',' + line;
+        } else {
+
+            var regex2 = new RegExp(/([^=])*? =/);
+            var match2 = line.trim().match(regex2);
+
+            injectRequire += ',' + match2[0] + ' function() {}';
+
+        }
+
+
+    });
+
+    injectRequire += ";\n";
+
+    return injectRequire + "\n" + codeModel;
+
+}
 
 
 module.exports = build;
