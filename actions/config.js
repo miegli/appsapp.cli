@@ -1,11 +1,13 @@
 var CLI = require('clui');
-var cmd=require('node-cmd');
+var cmd = require('node-cmd');
 var Spinner = CLI.Spinner;
 const fs = require('fs-extra')
 var path = require('path');
 var files = require('../lib/files');
 var chalk = require('chalk');
-var cmd=require('node-cmd');
+var cmd = require('node-cmd');
+var Observable = require('rxjs/Observable').Observable;
+
 
 config = function (program) {
 
@@ -13,9 +15,10 @@ config = function (program) {
 
         var status = new Spinner('Updating configuration, please wait...');
         status.start();
+        var jobCount = 0;
 
         var o = new Observable(function (observer) {
-        var jobCount = 0;
+
 
             if (files.fileExists(files.getCurrentDirectory() + "/serviceAccountKey.json")) {
                 var google = require(files.getCurrentDirectory() + "/serviceAccountKey.json");
@@ -23,6 +26,7 @@ config = function (program) {
                 cmd.get(
                     'firebase functions:config:set google.client_email="' + google.client_email + '" google.private_key="' + google.private_key + '" ',
                     function (err, data, stderr) {
+                        console.log(err);
                         if (err) {
                             reject(err);
                         } else {
@@ -46,22 +50,27 @@ config = function (program) {
                     }
                 );
             }
-        }
+        });
+
 
         var counter = 0;
         o.subscribe((next) => {
             "use strict";
             counter++;
             if (counter >= jobCount) {
+                status.stop();
                 resolve('configuration updated');
             }
-        }, (err) => {}, (complete) => {
+        }, (err) => {
+        }, (complete) => {
             "use strict";
             resolve('configuration updated');
         });
 
-
-
+        if (jobCount == 0) {
+            status.stop();
+            resolve('configuration updated');
+        }
 
     });
 
