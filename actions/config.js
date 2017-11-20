@@ -26,7 +26,6 @@ config = function (program) {
                 cmd.get(
                     'firebase functions:config:set google.client_email="' + google.client_email + '" google.private_key="' + google.private_key + '" ',
                     function (err, data, stderr) {
-                        console.log(err);
                         if (err) {
                             reject(err);
                         } else {
@@ -78,8 +77,3 @@ config = function (program) {
 
 
 module.exports = config;
-
-config(null).then(() => {
-    "use strict";
-
-});
