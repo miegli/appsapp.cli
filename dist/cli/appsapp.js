@@ -2,15 +2,8 @@
 var chalk = require('chalk');
 var clear = require('clear');
 var CLI = require('clui');
-var path = require('path');
 var figlet = require('figlet');
-var gulp = require('gulp');
-var Spinner = CLI.Spinner;
-var fs = require('fs');
-var glob = require('glob');
 var files = require('./lib/files');
-var replace = require('replace-in-file');
-var sha1 = require('sha1');
 var admin = require("firebase-admin");
 var encryption = require("./actions/encrypt");
 var compile = require("./actions/compile");
@@ -18,8 +11,8 @@ var firebase = require('./actions/firebase');
 var config = require('./actions/config');
 var Observable = require('rxjs/Observable').Observable;
 var program = require('commander');
-var Progress = CLI.Progress;
 var watch = require('node-watch');
+var Spinner = CLI.Spinner;
 
 clear();
 console.log(
@@ -29,6 +22,14 @@ console.log(
 );
 
 
+var package = require('./package.json');
+
+program
+    .version(package.version)
+    .option('-p, --project [project]', 'set firebase project/id to use')
+    .option('-w, --watch', 'watch for changes in source files and deploy backend functions automatically')
+    .parse(process.argv);
+
 
 
 if (!files.fileExists(files.getCurrentDirectory() + "/serviceAccountKey.json")) {
@@ -36,27 +37,13 @@ if (!files.fileExists(files.getCurrentDirectory() + "/serviceAccountKey.json")) 
     process.exit(1);
 }
 
-if (!files.fileExists(files.getCurrentDirectory()+'/package.json')) {
-    console.log(chalk.red('Error: ') + chalk('package.json not found. Please run appsapp from your project root directoriy.'));
-    process.exit(1);
-} else {
-    var package = require(files.getCurrentDirectory()+'/package.json');
-}
+
 
 if (!files.fileExists(files.getCurrentDirectory()+'/.firebaserc')) {
     console.log(chalk.red('Error: ') + chalk('.firebaserc not found. Please run "firebase init" first and set a default project.'));
     process.exit(1);
-} else {
-    var workingDir = path.dirname(fs.realpathSync(__filename));
-    var package = require(workingDir+'/../package.json');
 }
 
-
-program
-    .version(package.version)
-    .option('-p, --project [project]', 'set firebase project/id to use')
-    .option('-w, --watch', 'watch for changes in source files and deploy backend functions automatically')
-    .parse(process.argv);
 
 
 var serviceAccount = require(files.getCurrentDirectory() + "/serviceAccountKey.json");
@@ -110,7 +97,8 @@ if (program.watch) {
     encryption(program).then((next) => {
 
         compile(program).then((next) => {
-            console.log('Is watching now ..'+ files.getCurrentDirectory() + '/www/build/main.js');
+            var status = new Spinner("Is watching " + files.getCurrentDirectory() + '/www/build/main.js');
+            status.start();
         }).catch((error) => {
             console.log(error);
         });
@@ -167,10 +155,6 @@ if (program.watch) {
     });
 
 }
-
-
-// set firebase config
-// firebase functions:config:set slack.url=https://hooks.slack.com/services/XXX
 
 
 
