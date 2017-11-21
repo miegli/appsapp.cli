@@ -14,7 +14,10 @@
     "playground:build": "tsc -p playground -w",
     "playground": "concurrently \"npm run build:watch\" \"npm run playground:build\" \"npm run lite\"",
     "test": "tsc && karma start",
-    "p": "git add . && git commit -m 'new release' && git push && npm i && npm run build && npm publish dist"
+    "p": "git add . && git commit -m 'new release' && git push && npm i && npm run build && npm publish dist",
+    "preversion": "npm test",
+    "version": "npm run build && git add -A dist",
+    "postversion": "git push && git push --tags && rm -rf build/temp"
   },
   "devDependencies": {
     "@angular/common": "^4.0.0",
