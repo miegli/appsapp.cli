@@ -39,7 +39,7 @@ config = function (program) {
                 var amazon = require(files.getCurrentDirectory() + "/amazonAccessKey.json");
                 jobCount++;
                 cmd.get(
-                    'firebase functions:config:set amazon.accessKeyId="' + amazon.accessKeyId + '" amazon.secretAccessKey="' + amazon.secretAccessKey + '" amazon.region="' + amazon.region + '" ',
+                    'firebase functions:config:set amazon.accesskeyid="' + amazon.accessKeyId + '" amazon.secretaccesskey="' + amazon.secretAccessKey + '" amazon.region="' + amazon.region + '" ',
                     function (err, data, stderr) {
                         if (err) {
                             reject(err);
