@@ -13,7 +13,7 @@
     "lite": "lite-server",
     "playground:build": "tsc -p playground -w",
     "playground": "concurrently \"npm run build:watch\" \"npm run playground:build\" \"npm run lite\"",
-    "test": "tsc && karma start",
+    "test": "tsc",
     "p": "git add . && git commit -m 'new release' && git push && npm i && npm run build && npm publish dist",
     "preversion": "npm test",
     "version": "npm run build && git add -A dist",
