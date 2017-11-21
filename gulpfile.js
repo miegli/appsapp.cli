@@ -6,7 +6,10 @@ var gulp = require('gulp'),
   rename = require('gulp-rename'),
   del = require('del'),
   runSequence = require('run-sequence'),
-  inlineResources = require('./tools/gulp/inline-resources');
+  inlineResources = require('./tools/gulp/inline-resources'),
+  stringify = require("json-stringify-pretty-compact");
+
+var fs = require('fs');
 
 const rootFolder = path.join(__dirname);
 const srcFolder = path.join(rootFolder, 'src');
@@ -163,7 +166,31 @@ gulp.task('copy:buildCLI', function () {
 });
 
 /**
- * 8. Copy package.json from /src to /dist
+ * 8A. increment version for package.json
+ */
+gulp.task('version:manifest', function () {
+
+
+    var basePackage = require(`./package.json`);
+
+    var package = require(`${srcFolder}/package.json`);
+    package.version = basePackage.version;
+    fs.writeFile(`${srcFolder}/package.json`, stringify(package), function(e) {
+        //
+    });
+
+    var functionsPackage = require(`${srcFolder}/../functions/package.json`);
+    functionsPackage.dependencies['appsapp-cli'] = "^"+basePackage.version;
+
+    fs.writeFile(`${srcFolder}/../functions/package.json`, stringify(functionsPackage), function(e) {
+       //
+    });
+
+
+});
+
+/**
+ * 8B. Copy package.json from /src to /dist
  */
 gulp.task('copy:manifest', function () {
   return gulp.src([`${srcFolder}/package.json`])
@@ -202,6 +229,7 @@ gulp.task('compile', function () {
     'rollup:umd',
     'copy:build',
     'copy:buildCLI',
+    'version:manifest',
     'copy:manifest',
     'copy:readme',
     'clean:build',
@@ -224,10 +252,10 @@ gulp.task('watch', function () {
 });
 
 gulp.task('clean', ['clean:dist', 'clean:tmp', 'clean:build']);
-
 gulp.task('build', ['clean', 'compile']);
 gulp.task('build:watch', ['build', 'watch']);
 gulp.task('default', ['build:watch']);
+gulp.task('test', ['version:manifest']);
 
 /**
  * Deletes the specified folder

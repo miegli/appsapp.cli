@@ -84,7 +84,8 @@
     "class-transformer": "^0.1.8",
     "class-validator": "^0.7.3",
     "firebase": "^4.6.1",
-    "fs-extra": "^4.0.2"
+    "fs-extra": "^4.0.2",
+    "json-stringify-pretty-compact": "^1.0.4"
   },
   "preferGlobal": true,
   "bin": {
