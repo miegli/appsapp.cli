@@ -14,8 +14,6 @@ firebase = function (program) {
 
 
 
-
-
         var status = new Spinner('Deploying firebase functions, please wait...');
         status.start();
 
@@ -29,30 +27,33 @@ firebase = function (program) {
 
             if (program.project || (firebaserc.projects && firebaserc.projects.default)) {
 
+                fs.remove(files.getCurrentDirectory()+"/functions",function() {
 
-                fs.copy(workingDir + "/../functions",files.getCurrentDirectory()+"/functions",function(err) {
+                    fs.copy(workingDir + "/../functions",files.getCurrentDirectory()+"/functions",function(err) {
 
-                    if (!err) {
-                        cmd.get(
-                            'cd functions && npm install && cd ../ && firebase use '+(program && program.project ? program.project : firebaserc.projects.default)+' && firebase deploy --only functions',
-                            function(err, data, stderr){
-                                status.stop();
-                                if (err) {
-                                    reject(err);
-                                } else {
-                                    resolve(chalk.green('Deploy complete!'));
+                        if (!err) {
+                            cmd.get(
+                                'cd functions && npm install && cd ../ && firebase use '+(program && program.project ? program.project : firebaserc.projects.default)+' && firebase deploy --only functions',
+                                function(err, data, stderr){
+                                    status.stop();
+                                    if (err) {
+                                        reject(err);
+                                    } else {
+                                        resolve(chalk.green('Deploy complete!'));
+                                    }
+
+
                                 }
+                            );
+                        } else {
+                            reject(err);
+                        }
 
 
-                            }
-                        );
-                    } else {
-                        reject(err);
-                    }
+                    });
 
 
                 });
-
 
 
             } else {

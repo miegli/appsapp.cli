@@ -12,5 +12,4 @@ export * from './module/validation/validators/IsRating';
 export * from './module/validation/validators/IsText';
 export * from './module/validation/validators/IsNumpad';
 export * from './module/interfaces/messages';
-
 export * from 'class-validator/decorator/decorators'
