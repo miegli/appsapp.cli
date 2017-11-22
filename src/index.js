@@ -2,7 +2,7 @@
 function __export(m) {
     for (var p in m) if (!exports.hasOwnProperty(p)) exports[p] = m[p];
 }
-exports.__esModule = true;
+Object.defineProperty(exports, "__esModule", { value: true });
 __export(require("./module/models/persistable"));
 __export(require("./module/validation/validators/HasConditions"));
 __export(require("./module/validation/validators/HasDescription"));

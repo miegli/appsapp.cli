@@ -1,5 +1,5 @@
 "use strict";
-exports.__esModule = true;
+Object.defineProperty(exports, "__esModule", { value: true });
 var class_validator_1 = require("class-validator");
 var class_validator_2 = require("class-validator");
 function HasConditions(options, actionIfMatches, validationOptions) {

@@ -1,5 +1,5 @@
 "use strict";
-exports.__esModule = true;
+Object.defineProperty(exports, "__esModule", { value: true });
 var Observable_1 = require("rxjs/Observable");
 var class_validator_1 = require("class-validator");
 var class_transformer_1 = require("class-transformer");
@@ -129,7 +129,7 @@ var PersistableModel = /** @class */ (function () {
             if (self.__persistenceManager) {
                 self.__persistenceManager.action(self, observer, action).then(function (success) {
                     observer.complete();
-                })["catch"](function (error) {
+                }).catch(function (error) {
                     observer.error(error);
                 });
             }
@@ -213,7 +213,7 @@ var PersistableModel = /** @class */ (function () {
                         else {
                             observer.complete();
                         }
-                    })["catch"](function (error) {
+                    }).catch(function (error) {
                         self.__edited = {};
                         observer.error(error);
                     });
@@ -222,7 +222,7 @@ var PersistableModel = /** @class */ (function () {
                     observer.error('No persistence Manger provided');
                     self.__edited = {};
                 }
-            })["catch"](function (error) {
+            }).catch(function (error) {
                 observer.error(error);
             });
         });
@@ -238,7 +238,7 @@ var PersistableModel = /** @class */ (function () {
         if (this.__persistenceManager) {
             this.__persistenceManager.load(self).then(function (model) {
                 self.emit();
-            })["catch"](function (error) {
+            }).catch(function (error) {
                 console.log(error);
             });
         }
@@ -584,7 +584,7 @@ var PersistableModel = /** @class */ (function () {
             if (model) {
                 var propertiesWithValidationError_1 = {};
                 model.validate().then(function (success) {
-                })["catch"](function (error) {
+                }).catch(function (error) {
                     Object.keys(error).forEach(function (e) {
                         propertiesWithValidationError_1[e.property] = true;
                     });
