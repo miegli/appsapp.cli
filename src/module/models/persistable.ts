@@ -657,7 +657,7 @@ export abstract class PersistableModel {
             return this.serialize();
         }
 
-        let s = null;
+        let s = null, self = this;
 
         switch (this.getType(property)) {
 

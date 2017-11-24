@@ -440,6 +440,44 @@ var PersistableModel = /** @class */ (function () {
         }
     };
     /**
+     * get properties
+     * @param stringify
+     */
+    PersistableModel.prototype.getProperties = function (stringify) {
+        var properties = {}, self = this;
+        Object.keys(self).forEach(function (property) {
+            if (property.substr(0, 1) !== '_') {
+                if (stringify) {
+                    properties[property] = self.__toString(property);
+                }
+                else {
+                    properties[property] = self.getPropertyValue(property);
+                }
+            }
+        });
+        return properties;
+    };
+    /**
+     * return string representative from given property value
+     * @param property
+     * @param {boolean} get value is in editing mode
+     * @returns {any}
+     */
+    PersistableModel.prototype.__toString = function (property) {
+        if (property === undefined) {
+            return this.serialize();
+        }
+        var s = null;
+        switch (this.getType(property)) {
+            case '':
+                s = property;
+                break;
+            default:
+                s = JSON.stringify(self.getPropertyValue(property));
+        }
+        return s;
+    };
+    /**
      * set persistenceManager
      * @param persistenceManager
      * @returns {PersistableModel}
