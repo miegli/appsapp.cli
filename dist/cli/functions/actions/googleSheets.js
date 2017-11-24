@@ -47,7 +47,7 @@ function getSpreadsheet(spreadsheetId, title, data, config) {
                 drive.permissions.create({
                     auth: auth,
                     fileId: response.spreadsheetId,
-                    resource: config.spreadsheet.permissions ? config.spreadsheet.permissions : {
+                    resource: config && config.spreadsheet && config.spreadsheet.permissions ? config.spreadsheet.permissions : {
                         role: 'reader',
                         type: 'anyone',
                     }
