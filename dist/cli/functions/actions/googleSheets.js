@@ -348,7 +348,7 @@ function updateSheet(spreadsheet, data, auth, model, config) {
     var buildSheetConfigRequest = function (config) {
         return [{
             "updateSpreadsheetProperties": {
-                "properties": config.spreadsheet && config.spreadsheet.properties ? config.spreadsheet.properties : null,
+                "properties": config && config.spreadsheet && config.spreadsheet.properties ? config.spreadsheet.properties : null,
                 "fields": "title"
             }
         }]
