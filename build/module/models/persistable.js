@@ -1,11 +1,12 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-var Observable_1 = require("rxjs/Observable");
-var class_validator_1 = require("class-validator");
-var class_transformer_1 = require("class-transformer");
-var class_validator_2 = require("class-validator");
-var class_validator_3 = require("class-validator");
-var angular2_uuid_1 = require("angular2-uuid");
+import { Observable } from 'rxjs/Observable';
+import { validate, validateSync } from 'class-validator';
+import { plainToClass, serialize } from 'class-transformer';
+import { getFromContainer } from 'class-validator';
+import { MetadataStorage } from 'class-validator';
+import { UUID } from 'angular2-uuid';
+/**
+ * @abstract
+ */
 var PersistableModel = /** @class */ (function () {
     /**
      * PersistanceManager as an optional argument when changes were persisted to stable database
@@ -33,7 +34,7 @@ var PersistableModel = /** @class */ (function () {
         this.__conditionContraintsProperties = {};
         this.__conditionContraintsPropertiesValue = {};
         this.__conditionContraintsAffectedProperties = {};
-        this.__metadata = class_validator_2.getFromContainer(class_validator_3.MetadataStorage).getTargetValidationMetadatas(this.constructor, '');
+        this.__metadata = getFromContainer(MetadataStorage).getTargetValidationMetadatas(this.constructor, '');
         // check if all loaded metadata has corresponding properties
         this.__metadata.forEach(function (metadata) {
             if (_this[metadata.propertyName] == undefined) {
@@ -44,15 +45,15 @@ var PersistableModel = /** @class */ (function () {
     }
     /**
      *
-     * @private
+     * @return {?}
      */
     PersistableModel.prototype.__init = function () {
         var _this = this;
-        var self = this;
+        var /** @type {?} */ self = this;
         /**
          * create observerable and observer for handling the models data changes
          */
-        this.__observable = new Observable_1.Observable(function (observer) {
+        this.__observable = new Observable(function (observer) {
             self.__observer = observer;
             self.__observer.next(_this);
         });
@@ -76,11 +77,12 @@ var PersistableModel = /** @class */ (function () {
     };
     /**
      * update property
-     * @param property
-     * @param value
+     * @param {?} property
+     * @param {?} value
+     * @return {?}
      */
     PersistableModel.prototype.update = function (property, value) {
-        var observer = this.setProperty(property, value).setHasNoChanges(property).getPropertyObserver(property);
+        var /** @type {?} */ observer = this.setProperty(property, value).setHasNoChanges(property).getPropertyObserver(property);
         if (observer) {
             observer.next(value);
         }
@@ -94,7 +96,7 @@ var PersistableModel = /** @class */ (function () {
     };
     /**
      * call next method on observer
-     * @returns {PersistableModel}
+     * @return {?}
      */
     PersistableModel.prototype.emit = function () {
         if (this.__observer) {
@@ -104,11 +106,11 @@ var PersistableModel = /** @class */ (function () {
     };
     /**
      * save with optional observable
-     * @param action
-     * @returns {Promise<any>}
+     * @param {?=} action
+     * @return {?}
      */
     PersistableModel.prototype.saveWithPromise = function (action) {
-        var self = this;
+        var /** @type {?} */ self = this;
         return new Promise(function (resolve, reject) {
             self.save(action).subscribe(function (next) {
             }, function (error) {
@@ -120,12 +122,12 @@ var PersistableModel = /** @class */ (function () {
     };
     /**
      * execute cation
-     * @param action
-     * @returns {Promise<any>}
+     * @param {?} action
+     * @return {?}
      */
     PersistableModel.prototype.action = function (action) {
-        var self = this;
-        var observable = new Observable_1.Observable(function (observer) {
+        var /** @type {?} */ self = this;
+        var /** @type {?} */ observable = new Observable(function (observer) {
             if (self.__persistenceManager) {
                 self.__persistenceManager.action(self, observer, action).then(function (success) {
                     observer.complete();
@@ -148,12 +150,12 @@ var PersistableModel = /** @class */ (function () {
     };
     /**
      * save with optional observable
-     * @param action
-     * @param silent
-     * @returns {Observable<any>}
+     * @param {?=} action
+     * @param {?=} silent
+     * @return {?}
      */
     PersistableModel.prototype.save = function (action, silent) {
-        var self = this, observer = null;
+        var /** @type {?} */ self = this, /** @type {?} */ observer = null;
         self.executeSave(action).subscribe(function (next) {
             if (observer) {
                 observer.next(next);
@@ -182,21 +184,21 @@ var PersistableModel = /** @class */ (function () {
                 }
             }
         });
-        return new Observable_1.Observable(function (o) {
+        return new Observable(function (o) {
             observer = o;
         });
     };
     /**
      * save model and persist if is persistable
-     * @param {any} action as an optinal argument for transmitting additional action metadata
-     * @returns {Observable<any>}
+     * @param {?=} action
+     * @return {?}
      */
     PersistableModel.prototype.executeSave = function (action) {
-        var self = this;
+        var /** @type {?} */ self = this;
         Object.keys(self.__edited).forEach(function (property) {
             self[property] = self.__edited[property];
         });
-        return new Observable_1.Observable(function (observer) {
+        return new Observable(function (observer) {
             self.validate().then(function () {
                 self.setHasPendingChanges(true, action);
                 if (self.__persistenceManager) {
@@ -229,10 +231,10 @@ var PersistableModel = /** @class */ (function () {
     };
     /**
      * resets to previous data
-     * @returns {PersistableModel}
+     * @return {?}
      */
     PersistableModel.prototype.reset = function () {
-        var self = this;
+        var /** @type {?} */ self = this;
         self.__edited = {};
         self.emit();
         if (this.__persistenceManager) {
@@ -246,22 +248,22 @@ var PersistableModel = /** @class */ (function () {
     };
     /**
      * get models observer
-     * @returns {Observer<any>}
+     * @return {?}
      */
     PersistableModel.prototype.getObserver = function () {
         return this.__observer;
     };
     /**
      * get models obervable
-     * @returns {Observable<any>}
+     * @return {?}
      */
     PersistableModel.prototype.getObservable = function () {
         return this.__observable;
     };
     /**
      * set uuid
-     * @param uuid
-     * @returns {PersistableModel}
+     * @param {?} uuid
+     * @return {?}
      */
     PersistableModel.prototype.setUuid = function (uuid) {
         this.__uuid = uuid;
@@ -269,7 +271,7 @@ var PersistableModel = /** @class */ (function () {
     };
     /**
      * get uuid
-     * @returns {string}
+     * @return {?}
      */
     PersistableModel.prototype.getUuid = function () {
         return this.__uuid;
@@ -277,19 +279,20 @@ var PersistableModel = /** @class */ (function () {
     /**
      * get models constructors name as an object identifier
      * return {string}
+     * @return {?}
      */
     PersistableModel.prototype.getObjectIdentifier = function () {
         return this.constructor.name;
     };
     /**
      * set firebaseDatabase
-     * @param {AngularFireDatabase}
-     * @returns {PersistableModel}
+     * @param {?} firebaseDatabase
+     * @return {?}
      */
     PersistableModel.prototype.setFirebaseDatabase = function (firebaseDatabase) {
         this.__firebaseDatabase = firebaseDatabase;
-        var self = this;
-        var connectedRef = this.__firebaseDatabase.app.database().ref(".info/connected");
+        var /** @type {?} */ self = this;
+        var /** @type {?} */ connectedRef = this.__firebaseDatabase.app.database().ref(".info/connected");
         connectedRef.on("value", function (snap) {
             self.__isOnline = snap.val();
             if (self.__persistenceManager && self.__isOnline) {
@@ -312,15 +315,15 @@ var PersistableModel = /** @class */ (function () {
     };
     /**
      * get firebase database
-     * @returns {AngularFireDatabase}
+     * @return {?}
      */
     PersistableModel.prototype.getFirebaseDatabase = function () {
         return this.__firebaseDatabase;
     };
     /**
      * set firebase database path
-     * @param path
-     * @returns {PersistableModel}
+     * @param {?} path
+     * @return {?}
      */
     PersistableModel.prototype.setFirebaseDatabasePath = function (path) {
         this.__firebaseDatabasePath = path;
@@ -329,15 +332,15 @@ var PersistableModel = /** @class */ (function () {
     };
     /**
      * get firebase database path
-     * @returns {string}
+     * @return {?}
      */
     PersistableModel.prototype.getFirebaseDatabasePath = function () {
         return this.__firebaseDatabasePath;
     };
     /**
      * set firebaseDatabaseObject
-     * @param firebaseDatabaseObject
-     * @returns {PersistableModel}
+     * @param {?} firebaseDatabaseObject
+     * @return {?}
      */
     PersistableModel.prototype.setFirebaseDatabaseObject = function (firebaseDatabaseObject) {
         this.__angularFireObject = firebaseDatabaseObject;
@@ -345,22 +348,22 @@ var PersistableModel = /** @class */ (function () {
     };
     /**
      * get firebaseDatabaseObject
-     * @returns {AngularFireObject<any>}
+     * @return {?}
      */
     PersistableModel.prototype.getFirebaseDatabaseObject = function () {
         return this.__angularFireObject;
     };
     /**
      * get firebaseDatabase prefix
-     * @returns string
+     * @return {?} string
      */
     PersistableModel.prototype.getFirebaseDatabaseRoot = function () {
         return this.__firebaseDatabaseRoot;
     };
     /**
      * set firebase databse path prefix
-     * @param path
-     * @returns {PersistableModel}
+     * @param {?} path
+     * @return {?}
      */
     PersistableModel.prototype.setFirebaseDatabaseRoot = function (path) {
         this.__firebaseDatabaseRoot = path;
@@ -368,12 +371,13 @@ var PersistableModel = /** @class */ (function () {
     };
     /**
      * get obervable property for using as an binding variable
-     * @returns {Observable<any>}
+     * @param {?} property
+     * @return {?}
      */
     PersistableModel.prototype.getProperty = function (property) {
-        var self = this;
+        var /** @type {?} */ self = this;
         if (!self.__bindings[property]) {
-            self.__bindings[property] = new Observable_1.Observable(function (observer) {
+            self.__bindings[property] = new Observable(function (observer) {
                 self.__bindingsObserver[property] = observer;
             });
             window.setTimeout(function () {
@@ -386,7 +390,8 @@ var PersistableModel = /** @class */ (function () {
     };
     /**
      * get observer property for using as an binding variable
-     * @returns {Observer<any>}
+     * @param {?} property
+     * @return {?}
      */
     PersistableModel.prototype.getPropertyObserver = function (property) {
         if (this.__bindingsObserver[property]) {
@@ -398,8 +403,8 @@ var PersistableModel = /** @class */ (function () {
     };
     /**
      * set module provider messages
-     * @param {AppsappModuleProviderMessages} messages
-     * @returns {PersistableModel}
+     * @param {?} messages
+     * @return {?}
      */
     PersistableModel.prototype.setMessages = function (messages) {
         this.__messages = messages;
@@ -407,17 +412,17 @@ var PersistableModel = /** @class */ (function () {
     };
     /**
      * get modules providers message
-     * @param keyword
-     * @returns {any}
+     * @param {?} keyword
+     * @return {?}
      */
     PersistableModel.prototype.getMessage = function (keyword) {
         return this.__messages[keyword] == undefined ? keyword : this.__messages[keyword];
     };
     /**
      * set property value for using as an binding variable
-     * @param {string} property
-     * @param {any} value
-     * @returns {PersistableModel}
+     * @param {?} property
+     * @param {?} value
+     * @return {?}
      */
     PersistableModel.prototype.setProperty = function (property, value) {
         this[property] = value;
@@ -427,9 +432,9 @@ var PersistableModel = /** @class */ (function () {
     };
     /**
      * return current property value
-     * @param property
-     * @param {boolean} get value is in editing mode
-     * @returns {any}
+     * @param {?} property
+     * @param {?=} editing
+     * @return {?}
      */
     PersistableModel.prototype.getPropertyValue = function (property, editing) {
         if (editing) {
@@ -441,10 +446,11 @@ var PersistableModel = /** @class */ (function () {
     };
     /**
      * get properties
-     * @param stringify
+     * @param {?=} stringify
+     * @return {?}
      */
     PersistableModel.prototype.getProperties = function (stringify) {
-        var properties = {}, self = this;
+        var /** @type {?} */ properties = {}, /** @type {?} */ self = this;
         Object.keys(self).forEach(function (property) {
             if (property.substr(0, 1) !== '_') {
                 if (stringify) {
@@ -459,15 +465,14 @@ var PersistableModel = /** @class */ (function () {
     };
     /**
      * return string representative from given property value
-     * @param property
-     * @param {boolean} get value is in editing mode
-     * @returns {any}
+     * @param {?=} property
+     * @return {?}
      */
     PersistableModel.prototype.__toString = function (property) {
         if (property === undefined) {
             return this.serialize();
         }
-        var s = null, self = this;
+        var /** @type {?} */ s = null, /** @type {?} */ self = this;
         switch (this.getType(property)) {
             case '':
                 s = property;
@@ -479,24 +484,24 @@ var PersistableModel = /** @class */ (function () {
     };
     /**
      * set persistenceManager
-     * @param persistenceManager
-     * @returns {PersistableModel}
+     * @param {?} persistenceManager
+     * @return {?}
      */
     PersistableModel.prototype.setPersistanceManager = function (persistenceManager) {
         this.__persistenceManager = persistenceManager;
-        this.__uuid = angular2_uuid_1.UUID.UUID();
+        this.__uuid = UUID.UUID();
         return this;
     };
     /**
      * valid this object
-     * @param {boolean} softcheck
-     * @returns {Promise<any>}
+     * @param {?=} softcheck
+     * @return {?}
      */
     PersistableModel.prototype.validate = function (softcheck) {
-        var self = this;
+        var /** @type {?} */ self = this;
         return new Promise(function (resolve, reject) {
             self.removeConditionProperties();
-            class_validator_1.validate(self, { skipMissingProperties: true }).then(function (errors) {
+            validate(self, { skipMissingProperties: true }).then(function (errors) {
                 if (errors.length > 0) {
                     if (softcheck) {
                         resolve();
@@ -526,10 +531,10 @@ var PersistableModel = /** @class */ (function () {
     };
     /**
      * remove properties with invalid condition validators
-     * @returns {PersistableModel}
+     * @return {?}
      */
     PersistableModel.prototype.removeConditionProperties = function () {
-        var self = this;
+        var /** @type {?} */ self = this;
         if (self.__conditionActionIfMatchesRemovedProperties) {
             Object.keys(self.__conditionActionIfMatchesRemovedProperties).forEach(function (property) {
                 if (self.__conditionActionIfMatchesRemovedProperties[property]) {
@@ -544,13 +549,13 @@ var PersistableModel = /** @class */ (function () {
     };
     /**
      * get validation observable for given property
-     * @param {string} property
-     * @return {boolean}
+     * @param {?} property
+     * @return {?}
      */
     PersistableModel.prototype.getValidation = function (property) {
-        var self = this;
+        var /** @type {?} */ self = this;
         if (self.__validator[property] === undefined) {
-            self.__validator[property] = new Observable_1.Observable(function (observer) {
+            self.__validator[property] = new Observable(function (observer) {
                 self.__validatorObserver[property] = observer;
             });
         }
@@ -558,8 +563,8 @@ var PersistableModel = /** @class */ (function () {
     };
     /**
      * get condition observable for given property
-     * @param property
-     * @returns {Observable}
+     * @param {?} property
+     * @return {?}
      */
     PersistableModel.prototype.getCondition = function (property) {
         var _this = this;
@@ -568,7 +573,7 @@ var PersistableModel = /** @class */ (function () {
                 this.registerConditionValidators(true);
             }
             if (this.__conditionActionIfMatches[property] === undefined) {
-                this.__conditionActionIfMatches[property] = new Observable_1.Observable(function (observer) {
+                this.__conditionActionIfMatches[property] = new Observable(function (observer) {
                     _this.__conditionActionIfMatchesObserver[property] = observer;
                 });
             }
@@ -577,8 +582,8 @@ var PersistableModel = /** @class */ (function () {
     };
     /**
      * is the object/property on editing state
-     * @param {string} property as an optional argument
-     * @returns {boolean}
+     * @param {?=} property
+     * @return {?}
      */
     PersistableModel.prototype.hasChanges = function (property) {
         if (property) {
@@ -590,8 +595,8 @@ var PersistableModel = /** @class */ (function () {
     };
     /**
      * remove changes state
-     * @param {string} property as an optional argument
-     * @returns {boolean}
+     * @param {?=} property
+     * @return {?}
      */
     PersistableModel.prototype.setHasNoChanges = function (property) {
         if (property) {
@@ -612,15 +617,15 @@ var PersistableModel = /** @class */ (function () {
     };
     /**
      * load json data
-     * @param {object|string} stringified or real json object
-     * @returns {Promise<any>}
+     * @param {?} json
+     * @return {?}
      */
     PersistableModel.prototype.loadJson = function (json) {
-        var self = this;
-        var model = class_transformer_1.plainToClass(this.constructor, typeof json == 'string' ? JSON.parse(json) : json, { excludePrefixes: ["__"] });
+        var /** @type {?} */ self = this;
+        var /** @type {?} */ model = (plainToClass(/** @type {?} */ (this.constructor), typeof json == 'string' ? JSON.parse(json) : json, { excludePrefixes: ["__"] }));
         return new Promise(function (resolve, reject) {
             if (model) {
-                var propertiesWithValidationError_1 = {};
+                var /** @type {?} */ propertiesWithValidationError_1 = {};
                 model.validate().then(function (success) {
                 }).catch(function (error) {
                     Object.keys(error).forEach(function (e) {
@@ -644,9 +649,9 @@ var PersistableModel = /** @class */ (function () {
     };
     /**
      * transform type from metadata to avoid non matching data types
-     * @param property
-     * @param value
-     * @returns {any}
+     * @param {?} property
+     * @param {?} value
+     * @return {?}
      */
     PersistableModel.prototype.transformTypeFromMetadata = function (property, value) {
         if (this.getMetadata(property, 'isDate').length) {
@@ -665,16 +670,16 @@ var PersistableModel = /** @class */ (function () {
     };
     /**
      * has model pending changes that are not synchronised yet or not
-     * @returns {boolean}
+     * @return {?}
      */
     PersistableModel.prototype.hasPendingChanges = function () {
         return this._hasPendingChanges;
     };
     /**
      * set pending changes state
-     * @param {boolean} state
-     * @param {any} action as an optional argument
-     * @returns {PersistableModel}
+     * @param {?} state
+     * @param {?=} action
+     * @return {?}
      */
     PersistableModel.prototype.setHasPendingChanges = function (state, action) {
         if (state && this.__persistenceManager) {
@@ -688,17 +693,17 @@ var PersistableModel = /** @class */ (function () {
     };
     /**
      * serialize this object
-     * @param {boolean} noUnderScoreData
-     * @param {boolean} force returning as an real object, otherwise return stringified object
-     * @returns {any}
+     * @param {?=} noUnderScoreData
+     * @param {?=} asObject
+     * @return {?}
      */
     PersistableModel.prototype.serialize = function (noUnderScoreData, asObject) {
-        var json = '';
+        var /** @type {?} */ json = '';
         if (noUnderScoreData) {
-            json = class_transformer_1.serialize(this, { excludePrefixes: ["__", "_"] });
+            json = serialize(this, { excludePrefixes: ["__", "_"] });
         }
         else {
-            json = class_transformer_1.serialize(this, { excludePrefixes: ["__"] });
+            json = serialize(this, { excludePrefixes: ["__"] });
         }
         if (asObject) {
             return JSON.parse(json);
@@ -709,21 +714,22 @@ var PersistableModel = /** @class */ (function () {
     };
     /**
      * get the persistence manger
-     * @returns {PersistenceManager}
+     * @return {?}
      */
     PersistableModel.prototype.getPersistanceManager = function () {
         return this.__persistenceManager;
     };
     /**
      * check if current network state is online
-     * @returns {boolean}
+     * @return {?}
      */
     PersistableModel.prototype.isOnline = function () {
         return this.__isOnline;
     };
     /**
      * set if model is connected to internet
-     * @param state
+     * @param {?} state
+     * @return {?}
      */
     PersistableModel.prototype.setIsOnline = function (state) {
         this.__isOnline = state;
@@ -731,12 +737,12 @@ var PersistableModel = /** @class */ (function () {
     };
     /**
      * get properties metatadata
-     * @param {string} property
-     * @param {string} type
-     * @returns {Array}
+     * @param {?=} property
+     * @param {?=} type
+     * @return {?}
      */
     PersistableModel.prototype.getMetadata = function (property, type) {
-        var validationMetadata = [];
+        var /** @type {?} */ validationMetadata = [];
         this.__metadata.forEach(function (metadata) {
             if (!property || metadata.propertyName == property) {
                 if (!type || metadata.type == type || (metadata.type == 'customValidation' && metadata.constraints && metadata.constraints[0].type == type)) {
@@ -748,9 +754,9 @@ var PersistableModel = /** @class */ (function () {
     };
     /**
      * get metadata contraints value
-     * @param property
-     * @param type
-     * @returns {any}
+     * @param {?} property
+     * @param {?} type
+     * @return {?}
      */
     PersistableModel.prototype.getMetadataValue = function (property, type) {
         if (this.getMetadata(property, type)[0] && this.getMetadata(property, type)[0].constraints) {
@@ -776,12 +782,12 @@ var PersistableModel = /** @class */ (function () {
     };
     /**
      * resolves input type for given property
-     * @param {string} property
-     * @returns {any}
+     * @param {?} property
+     * @return {?}
      */
     PersistableModel.prototype.getType = function (property) {
-        var type = null;
-        var typeMappings = {
+        var /** @type {?} */ type = null;
+        var /** @type {?} */ typeMappings = {
             'isString': 'text',
             'number': 'numberplain',
             'isPrecision': 'numberplain',
@@ -824,17 +830,17 @@ var PersistableModel = /** @class */ (function () {
     };
     /**
      * registers condition validators
-     * @param {boolean} prepare
-     * @returns {PersistableModel}
+     * @param {?} prepare
+     * @return {?}
      */
     PersistableModel.prototype.registerConditionValidators = function (prepare) {
-        var self = this;
+        var /** @type {?} */ self = this;
         self.__conditionBindings = { 'request': {}, 'properties': {} };
         this.getMetadata(null, 'hasConditions').forEach(function (validator) {
-            var hasRealtimeTypes = false;
+            var /** @type {?} */ hasRealtimeTypes = false;
             self.__conditionActionIfMatchesRemovedProperties[validator.propertyName] = true;
             if (self.__conditionActionIfMatches[validator.propertyName] == undefined) {
-                self.__conditionActionIfMatches[validator.propertyName] = new Observable_1.Observable(function (observer) {
+                self.__conditionActionIfMatches[validator.propertyName] = new Observable(function (observer) {
                     self.__conditionActionIfMatchesObserver[validator.propertyName] = observer;
                     self.__conditionActionIfMatchesObserver[validator.propertyName].next({
                         'action': self.__conditionActionIfMatchesAction[validator.propertyName],
@@ -888,8 +894,14 @@ var PersistableModel = /** @class */ (function () {
         // }
         return this;
     };
+    /**
+     * @param {?} property
+     * @param {?} chain
+     * @param {?} counter
+     * @return {?}
+     */
     PersistableModel.prototype.calculateCircularCondition = function (property, chain, counter) {
-        var self = this;
+        var /** @type {?} */ self = this;
         if (self.__conditionContraintsAffectedProperties[property] !== undefined) {
             Object.keys(self.__conditionContraintsAffectedProperties[property]).forEach(function (key) {
                 if (key == property) {
@@ -909,14 +921,14 @@ var PersistableModel = /** @class */ (function () {
     };
     /**
      *
-     * @param property
-     * @returns {PersistableModel}
+     * @param {?} property
+     * @return {?}
      */
     PersistableModel.prototype.executeConditionValidatorCircular = function (property) {
-        var self = this;
-        var circularChain = {}, counter = 0;
-        var obj = self.calculateCircularCondition(property, circularChain, counter);
-        var keys = Object.keys(obj);
+        var /** @type {?} */ self = this;
+        var /** @type {?} */ circularChain = {}, /** @type {?} */ counter = 0;
+        var /** @type {?} */ obj = self.calculateCircularCondition(property, circularChain, counter);
+        var /** @type {?} */ keys = Object.keys(obj);
         keys.sort(function (a, b) {
             return obj[a] - obj[b];
         });
@@ -928,17 +940,17 @@ var PersistableModel = /** @class */ (function () {
     };
     /**
      *
-     * @param property
-     * @returns {PersistableModel}
+     * @param {?} property
+     * @return {?}
      */
     PersistableModel.prototype.executeConditionValidator = function (property) {
-        var self = this;
+        var /** @type {?} */ self = this;
         if (self.__conditionContraintsProperties[property] !== undefined) {
             if (self.__conditionBindings['properties'][property] !== undefined) {
                 self.__conditionBindings['properties'][property].set(self.__conditionContraintsPropertiesValue[property]);
             }
         }
-        var result = class_validator_1.validateSync(self, { groups: ["condition_" + property] });
+        var /** @type {?} */ result = validateSync(self, { groups: ["condition_" + property] });
         if (result.length) {
             self.__conditionContraintsPropertiesValue[property] = null;
         }
@@ -956,7 +968,7 @@ var PersistableModel = /** @class */ (function () {
         }
         if (this.__conditionContraintsAffectedProperties[property] !== undefined) {
             Object.keys(this.__conditionContraintsAffectedProperties[property]).forEach(function (affectedProperty) {
-                var result = class_validator_1.validateSync(self, { groups: ["condition_" + affectedProperty] });
+                var /** @type {?} */ result = validateSync(self, { groups: ["condition_" + affectedProperty] });
                 self.__conditionActionIfMatchesObserver[affectedProperty].next({
                     action: self.__conditionActionIfMatchesAction[affectedProperty],
                     state: result.length ? true : false
@@ -972,13 +984,13 @@ var PersistableModel = /** @class */ (function () {
     };
     /**
      * recovers a missing property
-     * @param property
-     * @returns {PersistableModel}
+     * @param {?} property
+     * @return {?}
      */
     PersistableModel.prototype.recoverMissingProperty = function (property) {
         if (Object.keys(this).indexOf(property) == -1) {
             if (this.__temp[property] == undefined) {
-                var tmpmodel = class_transformer_1.plainToClass(this.constructor, {}, { excludePrefixes: ["__"] });
+                var /** @type {?} */ tmpmodel = (plainToClass(/** @type {?} */ (this.constructor), {}, { excludePrefixes: ["__"] }));
                 this[property] = tmpmodel[property];
             }
             else {
@@ -989,8 +1001,8 @@ var PersistableModel = /** @class */ (function () {
     };
     /**
      * set notificationProvider
-     * @param notificationProvider
-     * @returns {PersistableModel}
+     * @param {?} notificationProvider
+     * @return {?}
      */
     PersistableModel.prototype.setNotificationProvider = function (notificationProvider) {
         this.__notificationProvider = notificationProvider;
@@ -998,9 +1010,9 @@ var PersistableModel = /** @class */ (function () {
     };
     /**
      * send notification message to user
-     * @param message
-     * @param error
-     * @returns {PersistableModel}
+     * @param {?} message
+     * @param {?=} error
+     * @return {?}
      */
     PersistableModel.prototype.notify = function (message, error) {
         this.__notificationProvider(message, error);
@@ -1008,4 +1020,64 @@ var PersistableModel = /** @class */ (function () {
     };
     return PersistableModel;
 }());
-exports.PersistableModel = PersistableModel;
+export { PersistableModel };
+function PersistableModel_tsickle_Closure_declarations() {
+    /** @type {?} */
+    PersistableModel.prototype.__observer;
+    /** @type {?} */
+    PersistableModel.prototype.__observable;
+    /** @type {?} */
+    PersistableModel.prototype.__uuid;
+    /** @type {?} */
+    PersistableModel.prototype.__firebaseDatabase;
+    /** @type {?} */
+    PersistableModel.prototype.__firebaseDatabasePath;
+    /** @type {?} */
+    PersistableModel.prototype.__firebaseDatabaseRoot;
+    /** @type {?} */
+    PersistableModel.prototype.__angularFireObject;
+    /** @type {?} */
+    PersistableModel.prototype.__bindings;
+    /** @type {?} */
+    PersistableModel.prototype.__bindingsObserver;
+    /** @type {?} */
+    PersistableModel.prototype.__validator;
+    /** @type {?} */
+    PersistableModel.prototype.__validatorObserver;
+    /** @type {?} */
+    PersistableModel.prototype.__edited;
+    /** @type {?} */
+    PersistableModel.prototype.__temp;
+    /** @type {?} */
+    PersistableModel.prototype.__forceUpdateProperty;
+    /** @type {?} */
+    PersistableModel.prototype.__persistenceManager;
+    /** @type {?} */
+    PersistableModel.prototype.__isOnline;
+    /** @type {?} */
+    PersistableModel.prototype.__validationErrors;
+    /** @type {?} */
+    PersistableModel.prototype.__metadata;
+    /** @type {?} */
+    PersistableModel.prototype._hasPendingChanges;
+    /** @type {?} */
+    PersistableModel.prototype.__conditionBindings;
+    /** @type {?} */
+    PersistableModel.prototype.__conditionActionIfMatches;
+    /** @type {?} */
+    PersistableModel.prototype.__conditionActionIfMatchesAction;
+    /** @type {?} */
+    PersistableModel.prototype.__conditionActionIfMatchesObserver;
+    /** @type {?} */
+    PersistableModel.prototype.__conditionActionIfMatchesRemovedProperties;
+    /** @type {?} */
+    PersistableModel.prototype.__conditionContraintsProperties;
+    /** @type {?} */
+    PersistableModel.prototype.__conditionContraintsPropertiesValue;
+    /** @type {?} */
+    PersistableModel.prototype.__conditionContraintsAffectedProperties;
+    /** @type {?} */
+    PersistableModel.prototype.__messages;
+    /** @type {?} */
+    PersistableModel.prototype.__notificationProvider;
+}

@@ -1,0 +1,163 @@
+0 info it worked if it ends with ok
+1 verbose cli [ '/usr/local/bin/node',
+1 verbose cli   '/usr/local/bin/npm',
+1 verbose cli   'update',
+1 verbose cli   'appsapp-cli' ]
+2 info using npm@3.10.10
+3 info using node@v6.11.1
+4 silly mapToRegistry name appsapp-cli
+5 silly mapToRegistry using default registry
+6 silly mapToRegistry registry https://registry.npmjs.org/
+7 silly mapToRegistry data Result {
+7 silly mapToRegistry   raw: 'appsapp-cli',
+7 silly mapToRegistry   scope: null,
+7 silly mapToRegistry   escapedName: 'appsapp-cli',
+7 silly mapToRegistry   name: 'appsapp-cli',
+7 silly mapToRegistry   rawSpec: '',
+7 silly mapToRegistry   spec: 'latest',
+7 silly mapToRegistry   type: 'tag' }
+8 silly mapToRegistry uri https://registry.npmjs.org/appsapp-cli
+9 verbose request uri https://registry.npmjs.org/appsapp-cli
+10 verbose request no auth needed
+11 info attempt registry request try #1 at 4:51:18 PM
+12 verbose request using bearer token for auth
+13 verbose request id 6c58f0e673b21580
+14 verbose etag W/"5a1530e9-1527b"
+15 verbose lastModified Wed, 22 Nov 2017 08:10:17 GMT
+16 http request GET https://registry.npmjs.org/appsapp-cli
+17 http 304 https://registry.npmjs.org/appsapp-cli
+18 verbose headers { server: 'nginx/1.10.1',
+18 verbose headers   'last-modified': 'Wed, 22 Nov 2017 08:10:17 GMT',
+18 verbose headers   etag: '"5a1530e9-1527b"',
+18 verbose headers   'cache-control': 'max-age=300',
+18 verbose headers   'accept-ranges': 'bytes',
+18 verbose headers   date: 'Fri, 24 Nov 2017 15:51:18 GMT',
+18 verbose headers   via: '1.1 varnish',
+18 verbose headers   connection: 'keep-alive',
+18 verbose headers   'x-served-by': 'cache-hhn1541-HHN',
+18 verbose headers   'x-cache': 'MISS',
+18 verbose headers   'x-cache-hits': '0',
+18 verbose headers   'x-timer': 'S1511538678.181133,VS0,VE1',
+18 verbose headers   vary: 'Accept-Encoding, Accept' }
+19 silly get cb [ 304,
+19 silly get   { server: 'nginx/1.10.1',
+19 silly get     'last-modified': 'Wed, 22 Nov 2017 08:10:17 GMT',
+19 silly get     etag: '"5a1530e9-1527b"',
+19 silly get     'cache-control': 'max-age=300',
+19 silly get     'accept-ranges': 'bytes',
+19 silly get     date: 'Fri, 24 Nov 2017 15:51:18 GMT',
+19 silly get     via: '1.1 varnish',
+19 silly get     connection: 'keep-alive',
+19 silly get     'x-served-by': 'cache-hhn1541-HHN',
+19 silly get     'x-cache': 'MISS',
+19 silly get     'x-cache-hits': '0',
+19 silly get     'x-timer': 'S1511538678.181133,VS0,VE1',
+19 silly get     vary: 'Accept-Encoding, Accept' } ]
+20 verbose etag https://registry.npmjs.org/appsapp-cli from cache
+21 verbose get saving appsapp-cli to /Users/pamegli/.npm/registry.npmjs.org/appsapp-cli/.cache.json
+22 verbose correctMkdir /Users/pamegli/.npm correctMkdir not in flight; initializing
+23 silly cache add args [ 'appsapp-cli', '^1.6.4' ]
+24 verbose cache add spec appsapp-cli@^1.6.4
+25 silly cache add parsed spec Result {
+25 silly cache add   raw: 'appsapp-cli@^1.6.4',
+25 silly cache add   scope: null,
+25 silly cache add   escapedName: 'appsapp-cli',
+25 silly cache add   name: 'appsapp-cli',
+25 silly cache add   rawSpec: '^1.6.4',
+25 silly cache add   spec: '>=1.6.4 <2.0.0',
+25 silly cache add   type: 'range' }
+26 silly addNamed appsapp-cli@>=1.6.4 <2.0.0
+27 verbose addNamed ">=1.6.4 <2.0.0" is a valid semver range for appsapp-cli
+28 silly addNameRange { name: 'appsapp-cli', range: '>=1.6.4 <2.0.0', hasData: false }
+29 silly mapToRegistry name appsapp-cli
+30 silly mapToRegistry using default registry
+31 silly mapToRegistry registry https://registry.npmjs.org/
+32 silly mapToRegistry data Result {
+32 silly mapToRegistry   raw: 'appsapp-cli',
+32 silly mapToRegistry   scope: null,
+32 silly mapToRegistry   escapedName: 'appsapp-cli',
+32 silly mapToRegistry   name: 'appsapp-cli',
+32 silly mapToRegistry   rawSpec: '',
+32 silly mapToRegistry   spec: 'latest',
+32 silly mapToRegistry   type: 'tag' }
+33 silly mapToRegistry uri https://registry.npmjs.org/appsapp-cli
+34 verbose addNameRange registry:https://registry.npmjs.org/appsapp-cli not in flight; fetching
+35 verbose get https://registry.npmjs.org/appsapp-cli not expired, no request
+36 silly addNameRange number 2 { name: 'appsapp-cli', range: '>=1.6.4 <2.0.0', hasData: true }
+37 silly addNameRange versions [ 'appsapp-cli',
+37 silly addNameRange   [ '1.0.1',
+37 silly addNameRange     '1.0.2',
+37 silly addNameRange     '1.0.3',
+37 silly addNameRange     '1.0.4',
+37 silly addNameRange     '1.0.5',
+37 silly addNameRange     '1.0.6',
+37 silly addNameRange     '1.0.7',
+37 silly addNameRange     '1.0.8',
+37 silly addNameRange     '1.0.9',
+37 silly addNameRange     '1.1.0',
+37 silly addNameRange     '1.1.1',
+37 silly addNameRange     '1.1.2',
+37 silly addNameRange     '1.1.4',
+37 silly addNameRange     '1.1.5',
+37 silly addNameRange     '1.1.6',
+37 silly addNameRange     '1.2.0',
+37 silly addNameRange     '1.2.1',
+37 silly addNameRange     '1.2.2',
+37 silly addNameRange     '1.2.3',
+37 silly addNameRange     '1.2.4',
+37 silly addNameRange     '1.2.6',
+37 silly addNameRange     '1.2.7',
+37 silly addNameRange     '1.2.8',
+37 silly addNameRange     '1.2.9',
+37 silly addNameRange     '1.3.0',
+37 silly addNameRange     '1.3.1',
+37 silly addNameRange     '1.3.2',
+37 silly addNameRange     '1.3.3',
+37 silly addNameRange     '1.3.4',
+37 silly addNameRange     '1.3.5',
+37 silly addNameRange     '1.3.6',
+37 silly addNameRange     '1.3.7',
+37 silly addNameRange     '1.3.8',
+37 silly addNameRange     '1.3.9',
+37 silly addNameRange     '1.4.0',
+37 silly addNameRange     '1.4.1',
+37 silly addNameRange     '1.4.2',
+37 silly addNameRange     '1.4.3',
+37 silly addNameRange     '1.4.4',
+37 silly addNameRange     '1.4.5',
+37 silly addNameRange     '1.4.6',
+37 silly addNameRange     '1.4.7',
+37 silly addNameRange     '1.4.8',
+37 silly addNameRange     '1.4.9',
+37 silly addNameRange     '1.5.0',
+37 silly addNameRange     '1.5.1',
+37 silly addNameRange     '1.6.1',
+37 silly addNameRange     '1.6.2',
+37 silly addNameRange     '1.6.3' ] ]
+38 verbose stack Error: No compatible version found: appsapp-cli@'>=1.6.4 <2.0.0'
+38 verbose stack Valid install targets:
+38 verbose stack 1.0.1, 1.0.2, 1.0.3, 1.0.4, 1.0.5, 1.0.6, 1.0.7, 1.0.8, 1.0.9, 1.1.0, 1.1.1, 1.1.2, 1.1.4, 1.1.5, 1.1.6, 1.2.0, 1.2.1, 1.2.2, 1.2.3, 1.2.4, 1.2.6, 1.2.7, 1.2.8, 1.2.9, 1.3.0, 1.3.1, 1.3.2, 1.3.3, 1.3.4, 1.3.5, 1.3.6, 1.3.7, 1.3.8, 1.3.9, 1.4.0, 1.4.1, 1.4.2, 1.4.3, 1.4.4, 1.4.5, 1.4.6, 1.4.7, 1.4.8, 1.4.9, 1.5.0, 1.5.1, 1.6.1, 1.6.2, 1.6.3
+38 verbose stack
+38 verbose stack     at installTargetsError (/usr/local/lib/node_modules/npm/lib/cache/add-named.js:292:12)
+38 verbose stack     at next (/usr/local/lib/node_modules/npm/lib/cache/add-named.js:270:19)
+38 verbose stack     at setData (/usr/local/lib/node_modules/npm/lib/cache/add-named.js:242:5)
+38 verbose stack     at RES (/usr/local/lib/node_modules/npm/node_modules/inflight/inflight.js:23:14)
+38 verbose stack     at f (/usr/local/lib/node_modules/npm/node_modules/once/once.js:25:25)
+38 verbose stack     at fixName (/usr/local/lib/node_modules/npm/lib/cache/add-named.js:30:5)
+38 verbose stack     at /usr/local/lib/node_modules/npm/lib/utils/pulse-till-done.js:20:8
+38 verbose stack     at CachingRegistryClient.get_ (/usr/local/lib/node_modules/npm/lib/cache/caching-client.js:126:16)
+38 verbose stack     at /usr/local/lib/node_modules/npm/lib/cache/caching-client.js:91:14
+38 verbose stack     at /usr/local/lib/node_modules/npm/node_modules/graceful-fs/graceful-fs.js:78:16
+39 verbose cwd /Users/pamegli/Documents/projects/appsapp.myApp/appsapp/functions
+40 error Darwin 16.7.0
+41 error argv "/usr/local/bin/node" "/usr/local/bin/npm" "update" "appsapp-cli"
+42 error node v6.11.1
+43 error npm  v3.10.10
+44 error code ETARGET
+45 error notarget No compatible version found: appsapp-cli@'>=1.6.4 <2.0.0'
+45 error notarget Valid install targets:
+45 error notarget 1.0.1, 1.0.2, 1.0.3, 1.0.4, 1.0.5, 1.0.6, 1.0.7, 1.0.8, 1.0.9, 1.1.0, 1.1.1, 1.1.2, 1.1.4, 1.1.5, 1.1.6, 1.2.0, 1.2.1, 1.2.2, 1.2.3, 1.2.4, 1.2.6, 1.2.7, 1.2.8, 1.2.9, 1.3.0, 1.3.1, 1.3.2, 1.3.3, 1.3.4, 1.3.5, 1.3.6, 1.3.7, 1.3.8, 1.3.9, 1.4.0, 1.4.1, 1.4.2, 1.4.3, 1.4.4, 1.4.5, 1.4.6, 1.4.7, 1.4.8, 1.4.9, 1.5.0, 1.5.1, 1.6.1, 1.6.2, 1.6.3
+46 error notarget This is most likely not a problem with npm itself.
+46 error notarget In most cases you or one of your dependencies are requesting
+46 error notarget a package version that doesn't exist.
+47 verbose exit [ 1, true ]
