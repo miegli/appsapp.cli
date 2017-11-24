@@ -3,7 +3,6 @@
 const google = require('googleapis');
 var sheets = google.sheets('v4');
 var drive = google.drive('v3');
-var email = require('./email');
 var jwtClient = null;
 const functions = require('firebase-functions');
 
@@ -407,9 +406,8 @@ function googleSheets(action, data, config, model) {
 
         getSpreadsheet(config && config.spreadsheet && config.spreadsheet.spreadsheetId ? config.spreadsheet.spreadsheetId : 'newsheet', 'unbekannt', data, config).then((response) => {
 
-
-            updateSheet(response.spreadsheet, config, response.auth, model, config).then(() => {
-                resolve(response.spreadsheet);
+            updateSheet(response.spreadsheet, config, response.auth, model, config).then((response) => {
+                resolve(response);
             }).catch((err) => {
                 reject(err);
             });
@@ -425,5 +423,6 @@ function googleSheets(action, data, config, model) {
 }
 
 module.exports = googleSheets;
+
 
 
