@@ -407,14 +407,14 @@ function googleSheets(action, data, config, model) {
         getSpreadsheet(config && config.spreadsheet && config.spreadsheet.spreadsheetId ? config.spreadsheet.spreadsheetId : 'newsheet', 'unbekannt', data, config).then((response) => {
 
             updateSheet(response.spreadsheet, config, response.auth, model, config).then((response) => {
-                resolve({config: response, response: {state: 'done'}}); resolve(response);
+                resolve({config: {spreadsheet: response}, response: {state: 'done'}}); resolve(response);
             }).catch((err) => {
                 reject(err);
             });
 
 
         }).catch((err) => {
-            console.log(err);
+            reject(err);
         });
 
 
