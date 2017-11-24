@@ -469,11 +469,19 @@ var PersistableModel = /** @class */ (function () {
         }
         var s = null, self = this;
         switch (this.getType(property)) {
-            case '':
-                s = property;
+            case 'text':
+                s = self.getPropertyValue(property);
+                break;
+            case 'numberplain':
+                s = self.getPropertyValue(property);
                 break;
             default:
-                s = JSON.stringify(self.getPropertyValue(property));
+                if (typeof self.getPropertyValue(property) !== 'string') {
+                    s = JSON.stringify(self.getPropertyValue(property));
+                }
+                else {
+                    s = self.getPropertyValue(property);
+                }
         }
         return s;
     };
