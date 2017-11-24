@@ -101,7 +101,7 @@ function getSpreadsheet(spreadsheetId, title, data, config) {
 }
 
 
-function updateSheet(spreadsheet, data, auth, model) {
+function updateSheet(spreadsheet, data, auth, model, config) {
 
 
     var getMergedColumns = function (spreadsheet, data, auth, model) {
@@ -291,7 +291,6 @@ function updateSheet(spreadsheet, data, auth, model) {
 
     }
 
-
     var buildAddRowRequest = function (sheetId, COLUMNS) {
 
         var addRowRequest = [];
@@ -346,7 +345,6 @@ function updateSheet(spreadsheet, data, auth, model) {
 
     }
 
-
     var buildSheetConfigRequest = function (config) {
         return [{
             "updateSpreadsheetProperties": {
@@ -359,7 +357,7 @@ function updateSheet(spreadsheet, data, auth, model) {
     return new Promise(function (resolve, reject) {
 
 
-        getMergedColumns(spreadsheet, data, auth, model).then((COLUMNS) => {
+        getMergedColumns(spreadsheet, data, auth, model, config).then((COLUMNS) => {
 
 
             var requests = [];
@@ -410,7 +408,7 @@ function googleSheets(action, data, config, model) {
         getSpreadsheet(config && config.spreadsheet && config.spreadsheet.spreadsheetId ? config.spreadsheet.spreadsheetId : 'newsheet', 'unbekannt', data, config).then((response) => {
 
 
-            updateSheet(response.spreadsheet, config, response.auth, model).then(() => {
+            updateSheet(response.spreadsheet, config, response.auth, model, config).then(() => {
                 resolve(response.spreadsheet);
             }).catch((err) => {
                 reject(err);
