@@ -1,8 +1,8 @@
 (function (global, factory) {
-	typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports, require('rxjs/Observable'), require('class-validator'), require('class-transformer'), require('angular2-uuid')) :
-	typeof define === 'function' && define.amd ? define(['exports', 'rxjs/Observable', 'class-validator', 'class-transformer', 'angular2-uuid'], factory) :
-	(factory((global['appsapp-cli'] = {}),global.Observable,global.classValidator,global.classTransformer,global.angular2Uuid));
-}(this, (function (exports,Observable,classValidator,classTransformer,angular2Uuid) { 'use strict';
+	typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports, require('rxjs/Observable'), require('class-validator'), require('class-transformer'), require('angular2-uuid'), require('class-validator/decorator/decorators')) :
+	typeof define === 'function' && define.amd ? define(['exports', 'rxjs/Observable', 'class-validator', 'class-transformer', 'angular2-uuid', 'class-validator/decorator/decorators'], factory) :
+	(factory((global['appsapp-cli'] = {}),global.Observable,global.classValidator,global.classTransformer,global.angular2Uuid,global.decorators));
+}(this, (function (exports,Observable,classValidator,classTransformer,angular2Uuid,decorators) { 'use strict';
 
 /**
  * @abstract
@@ -1346,6 +1346,75 @@ exports.IsPhoneNumber = IsPhoneNumber;
 exports.IsRating = IsRating;
 exports.IsText = IsText;
 exports.IsNumpad = IsNumpad;
+exports.ValidatorConstraint = decorators.ValidatorConstraint;
+exports.Validate = decorators.Validate;
+exports.ValidateNested = decorators.ValidateNested;
+exports.ValidateIf = decorators.ValidateIf;
+exports.IsDefined = decorators.IsDefined;
+exports.Equals = decorators.Equals;
+exports.NotEquals = decorators.NotEquals;
+exports.IsEmpty = decorators.IsEmpty;
+exports.IsNotEmpty = decorators.IsNotEmpty;
+exports.IsIn = decorators.IsIn;
+exports.IsNotIn = decorators.IsNotIn;
+exports.IsOptional = decorators.IsOptional;
+exports.IsBoolean = decorators.IsBoolean;
+exports.IsDate = decorators.IsDate;
+exports.IsNumber = decorators.IsNumber;
+exports.IsInt = decorators.IsInt;
+exports.IsString = decorators.IsString;
+exports.IsDateString = decorators.IsDateString;
+exports.IsArray = decorators.IsArray;
+exports.IsEnum = decorators.IsEnum;
+exports.IsDivisibleBy = decorators.IsDivisibleBy;
+exports.IsPositive = decorators.IsPositive;
+exports.IsNegative = decorators.IsNegative;
+exports.Min = decorators.Min;
+exports.Max = decorators.Max;
+exports.MinDate = decorators.MinDate;
+exports.MaxDate = decorators.MaxDate;
+exports.IsBooleanString = decorators.IsBooleanString;
+exports.IsNumberString = decorators.IsNumberString;
+exports.Contains = decorators.Contains;
+exports.NotContains = decorators.NotContains;
+exports.IsAlpha = decorators.IsAlpha;
+exports.IsAlphanumeric = decorators.IsAlphanumeric;
+exports.IsAscii = decorators.IsAscii;
+exports.IsBase64 = decorators.IsBase64;
+exports.IsByteLength = decorators.IsByteLength;
+exports.IsCreditCard = decorators.IsCreditCard;
+exports.IsCurrency = decorators.IsCurrency;
+exports.IsEmail = decorators.IsEmail;
+exports.IsFQDN = decorators.IsFQDN;
+exports.IsFullWidth = decorators.IsFullWidth;
+exports.IsHalfWidth = decorators.IsHalfWidth;
+exports.IsVariableWidth = decorators.IsVariableWidth;
+exports.IsHexColor = decorators.IsHexColor;
+exports.IsHexadecimal = decorators.IsHexadecimal;
+exports.IsIP = decorators.IsIP;
+exports.IsISBN = decorators.IsISBN;
+exports.IsISIN = decorators.IsISIN;
+exports.IsISO8601 = decorators.IsISO8601;
+exports.IsJSON = decorators.IsJSON;
+exports.IsLowercase = decorators.IsLowercase;
+exports.IsMobilePhone = decorators.IsMobilePhone;
+exports.IsMongoId = decorators.IsMongoId;
+exports.IsMultibyte = decorators.IsMultibyte;
+exports.IsSurrogatePair = decorators.IsSurrogatePair;
+exports.IsUrl = decorators.IsUrl;
+exports.IsUUID = decorators.IsUUID;
+exports.IsUppercase = decorators.IsUppercase;
+exports.Length = decorators.Length;
+exports.MinLength = decorators.MinLength;
+exports.MaxLength = decorators.MaxLength;
+exports.Matches = decorators.Matches;
+exports.IsMilitaryTime = decorators.IsMilitaryTime;
+exports.ArrayContains = decorators.ArrayContains;
+exports.ArrayNotContains = decorators.ArrayNotContains;
+exports.ArrayNotEmpty = decorators.ArrayNotEmpty;
+exports.ArrayMinSize = decorators.ArrayMinSize;
+exports.ArrayMaxSize = decorators.ArrayMaxSize;
+exports.ArrayUnique = decorators.ArrayUnique;
 
 Object.defineProperty(exports, '__esModule', { value: true });
 

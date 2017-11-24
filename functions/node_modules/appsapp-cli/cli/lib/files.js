@@ -11,7 +11,8 @@ module.exports = {
     },
 
     getCurrentDirectory : function() {
-        return (process.cwd());
+        return (process.env.PWD);
+        //return (process.cwd());
     },
 
     directoryExists : function(filePath) {
