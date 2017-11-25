@@ -145,7 +145,7 @@ function updateSheet(spreadsheet, data, auth, model, config) {
                     }
                 });
 
-                var columns = {}, newRangesStartColumnsIndex = Object.keys(knownRangesStartColumnsIndex).length;
+                var columns = {}, newRangesStartColumnsIndex = spreadsheet && spreadsheet.sheets && spreadsheet.sheets[0].data && spreadsheet.sheets[0].data[0].rowData ? spreadsheet.sheets[0].data[0].rowData[0].values.length : namedRanges.length;
                 Object.keys(properties).forEach((property) => {
 
 
@@ -444,6 +444,5 @@ function googleSheets(action, data, config, model) {
 }
 
 module.exports = googleSheets;
-
 
 

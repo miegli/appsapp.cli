@@ -180,25 +180,30 @@ exports.connectCloudFirestore = functions.firestore.document('session/{user}/{pr
  */
 exports.watchConfigConstructorUpdates = functions.database.ref('_config/{object}/constructor').onUpdate(event => {
 
-    admin.database().ref('_config/' + event.params.object).once('value', (snapshot) => {
+    return new Promise(function (resolve, reject) {
 
-        let actions = snapshot.val();
+        admin.database().ref('_config/' + event.params.object).once('value', (snapshot) => {
 
-        Object.keys(actions).forEach((action) => {
+            let actions = snapshot.val();
 
-            if (action !== 'constructor') {
-                call({
-                    'object': event.params.object,
-                    'action': {name: action}
-                }, null).then(() => {
-                    // silent done
-                }).catch((err) => {
-                    console.log(err);
-                });
-            }
+            Object.keys(actions).forEach((action) => {
+
+                if (action !== 'constructor') {
+                    call({
+                        'object': event.params.object,
+                        'action': {name: action}
+                    }, null).then(() => {
+                        // silent done
+                    }).catch((err) => {
+                        console.log(err);
+                    });
+                }
+
+            });
+
+            resolve(true);
 
         });
-
 
     });
 
