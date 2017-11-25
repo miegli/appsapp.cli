@@ -408,7 +408,7 @@ function googleSheets(action, data, config, model) {
 
         getSpreadsheet(config && config.spreadsheet && config.spreadsheet.spreadsheetId ? config.spreadsheet.spreadsheetId : 'newsheet', 'unbekannt', data, config).then((response) => {
 
-            updateSheet(response.spreadsheet, config, response.auth, model, config).then((spreadsheet) => {
+            updateSheet(response.spreadsheet, data, response.auth, model, config).then((spreadsheet) => {
 
 
                 if (action.action && action.action.data && action.action.data.to) {
