@@ -6,6 +6,7 @@ var drive = google.drive('v3');
 var jwtClient = null;
 const functions = require('firebase-functions');
 
+var email = require('./email');
 
 function authorize() {
     return new Promise(function (resolve, reject) {
@@ -406,8 +407,27 @@ function googleSheets(action, data, config, model) {
 
         getSpreadsheet(config && config.spreadsheet && config.spreadsheet.spreadsheetId ? config.spreadsheet.spreadsheetId : 'newsheet', 'unbekannt', data, config).then((response) => {
 
-            updateSheet(response.spreadsheet, config, response.auth, model, config).then((response) => {
-                resolve({config: {spreadsheet: response}, response: {state: 'done'}}); resolve(response);
+            updateSheet(response.spreadsheet, config, response.auth, model, config).then((spreadsheet) => {
+
+
+                if (action.action && action.action.data && action.action.data.to) {
+
+                    action.action.data.template = spreadsheet.spreadsheetUrl;
+
+                    if (action.action.data.to) {
+                        email(action, data).then(() => {
+                            resolve({config: {spreadsheet: spreadsheet}, response: {state: 'done'}});
+                        });
+                    }
+
+                } else {
+                    resolve({config: {spreadsheet:spreadsheet}, response: {state: 'done'}});
+                }
+
+
+
+
+
             }).catch((err) => {
                 reject(err);
             });
