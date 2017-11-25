@@ -190,7 +190,7 @@ exports.watchConfigConstructorUpdates = functions.database.ref('_config/{object}
                 call({
                     'object': event.params.object,
                     'action': {name: action}
-                }, {}).then(() => {
+                }, null).then(() => {
                     // silent done
                 }).catch((err) => {
                     console.log(err);
@@ -292,27 +292,39 @@ function call(action, data) {
 
                         model.loadJson(data).then(() => {
 
-                            model.validate().then(() => {
+                            if (!data) {
 
                                 actions[action.action.name](action, data, configAction, model).then(function (data) {
-
-                                    if (data.config) {
-                                        return admin.database().ref('_config/' + action.object + "/" + action.action.name).set(data.config).then(function () {
-                                            resolve(data.response);
-                                        }).catch(function (error) {
-                                            reject(error);
-                                        });
-                                    } else {
-                                        resolve(data.response);
-                                    }
-
+                                    resolve(data.response);
                                 }).catch(function (error) {
                                     reject(error);
                                 });
 
-                            }).catch((err) => {
-                                reject(err);
-                            });
+                            } else {
+
+                                model.validate().then(() => {
+
+                                    actions[action.action.name](action, data, configAction, model).then(function (data) {
+
+                                        if (data.config) {
+                                            return admin.database().ref('_config/' + action.object + "/" + action.action.name).set(data.config).then(function () {
+                                                resolve(data.response);
+                                            }).catch(function (error) {
+                                                reject(error);
+                                            });
+                                        } else {
+                                            resolve(data.response);
+                                        }
+
+                                    }).catch(function (error) {
+                                        reject(error);
+                                    });
+
+                                }).catch((err) => {
+                                    reject(err);
+                                });
+
+                            }
 
                         });
 

@@ -198,7 +198,6 @@ function updateSheet(spreadsheet, data, auth, model, config) {
 
     }
 
-
     var buildColumnsSizeRequest = function (sheetId, COLUMNS) {
 
         return [{
@@ -367,9 +366,11 @@ function updateSheet(spreadsheet, data, auth, model, config) {
                 requests.push(request);
             });
 
-            buildAddRowRequest(spreadsheet.sheets[0].properties.sheetId, COLUMNS).forEach((request) => {
-                requests.push(request);
-            });
+            if (data) {
+                buildAddRowRequest(spreadsheet.sheets[0].properties.sheetId, COLUMNS).forEach((request) => {
+                    requests.push(request);
+                });
+            }
 
             buildSheetConfigRequest(config).forEach((request) => {
                 requests.push(request);
