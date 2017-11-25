@@ -115,10 +115,10 @@ findModels = function () {
             }, (err) => {
             }, (complete) => {
 
-                // fsextra.remove("./_tmpdist", function (err) {
-                //     status.stop();
-                //     resolve(chalk.green('Backend functions successfully updated.'));
-                // });
+                fsextra.remove("./_tmpdist", function (err) {
+                    status.stop();
+                    resolve(chalk.green('Backend functions successfully updated.'));
+                });
 
             });
 
