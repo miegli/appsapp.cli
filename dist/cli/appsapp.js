@@ -9,6 +9,7 @@ var encryption = require("./actions/encrypt");
 var compile = require("./actions/compile");
 var firebase = require('./actions/firebase');
 var config = require('./actions/config');
+var reset = require('./actions/reset');
 var Observable = require('rxjs/Observable').Observable;
 var program = require('commander');
 var watch = require('node-watch');
@@ -28,6 +29,7 @@ program
     .version(package.version)
     .option('-p, --project [project]', 'set firebase project/id to use')
     .option('-w, --watch', 'watch for changes in source files and deploy backend functions automatically')
+    .option('-r, --reset [model]', 'Clear config for all finishers for given model.')
     .parse(process.argv);
 
 
@@ -89,6 +91,16 @@ var execute = function () {
 
 };
 
+
+if (program.reset) {
+
+    reset(program).then((status) => {
+        console.log(status);
+        process.exit();
+    });
+
+    return;
+}
 
 
 if (program.watch) {
