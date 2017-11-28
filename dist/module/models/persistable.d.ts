@@ -9,7 +9,7 @@ export interface actionEmail {
         from?: string;
         subject?: string;
     };
-    additionActions?: [actionEmail | actionWebhook | actionGoogleSheets | actionCustom];
+    additionalActions?: [actionEmail | actionWebhook | actionGoogleSheets | actionCustom];
 }
 export interface actionGoogleSheets {
     name: 'googleSheets';
@@ -18,21 +18,21 @@ export interface actionGoogleSheets {
         from?: string;
         subject?: string;
     };
-    additionActions?: [actionEmail | actionWebhook | actionGoogleSheets | actionCustom];
+    additionalActions?: [actionEmail | actionWebhook | actionGoogleSheets | actionCustom];
 }
 export interface actionWebhook {
     name: 'webhook';
     data: {
         url: string;
     };
-    additionActions?: [actionEmail | actionWebhook | actionGoogleSheets | actionCustom];
+    additionalActions?: [actionEmail | actionWebhook | actionGoogleSheets | actionCustom];
 }
 export interface actionCustom {
     name: 'custom';
     data: {
         name: string;
     };
-    additionActions?: [actionEmail | actionWebhook | actionGoogleSheets | actionCustom];
+    additionalActions?: [actionEmail | actionWebhook | actionGoogleSheets | actionCustom];
 }
 export declare abstract class PersistableModel {
     private __observer;

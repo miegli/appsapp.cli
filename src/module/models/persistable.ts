@@ -18,7 +18,7 @@ export interface actionEmail {
         from?: string,
         subject?: string
     },
-    additionActions?: [actionEmail | actionWebhook | actionGoogleSheets | actionCustom]
+    additionalActions?: [actionEmail | actionWebhook | actionGoogleSheets | actionCustom]
 }
 
 export interface actionGoogleSheets {
@@ -28,7 +28,7 @@ export interface actionGoogleSheets {
         from?: string,
         subject?: string
     },
-    additionActions?: [actionEmail | actionWebhook | actionGoogleSheets | actionCustom]
+    additionalActions?: [actionEmail | actionWebhook | actionGoogleSheets | actionCustom]
 }
 
 export interface actionWebhook {
@@ -36,7 +36,7 @@ export interface actionWebhook {
     data: {
         url: string
     },
-    additionActions?: [actionEmail | actionWebhook | actionGoogleSheets | actionCustom]
+    additionalActions?: [actionEmail | actionWebhook | actionGoogleSheets | actionCustom]
 }
 
 export interface actionCustom {
@@ -44,7 +44,7 @@ export interface actionCustom {
     data: {
         name: string
     },
-    additionActions?: [actionEmail | actionWebhook | actionGoogleSheets | actionCustom]
+    additionalActions?: [actionEmail | actionWebhook | actionGoogleSheets | actionCustom]
 }
 
 
@@ -308,6 +308,8 @@ export abstract class PersistableModel {
 
 
         return new Observable<any>((observer: Observer<any>) => {
+
+            console.log(self);
 
             self.validate().then(() => {
 
@@ -709,6 +711,7 @@ export abstract class PersistableModel {
         return new Promise(function (resolve, reject) {
 
             self.removeConditionProperties();
+
 
             validate(self, {skipMissingProperties: true}).then(errors => { // errors is an array of validation errors
 
