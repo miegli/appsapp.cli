@@ -307,7 +307,8 @@ function call(action, data) {
 
                             } else {
 
-                                model.validate().then(() => {
+                                model.removeConditionProperties();
+                                model.validate({skipMissingProperties: true}).then(() => {
 
                                     actions[action.action.name](action, data, configAction, model).then(function (data) {
 
