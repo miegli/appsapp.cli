@@ -309,8 +309,6 @@ export abstract class PersistableModel {
 
         return new Observable<any>((observer: Observer<any>) => {
 
-            console.log(self);
-
             self.validate().then(() => {
 
                 self.setHasPendingChanges(true, action);
@@ -442,7 +440,6 @@ export abstract class PersistableModel {
         this.getPersistanceManager().getFirebase().getAuth().then((auth: AngularFireAuth) => {
             auth.authState.subscribe((user) => {
                 if (user && self.__persistenceManager) {
-                    self.__isOnline = true;
                     self.__persistenceManager.getObserver().next({'action': 'connected'});
                 }
                 self.emit();

@@ -199,7 +199,6 @@ var PersistableModel = /** @class */ (function () {
             self[property] = self.__edited[property];
         });
         return new Observable$1(function (observer) {
-            console.log(self);
             self.validate().then(function () {
                 self.setHasPendingChanges(true, action);
                 if (self.__persistenceManager) {
@@ -306,7 +305,6 @@ var PersistableModel = /** @class */ (function () {
         this.getPersistanceManager().getFirebase().getAuth().then(function (auth) {
             auth.authState.subscribe(function (user) {
                 if (user && self.__persistenceManager) {
-                    self.__isOnline = true;
                     self.__persistenceManager.getObserver().next({ 'action': 'connected' });
                 }
                 self.emit();

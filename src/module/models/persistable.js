@@ -197,6 +197,7 @@ var PersistableModel = /** @class */ (function () {
             self[property] = self.__edited[property];
         });
         return new Observable_1.Observable(function (observer) {
+            console.log(self);
             self.validate().then(function () {
                 self.setHasPendingChanges(true, action);
                 if (self.__persistenceManager) {
