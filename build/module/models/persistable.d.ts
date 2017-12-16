@@ -1,6 +1,7 @@
 import { Observer } from "rxjs/Observer";
 import { Observable } from "rxjs/Observable";
 import { AngularFireDatabase, AngularFireObject } from "angularfire2/database";
+import { HttpClient } from "@angular/common/http";
 export interface actionEmail {
     name: 'email';
     data: {
@@ -35,6 +36,8 @@ export interface actionCustom {
     additionalActions?: [actionEmail | actionWebhook | actionGoogleSheets | actionCustom];
 }
 export declare abstract class PersistableModel {
+    private __httpClient;
+    private __isLoadedPromise;
     private __observer;
     private __observable;
     private __uuid;
@@ -73,6 +76,17 @@ export declare abstract class PersistableModel {
      * @private
      */
     private __init();
+    /**
+     * get http client
+     * @returns HttpClient
+     */
+    getHttpClient(): HttpClient;
+    /**
+     * set http client
+     * @param HttpClient http
+     * @returns {PersistableModel}
+     */
+    private setHttpClient(http);
     /**
      * update property
      * @param property
@@ -240,7 +254,7 @@ export declare abstract class PersistableModel {
      * @param persistenceManager
      * @returns {PersistableModel}
      */
-    setPersistanceManager(persistenceManager: any): this;
+    setPersistenceManager(persistenceManager: any): this;
     /**
      * valid this object
      * @param {boolean} softcheck
@@ -312,7 +326,7 @@ export declare abstract class PersistableModel {
      * get the persistence manger
      * @returns {PersistenceManager}
      */
-    getPersistanceManager(): any;
+    getPersistenceManager(): any;
     /**
      * check if current network state is online
      * @returns {boolean}
@@ -330,6 +344,12 @@ export declare abstract class PersistableModel {
      * @returns {Array}
      */
     getMetadata(property?: string, type?: string): any[];
+    /**
+     * check if property is type of array
+     * @param property
+     * @returns {boolean}
+     */
+    isArray(property: any): boolean;
     /**
      * get metadata contraints value
      * @param property
@@ -374,6 +394,17 @@ export declare abstract class PersistableModel {
      * @returns {PersistableModel}
      */
     private setNotificationProvider(notificationProvider);
+    /**
+     *
+     * @param promise
+     * @returns {PersistableModel}
+     */
+    private setIsLoadedPromise(promise);
+    /**
+     * Is loaded promise
+     * @returns {Promise}
+     */
+    loaded(): Promise<any>;
     /**
      * send notification message to user
      * @param message

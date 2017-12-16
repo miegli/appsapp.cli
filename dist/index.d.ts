@@ -11,5 +11,6 @@ export * from './module/validation/validators/IsPhoneNumber';
 export * from './module/validation/validators/IsRating';
 export * from './module/validation/validators/IsText';
 export * from './module/validation/validators/IsNumpad';
+export * from './module/validation/validators/IsSelect';
 export * from './module/interfaces/messages';
 export * from 'class-validator/decorator/decorators';

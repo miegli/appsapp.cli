@@ -221,7 +221,7 @@ gulp.task('clean:build', function () {
 
 gulp.task('compile', function () {
   runSequence(
-    'clean:dist',
+    //'clean:dist',
     'copy:source',
     'inline-resources',
     'ngc',
@@ -232,8 +232,8 @@ gulp.task('compile', function () {
     'version:manifest',
     'copy:manifest',
     'copy:readme',
-   // 'clean:build',
-   // 'clean:tmp',
+    //'clean:build',
+    //'clean:tmp',
     function (err) {
       if (err) {
         console.log('ERROR:', err.message);
@@ -253,7 +253,7 @@ gulp.task('watch', function () {
 
 gulp.task('clean', ['clean:dist', 'clean:tmp', 'clean:build']);
 gulp.task('build', ['clean', 'compile']);
-gulp.task('build:watch', ['build', 'watch']);
+gulp.task('build:watch', ['compile', 'watch']);
 gulp.task('default', ['build:watch']);
 gulp.task('test', ['version:manifest']);
 

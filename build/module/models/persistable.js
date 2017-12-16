@@ -76,6 +76,22 @@ var PersistableModel = /** @class */ (function () {
         });
     };
     /**
+     * get http client
+     * @return {?} HttpClient
+     */
+    PersistableModel.prototype.getHttpClient = function () {
+        return this.__httpClient;
+    };
+    /**
+     * set http client
+     * @param {?} http
+     * @return {?}
+     */
+    PersistableModel.prototype.setHttpClient = function (http) {
+        this.__httpClient = http;
+        return this;
+    };
+    /**
      * update property
      * @param {?} property
      * @param {?} value
@@ -302,7 +318,7 @@ var PersistableModel = /** @class */ (function () {
                 self.__persistenceManager.getObserver().next({ 'action': 'disconnected' });
             }
         });
-        this.getPersistanceManager().getFirebase().getAuth().then(function (auth) {
+        this.getPersistenceManager().getFirebase().getAuth().then(function (auth) {
             auth.authState.subscribe(function (user) {
                 if (user && self.__persistenceManager) {
                     self.__persistenceManager.getObserver().next({ 'action': 'connected' });
@@ -494,9 +510,11 @@ var PersistableModel = /** @class */ (function () {
      * @param {?} persistenceManager
      * @return {?}
      */
-    PersistableModel.prototype.setPersistanceManager = function (persistenceManager) {
+    PersistableModel.prototype.setPersistenceManager = function (persistenceManager) {
         this.__persistenceManager = persistenceManager;
-        this.__uuid = UUID.UUID();
+        if (this.__uuid.length == 0) {
+            this.__uuid = UUID.UUID();
+        }
         return this;
     };
     /**
@@ -723,7 +741,7 @@ var PersistableModel = /** @class */ (function () {
      * get the persistence manger
      * @return {?}
      */
-    PersistableModel.prototype.getPersistanceManager = function () {
+    PersistableModel.prototype.getPersistenceManager = function () {
         return this.__persistenceManager;
     };
     /**
@@ -758,6 +776,14 @@ var PersistableModel = /** @class */ (function () {
             }
         });
         return validationMetadata;
+    };
+    /**
+     * check if property is type of array
+     * @param {?} property
+     * @return {?}
+     */
+    PersistableModel.prototype.isArray = function (property) {
+        return typeof this[property] == 'object' ? (typeof this[property].length == 'number' ? true : false) : false;
     };
     /**
      * get metadata contraints value
@@ -810,6 +836,7 @@ var PersistableModel = /** @class */ (function () {
             'isBoolean': 'boolean',
             'isRating': 'rating',
             'isBirthDate': 'birthday',
+            'isSelect': 'select',
             'isDateRange': 'dates',
             'isCalendar': 'date',
             'isNumpad': 'number',
@@ -964,10 +991,12 @@ var PersistableModel = /** @class */ (function () {
         else {
             self.__conditionContraintsPropertiesValue[property] = self.getPropertyValue(property, true);
         }
-        self.__conditionActionIfMatchesObserver[property].next({
-            action: self.__conditionActionIfMatchesAction[property],
-            state: result.length ? true : false
-        });
+        if (self.__conditionActionIfMatchesObserver[property] !== undefined) {
+            self.__conditionActionIfMatchesObserver[property].next({
+                action: self.__conditionActionIfMatchesAction[property],
+                state: result.length ? true : false
+            });
+        }
         self.recoverMissingProperty(property);
         self.__conditionActionIfMatchesRemovedProperties[property] = result.length ? true : false;
         if (self.__validatorObserver[property]) {
@@ -1016,6 +1045,22 @@ var PersistableModel = /** @class */ (function () {
         return this;
     };
     /**
+     *
+     * @param {?} promise
+     * @return {?}
+     */
+    PersistableModel.prototype.setIsLoadedPromise = function (promise) {
+        this.__isLoadedPromise = promise;
+        return this;
+    };
+    /**
+     * Is loaded promise
+     * @return {?}
+     */
+    PersistableModel.prototype.loaded = function () {
+        return this.__isLoadedPromise;
+    };
+    /**
      * send notification message to user
      * @param {?} message
      * @param {?=} error
@@ -1029,6 +1074,10 @@ var PersistableModel = /** @class */ (function () {
 }());
 export { PersistableModel };
 function PersistableModel_tsickle_Closure_declarations() {
+    /** @type {?} */
+    PersistableModel.prototype.__httpClient;
+    /** @type {?} */
+    PersistableModel.prototype.__isLoadedPromise;
     /** @type {?} */
     PersistableModel.prototype.__observer;
     /** @type {?} */

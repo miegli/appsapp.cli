@@ -81,8 +81,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 
 
 /**
- * Connects database
- *
+ * Connect realtime database for watching user session updates
  */
 exports.connectRealtimeDatabase = functions.database.ref('session/{user}/{project}/{object}/{objectid}/action/{actionid}').onCreate(event => {
     const date = new Date();
@@ -106,7 +105,9 @@ exports.connectRealtimeDatabase = functions.database.ref('session/{user}/{projec
         'target': 'session/' + event.params.user + '/' + event.params.project + '/' + event.params.object + '/' + event.params.objectid
     };
 
-
+    /**
+     * create an entry to event queue for later execution of given action/task.
+     */
     return new Promise(function (resolve, reject) {
 
         admin.database().ref(actiondata.target + "/data").once('value', (snapshot) => {
@@ -175,8 +176,7 @@ exports.connectCloudFirestore = functions.firestore.document('session/{user}/{pr
 
 
 /**
- * Connects database
- *
+ * Observes realtime database for persistable models constructor update
  */
 exports.watchConfigConstructorUpdates = functions.database.ref('_config/{object}/constructor').onUpdate(event => {
 
@@ -211,8 +211,7 @@ exports.watchConfigConstructorUpdates = functions.database.ref('_config/{object}
 });
 
 /**
- * Connects database
- *
+ * Connect realtime database for watching and execute events / actions
  */
 exports.connectEvents = functions.database.ref('_events/{actionid}').onCreate(event => {
 
@@ -232,7 +231,9 @@ exports.connectEvents = functions.database.ref('_events/{actionid}').onCreate(ev
         'target': original.target ? original.target : null
     };
 
-
+    /**
+     * Call action by given event queue object
+     */
     return new Promise(function (resolve, reject) {
 
         call(actiondata, original.snapshot !== undefined ? original.snapshot : null).then((data) => {
@@ -352,7 +353,7 @@ function call(action, data) {
 }
 
 /**
- *
+ * Decrypt secure data from frontend encryption
  * @param data
  */
 function decrypt(data) {

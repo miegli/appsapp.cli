@@ -1,3 +1,9 @@
+/**
+ * Creates a webhook call
+ * @param action
+ * @param data
+ * @returns {Promise}
+ */
 function webhook(action, data) {
   return new Promise(function (resolve, reject) {
 

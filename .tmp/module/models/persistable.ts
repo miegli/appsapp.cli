@@ -8,7 +8,7 @@ import {getFromContainer} from "class-validator";
 import {MetadataStorage} from "class-validator";
 import {UUID} from "angular2-uuid";
 import {AppsappModuleProviderMessages} from "../interfaces/messages";
-
+import {HttpClient} from "@angular/common/http";
 
 export interface actionEmail {
     name: 'email',
@@ -50,7 +50,8 @@ export interface actionCustom {
 
 export abstract class PersistableModel {
 
-
+    private __httpClient: HttpClient;
+    private __isLoadedPromise: Promise<any>;
     private __observer: Observer<any>;
     private __observable: Observable<any>;
     private __uuid: string = '';
@@ -86,16 +87,15 @@ export abstract class PersistableModel {
      */
     constructor() {
 
-
         this.__metadata = getFromContainer(MetadataStorage).getTargetValidationMetadatas(this.constructor, '');
 
         // check if all loaded metadata has corresponding properties
         this.__metadata.forEach((metadata) => {
+
             if (this[metadata.propertyName] == undefined) {
                 this[metadata.propertyName] = null;
             }
         });
-
         this.__init();
 
     }
@@ -142,6 +142,26 @@ export abstract class PersistableModel {
 
         });
 
+
+    }
+
+    /**
+     * get http client
+     * @returns HttpClient
+     */
+    public getHttpClient() {
+        return this.__httpClient;
+    }
+
+    /**
+     * set http client
+     * @param HttpClient http
+     * @returns {PersistableModel}
+     */
+    private setHttpClient(http) {
+
+        this.__httpClient = http;
+        return this;
 
     }
 
@@ -437,7 +457,7 @@ export abstract class PersistableModel {
         });
 
 
-        this.getPersistanceManager().getFirebase().getAuth().then((auth: AngularFireAuth) => {
+        this.getPersistenceManager().getFirebase().getAuth().then((auth: AngularFireAuth) => {
             auth.authState.subscribe((user) => {
                 if (user && self.__persistenceManager) {
                     self.__persistenceManager.getObserver().next({'action': 'connected'});
@@ -631,7 +651,7 @@ export abstract class PersistableModel {
         let properties = {}, self = this;
 
         Object.keys(self).forEach((property) => {
-            if (property.substr(0, 1) !== '_' ) {
+            if (property.substr(0, 1) !== '_') {
                 if (stringify) {
                     properties[property] = self.__toString(property);
                 } else {
@@ -676,7 +696,6 @@ export abstract class PersistableModel {
                 }
 
 
-
         }
 
 
@@ -689,10 +708,12 @@ export abstract class PersistableModel {
      * @param persistenceManager
      * @returns {PersistableModel}
      */
-    public setPersistanceManager(persistenceManager) {
+    public setPersistenceManager(persistenceManager) {
         this.__persistenceManager = persistenceManager;
 
-        this.__uuid = UUID.UUID();
+        if (this.__uuid.length == 0) {
+            this.__uuid = UUID.UUID();
+        }
         return this;
     }
 
@@ -1003,7 +1024,7 @@ export abstract class PersistableModel {
      * get the persistence manger
      * @returns {PersistenceManager}
      */
-    public getPersistanceManager() {
+    public getPersistenceManager() {
 
         return this.__persistenceManager;
 
@@ -1048,6 +1069,17 @@ export abstract class PersistableModel {
         });
 
         return validationMetadata;
+
+    }
+
+    /**
+     * check if property is type of array
+     * @param property
+     * @returns {boolean}
+     */
+    public isArray(property) {
+
+        return typeof this[property] == 'object' ? (typeof this[property].length == 'number' ? true : false) : false;
 
     }
 
@@ -1118,6 +1150,7 @@ export abstract class PersistableModel {
             'isBoolean': 'boolean',
             'isRating': 'rating',
             'isBirthDate': 'birthday',
+            'isSelect': 'select',
             'isDateRange': 'dates',
             'isCalendar': 'date',
             'isNumpad': 'number',
@@ -1348,11 +1381,12 @@ export abstract class PersistableModel {
             self.__conditionContraintsPropertiesValue[property] = self.getPropertyValue(property, true);
         }
 
-
-        self.__conditionActionIfMatchesObserver[property].next({
-            action: self.__conditionActionIfMatchesAction[property],
-            state: result.length ? true : false
-        });
+        if (self.__conditionActionIfMatchesObserver[property] !== undefined) {
+            self.__conditionActionIfMatchesObserver[property].next({
+                action: self.__conditionActionIfMatchesAction[property],
+                state: result.length ? true : false
+            });
+        }
 
         self.recoverMissingProperty(property);
 
@@ -1422,6 +1456,28 @@ export abstract class PersistableModel {
         this.__notificationProvider = notificationProvider;
 
         return this;
+    }
+
+
+    /**
+     *
+     * @param promise
+     * @returns {PersistableModel}
+     */
+    private setIsLoadedPromise(promise) {
+
+        this.__isLoadedPromise = promise;
+
+        return this;
+
+    }
+
+    /**
+     * Is loaded promise
+     * @returns {Promise}
+     */
+    public loaded() {
+        return this.__isLoadedPromise;
     }
 
     /**

@@ -5,9 +5,12 @@ var sheets = google.sheets('v4');
 var drive = google.drive('v3');
 var jwtClient = null;
 const functions = require('firebase-functions');
-
 var email = require('./email');
 
+/**
+ * Authorize google JWT client by given cloud functions configuration
+ * @returns {Promise}
+ */
 function authorize() {
     return new Promise(function (resolve, reject) {
 
@@ -18,7 +21,6 @@ function authorize() {
             ['https://www.googleapis.com/auth/spreadsheets', 'https://www.googleapis.com/auth/drive'], // an array of auth scopes
             null
         );
-
 
         jwtClient.authorize(function (err, tokens) {
 
@@ -35,6 +37,14 @@ function authorize() {
 
 }
 
+/**
+ * Return with promise a google spreadsheet instance by given identifier, or create a new sheet and update configuration if given.
+ * @param spreadsheetId
+ * @param title
+ * @param data
+ * @param config
+ * @returns {Promise}
+ */
 function getSpreadsheet(spreadsheetId, title, data, config) {
 
     return new Promise(function (resolve, reject) {
@@ -100,7 +110,15 @@ function getSpreadsheet(spreadsheetId, title, data, config) {
 
 }
 
-
+/**
+ * Updates given spreedsheet by given configuration, raw data, auth and appsapp persistable model
+ * @param spreadsheet
+ * @param data
+ * @param auth
+ * @param model
+ * @param config
+ * @returns {Promise}
+ */
 function updateSheet(spreadsheet, data, auth, model, config) {
 
 
@@ -198,6 +216,12 @@ function updateSheet(spreadsheet, data, auth, model, config) {
 
     }
 
+    /**
+     * Prepare spreadsheet column sizes
+     * @param sheetId
+     * @param COLUMNS
+     * @returns {[null]}
+     */
     var buildColumnsSizeRequest = function (sheetId, COLUMNS) {
 
         return [{
@@ -213,6 +237,12 @@ function updateSheet(spreadsheet, data, auth, model, config) {
 
     }
 
+    /**
+     * Prepare spreadsheet range request.
+     * @param sheetId
+     * @param COLUMNS
+     * @returns {Array}
+     */
     var buildNamedRangeRequest = function (sheetId, COLUMNS) {
 
 
@@ -290,6 +320,12 @@ function updateSheet(spreadsheet, data, auth, model, config) {
 
     }
 
+    /**
+     * Build spreadsheets add row request.
+     * @param sheetId
+     * @param COLUMNS
+     * @returns {Array}
+     */
     var buildAddRowRequest = function (sheetId, COLUMNS) {
 
         var addRowRequest = [];
@@ -302,13 +338,13 @@ function updateSheet(spreadsheet, data, auth, model, config) {
 
                 case 'numberplain':
                     value = {
-                        numberValue: column.value && column.value !== 'null' ? column.value : ''
+                        numberValue: column.value && column.value !== 'null' ? column.value : null
                     };
                     break;
 
                 default:
                     value = {
-                        stringValue: column.value && column.value !== 'null' ? column.value : ''
+                        stringValue: column.value && column.value !== 'null' ? column.value : null
                     };
             }
 
@@ -344,6 +380,11 @@ function updateSheet(spreadsheet, data, auth, model, config) {
 
     }
 
+    /**
+     * Prepare spreadsheets config request
+     * @param config
+     * @returns {[null]}
+     */
     var buildSheetConfigRequest = function (config) {
         return [{
             "updateSpreadsheetProperties": {
@@ -353,6 +394,9 @@ function updateSheet(spreadsheet, data, auth, model, config) {
         }]
     }
 
+    /**
+     * execute the spreadsheets update methods
+     */
     return new Promise(function (resolve, reject) {
 
 
@@ -401,7 +445,14 @@ function updateSheet(spreadsheet, data, auth, model, config) {
     });
 }
 
-
+/**
+ * Google spreadsheets main wrapper method.
+ * @param action
+ * @param data
+ * @param config
+ * @param model
+ * @returns {Promise}
+ */
 function googleSheets(action, data, config, model) {
 
     return new Promise(function (resolve, reject) {
