@@ -691,6 +691,9 @@ var PersistableModel = /** @class */ (function () {
         if (this.getMetadata(property, 'isDateRange').length) {
             return typeof value == 'object' ? value : [];
         }
+        if (this.getMetadata(property, 'isSelect').length) {
+            return typeof value == 'object' ? value : [];
+        }
         return value;
     };
     /**
@@ -1447,11 +1450,9 @@ function IsSelect(options) {
                             source: args.constraints[0].value.source,
                             getOptions: function () {
                                 return new Promise(function (resolve, reject) {
-                                    console.log(optionValidator);
                                     if (optionValidator.source) {
                                         Unirest.get(optionValidator.source.url).type('json').end(function (response) {
                                             var /** @type {?} */ options = [];
-                                            console.log(response);
                                             if (response.error) {
                                                 reject(response.error);
                                             }
@@ -1493,10 +1494,14 @@ function IsSelect(options) {
                                 }
                             });
                             optionValidator.target.forEach(function (value) {
+                                console.log('-->', value);
                                 if (values[value] == undefined) {
                                     allValide = false;
                                 }
                             });
+                            console.log(values);
+                            console.log(options);
+                            console.log(optionValidator.target);
                             resolve(allValide);
                         }).catch(function (error) {
                             resolve(false);
