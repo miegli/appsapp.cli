@@ -309,7 +309,7 @@ function call(action, data) {
                             } else {
 
                                 model.removeConditionProperties();
-                                model.validate({skipMissingProperties: true, async: true}).then(() => {
+                                model.validate().then(() => {
 
                                     actions[action.action.name](action, data, configAction, model).then(function (data) {
 
