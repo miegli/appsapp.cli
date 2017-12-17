@@ -37,12 +37,12 @@ export function IsSelect(options?: {
                             target: value,
                             source: args.constraints[0].value.source,
                             getOptions: () => {
-                                return new Promise(function (resolve, reject) {
+                                return new Promise(function (resolveOptions, rejectOptions) {
                                     if (optionValidator.source) {
                                         Unirest.get(optionValidator.source.url).type('json').end(function (response) {
                                             let options = [];
                                             if (response.error) {
-                                                reject(response.error);
+                                                rejectOptions(response.error);
                                             } else {
                                                 response.body.forEach((item) => {
                                                     options.push({
@@ -52,11 +52,11 @@ export function IsSelect(options?: {
                                                     })
                                                 });
 
-                                                resolve(options);
+                                                resolveOptions(options);
                                             }
                                         });
                                     } else {
-                                        resolve(args.constraints[0].value.options);
+                                        resolveOptions(args.constraints[0].value.options);
                                     }
                                 });
                             },
@@ -86,20 +86,21 @@ export function IsSelect(options?: {
                                 }
                             });
                             optionValidator.target.forEach((value) => {
-                                console.log('-->',value);
-                                console.log('--->',values[value]);
-                                console.log('---->',values[value] == undefined);
                                 if (values[value] == undefined) {
                                     allValide = false;
                                 }
                             });
 
-                            console.log('------------>',allValide);
+                            if (allValide) {
+                                resolve(true);
+                            } else {
+                                reject(false);
+                            }
 
-                            resolve(allValide);
+
 
                         }).catch((error) => {
-                            resolve(false);
+                            reject(error);
                         });
 
 
