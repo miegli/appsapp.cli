@@ -1450,12 +1450,12 @@ function IsSelect(options) {
                             target: value,
                             source: args.constraints[0].value.source,
                             getOptions: function () {
-                                return new Promise(function (resolve, reject) {
+                                return new Promise(function (resolveOptions, rejectOptions) {
                                     if (optionValidator.source) {
                                         get(optionValidator.source.url).type('json').end(function (response) {
                                             var /** @type {?} */ options = [];
                                             if (response.error) {
-                                                reject(response.error);
+                                                rejectOptions(response.error);
                                             }
                                             else {
                                                 response.body.forEach(function (item) {
@@ -1465,12 +1465,12 @@ function IsSelect(options) {
                                                         disabled: optionValidator.source.mapping.disabled !== undefined ? optionValidator._getPropertyFromObject(item, optionValidator.source.mapping.disabled) : false,
                                                     });
                                                 });
-                                                resolve(options);
+                                                resolveOptions(options);
                                             }
                                         });
                                     }
                                     else {
-                                        resolve(args.constraints[0].value.options);
+                                        resolveOptions(args.constraints[0].value.options);
                                     }
                                 });
                             },
@@ -1495,17 +1495,18 @@ function IsSelect(options) {
                                 }
                             });
                             optionValidator.target.forEach(function (value) {
-                                console.log('-->', value);
-                                console.log('--->', values[value]);
-                                console.log('---->', values[value] == undefined);
                                 if (values[value] == undefined) {
                                     allValide = false;
                                 }
                             });
-                            console.log('------------>', allValide);
-                            resolve(allValide);
+                            if (allValide) {
+                                resolve(true);
+                            }
+                            else {
+                                reject(false);
+                            }
                         }).catch(function (error) {
-                            resolve(false);
+                            reject(error);
                         });
                     });
                 }

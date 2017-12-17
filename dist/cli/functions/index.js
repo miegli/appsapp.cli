@@ -313,8 +313,6 @@ function call(action, data) {
 
                                     actions[action.action.name](action, data, configAction, model).then(function (data) {
 
-                                        console.log(model);
-
                                         if (data.config) {
                                             return admin.database().ref('_config/' + action.object + "/" + action.action.name).set(data.config).then(function () {
                                                 resolve(data.response);
