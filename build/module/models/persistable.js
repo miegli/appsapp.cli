@@ -1,10 +1,9 @@
-import { Observable as Observable$1 } from 'rxjs/Observable';
-import { MetadataStorage, Validator, getFromContainer, registerDecorator, validate, validateSync } from 'class-validator';
+import { Observable } from 'rxjs/Observable';
+import { validate, validateSync } from 'class-validator';
 import { plainToClass, serialize } from 'class-transformer';
+import { getFromContainer } from 'class-validator';
+import { MetadataStorage } from 'class-validator';
 import { UUID } from 'angular2-uuid';
-import { get } from 'unirest';
-
-
 /**
  * @abstract
  */
@@ -54,7 +53,7 @@ var PersistableModel = /** @class */ (function () {
         /**
          * create observerable and observer for handling the models data changes
          */
-        this.__observable = new Observable$1(function (observer) {
+        this.__observable = new Observable(function (observer) {
             self.__observer = observer;
             self.__observer.next(_this);
         });
@@ -144,7 +143,7 @@ var PersistableModel = /** @class */ (function () {
      */
     PersistableModel.prototype.action = function (action) {
         var /** @type {?} */ self = this;
-        var /** @type {?} */ observable = new Observable$1(function (observer) {
+        var /** @type {?} */ observable = new Observable(function (observer) {
             if (self.__persistenceManager) {
                 self.__persistenceManager.action(self, observer, action).then(function (success) {
                     observer.complete();
@@ -201,7 +200,7 @@ var PersistableModel = /** @class */ (function () {
                 }
             }
         });
-        return new Observable$1(function (o) {
+        return new Observable(function (o) {
             observer = o;
         });
     };
@@ -215,7 +214,7 @@ var PersistableModel = /** @class */ (function () {
         Object.keys(self.__edited).forEach(function (property) {
             self[property] = self.__edited[property];
         });
-        return new Observable$1(function (observer) {
+        return new Observable(function (observer) {
             self.validate().then(function () {
                 self.setHasPendingChanges(true, action);
                 if (self.__persistenceManager) {
@@ -393,7 +392,7 @@ var PersistableModel = /** @class */ (function () {
     PersistableModel.prototype.getProperty = function (property) {
         var /** @type {?} */ self = this;
         if (!self.__bindings[property]) {
-            self.__bindings[property] = new Observable$1(function (observer) {
+            self.__bindings[property] = new Observable(function (observer) {
                 self.__bindingsObserver[property] = observer;
             });
             window.setTimeout(function () {
@@ -581,7 +580,7 @@ var PersistableModel = /** @class */ (function () {
     PersistableModel.prototype.getValidation = function (property) {
         var /** @type {?} */ self = this;
         if (self.__validator[property] === undefined) {
-            self.__validator[property] = new Observable$1(function (observer) {
+            self.__validator[property] = new Observable(function (observer) {
                 self.__validatorObserver[property] = observer;
             });
         }
@@ -599,7 +598,7 @@ var PersistableModel = /** @class */ (function () {
                 this.registerConditionValidators(true);
             }
             if (this.__conditionActionIfMatches[property] === undefined) {
-                this.__conditionActionIfMatches[property] = new Observable$1(function (observer) {
+                this.__conditionActionIfMatches[property] = new Observable(function (observer) {
                     _this.__conditionActionIfMatchesObserver[property] = observer;
                 });
             }
@@ -875,7 +874,7 @@ var PersistableModel = /** @class */ (function () {
             var /** @type {?} */ hasRealtimeTypes = false;
             self.__conditionActionIfMatchesRemovedProperties[validator.propertyName] = true;
             if (self.__conditionActionIfMatches[validator.propertyName] == undefined) {
-                self.__conditionActionIfMatches[validator.propertyName] = new Observable$1(function (observer) {
+                self.__conditionActionIfMatches[validator.propertyName] = new Observable(function (observer) {
                     self.__conditionActionIfMatchesObserver[validator.propertyName] = observer;
                     self.__conditionActionIfMatchesObserver[validator.propertyName].next({
                         'action': self.__conditionActionIfMatchesAction[validator.propertyName],
@@ -1073,439 +1072,68 @@ var PersistableModel = /** @class */ (function () {
     };
     return PersistableModel;
 }());
-
-/**
- * @param {?} options
- * @param {?=} actionIfMatches
- * @param {?=} validationOptions
- * @return {?}
- */
-function HasConditions(options, actionIfMatches, validationOptions) {
-    return function (object, propertyName) {
-        if (actionIfMatches == undefined) {
-            actionIfMatches = 'show';
-        }
-        options.forEach(function (option) {
-            if (option.property == undefined) {
-                option.property = propertyName;
-            }
-            if (option.validator == undefined) {
-                option.validator = 'equals';
-            }
-            if (option.type == undefined) {
-                option.type = 'condition';
-            }
-            if (option.value == undefined) {
-                option.value = true;
-            }
-        });
-        registerDecorator({
-            name: "hasConditions",
-            target: object.constructor,
-            propertyName: propertyName,
-            constraints: [{ 'type': 'hasConditions', 'value': options, 'actionIfMatches': actionIfMatches }],
-            options: { groups: ['condition_' + propertyName] },
-            validator: {
-                /**
-                 * @param {?} value
-                 * @param {?} args
-                 * @return {?}
-                 */
-                validate: function (value, args) {
-                    var /** @type {?} */ validator = new Validator();
-                    var /** @type {?} */ state = true;
-                    /**
-                     * iterates over all rules synchronous
-                     */
-                    if (options) {
-                        options.forEach(function (condition) {
-                            if (state) {
-                                if (condition.type == 'condition') {
-                                    if (!validator[condition.validator](args.object.__conditionContraintsPropertiesValue[condition.property] === undefined ? args.object[condition.property] : args.object.__conditionContraintsPropertiesValue[condition.property], condition.value, condition.validatorAdditionalArgument)) {
-                                        state = false;
-                                    }
-                                }
-                            }
-                        });
-                    }
-                    return state;
-                }
-            }
-        });
-    };
+export { PersistableModel };
+function PersistableModel_tsickle_Closure_declarations() {
+    /** @type {?} */
+    PersistableModel.prototype.__httpClient;
+    /** @type {?} */
+    PersistableModel.prototype.__isLoadedPromise;
+    /** @type {?} */
+    PersistableModel.prototype.__observer;
+    /** @type {?} */
+    PersistableModel.prototype.__observable;
+    /** @type {?} */
+    PersistableModel.prototype.__uuid;
+    /** @type {?} */
+    PersistableModel.prototype.__firebaseDatabase;
+    /** @type {?} */
+    PersistableModel.prototype.__firebaseDatabasePath;
+    /** @type {?} */
+    PersistableModel.prototype.__firebaseDatabaseRoot;
+    /** @type {?} */
+    PersistableModel.prototype.__angularFireObject;
+    /** @type {?} */
+    PersistableModel.prototype.__bindings;
+    /** @type {?} */
+    PersistableModel.prototype.__bindingsObserver;
+    /** @type {?} */
+    PersistableModel.prototype.__validator;
+    /** @type {?} */
+    PersistableModel.prototype.__validatorObserver;
+    /** @type {?} */
+    PersistableModel.prototype.__edited;
+    /** @type {?} */
+    PersistableModel.prototype.__temp;
+    /** @type {?} */
+    PersistableModel.prototype.__forceUpdateProperty;
+    /** @type {?} */
+    PersistableModel.prototype.__persistenceManager;
+    /** @type {?} */
+    PersistableModel.prototype.__isOnline;
+    /** @type {?} */
+    PersistableModel.prototype.__validationErrors;
+    /** @type {?} */
+    PersistableModel.prototype.__metadata;
+    /** @type {?} */
+    PersistableModel.prototype._hasPendingChanges;
+    /** @type {?} */
+    PersistableModel.prototype.__conditionBindings;
+    /** @type {?} */
+    PersistableModel.prototype.__conditionActionIfMatches;
+    /** @type {?} */
+    PersistableModel.prototype.__conditionActionIfMatchesAction;
+    /** @type {?} */
+    PersistableModel.prototype.__conditionActionIfMatchesObserver;
+    /** @type {?} */
+    PersistableModel.prototype.__conditionActionIfMatchesRemovedProperties;
+    /** @type {?} */
+    PersistableModel.prototype.__conditionContraintsProperties;
+    /** @type {?} */
+    PersistableModel.prototype.__conditionContraintsPropertiesValue;
+    /** @type {?} */
+    PersistableModel.prototype.__conditionContraintsAffectedProperties;
+    /** @type {?} */
+    PersistableModel.prototype.__messages;
+    /** @type {?} */
+    PersistableModel.prototype.__notificationProvider;
 }
-
-/**
- * @param {?} description
- * @param {?=} validationOptions
- * @return {?}
- */
-function HasDescription(description, validationOptions) {
-    return function (object, propertyName) {
-        registerDecorator({
-            name: "hasDescription",
-            target: object.constructor,
-            propertyName: propertyName,
-            constraints: [{ 'type': 'hasDescription', 'value': description }],
-            options: validationOptions,
-            validator: {
-                /**
-                 * @param {?} value
-                 * @param {?} args
-                 * @return {?}
-                 */
-                validate: function (value, args) {
-                    return true;
-                }
-            }
-        });
-    };
-}
-
-/**
- * @param {?} label
- * @param {?=} validationOptions
- * @return {?}
- */
-function HasLabel(label, validationOptions) {
-    return function (object, propertyName) {
-        registerDecorator({
-            name: "hasLabel",
-            target: object.constructor,
-            propertyName: propertyName,
-            constraints: [{ 'type': 'hasLabel', 'value': label }],
-            options: validationOptions,
-            validator: {
-                /**
-                 * @param {?} value
-                 * @param {?} args
-                 * @return {?}
-                 */
-                validate: function (value, args) {
-                    return true;
-                }
-            }
-        });
-    };
-}
-
-/**
- * @param {?} precision
- * @param {?=} validationOptions
- * @return {?}
- */
-function HasPrecision(precision, validationOptions) {
-    return function (object, propertyName) {
-        registerDecorator({
-            name: "hasPrecision",
-            target: object.constructor,
-            propertyName: propertyName,
-            constraints: [{ 'type': 'hasPrecision', 'value': precision }],
-            options: validationOptions,
-            validator: {
-                /**
-                 * @param {?} value
-                 * @param {?} args
-                 * @return {?}
-                 */
-                validate: function (value, args) {
-                    return true;
-                }
-            }
-        });
-    };
-}
-
-/**
- * @param {?=} validationOptions
- * @return {?}
- */
-function IsBirthDate(validationOptions) {
-    return function (object, propertyName) {
-        registerDecorator({
-            name: "IsBirthDate",
-            target: object.constructor,
-            propertyName: propertyName,
-            constraints: [{ 'type': 'isBirthDate', 'value': true }],
-            options: validationOptions,
-            validator: {
-                /**
-                 * @param {?} value
-                 * @param {?} args
-                 * @return {?}
-                 */
-                validate: function (value, args) {
-                    return true;
-                }
-            }
-        });
-    };
-}
-
-/**
- * @param {?=} options
- * @return {?}
- */
-function IsCalendar(options) {
-    return function (object, propertyName) {
-        registerDecorator({
-            name: "isCalendar",
-            target: object.constructor,
-            propertyName: propertyName,
-            constraints: [{ 'type': 'isCalendar', value: options }],
-            validator: {
-                /**
-                 * @param {?} value
-                 * @param {?} args
-                 * @return {?}
-                 */
-                validate: function (value, args) {
-                    return true;
-                }
-            }
-        });
-    };
-}
-
-/**
- * @param {?=} options
- * @return {?}
- */
-function IsDateRange(options) {
-    return function (object, propertyName) {
-        registerDecorator({
-            name: "isDateRange",
-            target: object.constructor,
-            propertyName: propertyName,
-            constraints: [{ 'type': 'isDateRange', value: options }],
-            validator: {
-                /**
-                 * @param {?} value
-                 * @param {?} args
-                 * @return {?}
-                 */
-                validate: function (value, args) {
-                    return true;
-                }
-            }
-        });
-    };
-}
-
-/**
- * @return {?}
- */
-function IsPassword() {
-    return function (object, propertyName) {
-        registerDecorator({
-            name: "isPassword",
-            target: object.constructor,
-            propertyName: propertyName,
-            constraints: [{ 'type': 'isPassword' }],
-            validator: {
-                /**
-                 * @param {?} value
-                 * @return {?}
-                 */
-                validate: function (value) {
-                    return true;
-                }
-            }
-        });
-    };
-}
-
-/**
- * @param {?=} property
- * @param {?=} validationOptions
- * @return {?}
- */
-function IsPhoneNumber(property, validationOptions) {
-    return function (object, propertyName) {
-        registerDecorator({
-            name: "isPhoneNumber",
-            target: object.constructor,
-            propertyName: propertyName,
-            constraints: [{ 'type': 'isPhoneNumber', 'value': property }],
-            options: validationOptions,
-            validator: {
-                /**
-                 * @param {?} value
-                 * @param {?} args
-                 * @return {?}
-                 */
-                validate: function (value, args) {
-                    var /** @type {?} */ r = /[\\+ 0-9]/;
-                    return r.test(value);
-                }
-            }
-        });
-    };
-}
-
-/**
- * @param {?=} options
- * @param {?=} validationOptions
- * @return {?}
- */
-function IsRating(options, validationOptions) {
-    return function (object, propertyName) {
-        registerDecorator({
-            name: "isRating",
-            target: object.constructor,
-            propertyName: propertyName,
-            constraints: [{ 'type': 'isRating', 'value': options }],
-            options: validationOptions,
-            validator: {
-                /**
-                 * @param {?} value
-                 * @param {?} args
-                 * @return {?}
-                 */
-                validate: function (value, args) {
-                    return true;
-                }
-            }
-        });
-    };
-}
-
-/**
- * @param {?=} length
- * @param {?=} validationOptions
- * @return {?}
- */
-function IsText(length, validationOptions) {
-    return function (object, propertyName) {
-        registerDecorator({
-            name: "isText",
-            target: object.constructor,
-            propertyName: propertyName,
-            constraints: [{ 'type': 'isText', 'value': length }],
-            options: validationOptions,
-            validator: {
-                /**
-                 * @param {?} value
-                 * @param {?} args
-                 * @return {?}
-                 */
-                validate: function (value, args) {
-                    return (!length || value.length < length ? true : false);
-                }
-            }
-        });
-    };
-}
-
-/**
- * @param {?=} options
- * @param {?=} validationOptions
- * @return {?}
- */
-function IsNumpad(options, validationOptions) {
-    return function (object, propertyName) {
-        registerDecorator({
-            name: "isNumpad",
-            target: object.constructor,
-            propertyName: propertyName,
-            constraints: [{ 'type': 'isNumpad', 'value': options }],
-            options: validationOptions,
-            validator: {
-                /**
-                 * @param {?} value
-                 * @param {?} args
-                 * @return {?}
-                 */
-                validate: function (value, args) {
-                    return true;
-                }
-            }
-        });
-    };
-}
-
-/**
- * @param {?=} options
- * @return {?}
- */
-function IsSelect(options) {
-    return function (object, propertyName) {
-        registerDecorator({
-            name: "isSelect",
-            target: object.constructor,
-            propertyName: propertyName,
-            constraints: [{ 'type': 'isSelect', value: options }],
-            validator: {
-                /**
-                 * @param {?} value
-                 * @param {?} args
-                 * @return {?}
-                 */
-                validate: function (value, args) {
-                    return new Promise(function (resolve, reject) {
-                        var /** @type {?} */ optionValidator = {
-                            target: value,
-                            source: args.constraints[0].value.source,
-                            getOptions: function () {
-                                return new Promise(function (resolve, reject) {
-                                    if (optionValidator.source) {
-                                        get(optionValidator.source.url).type('json').end(function (response) {
-                                            var /** @type {?} */ options = [];
-                                            if (response.error) {
-                                                reject(response.error);
-                                            }
-                                            else {
-                                                response.body.forEach(function (item) {
-                                                    options.push({
-                                                        value: optionValidator._getPropertyFromObject(item, optionValidator.source.mapping.value),
-                                                        text: optionValidator._getPropertyFromObject(item, optionValidator.source.mapping.text),
-                                                        disabled: optionValidator.source.mapping.disabled !== undefined ? optionValidator._getPropertyFromObject(item, optionValidator.source.mapping.disabled) : false,
-                                                    });
-                                                });
-                                                resolve(options);
-                                            }
-                                        });
-                                    }
-                                    else {
-                                        resolve(args.constraints[0].value.options);
-                                    }
-                                });
-                            },
-                            _getPropertyFromObject: function (inputObject, property) {
-                                if (typeof property == 'function') {
-                                    return inputObject !== undefined ? property(inputObject) : null;
-                                }
-                                if (property.indexOf(".") > 0) {
-                                    return optionValidator._getPropertyFromObject(inputObject[property.substr(0, property.indexOf("."))], property.substr(property.indexOf(".") + 1));
-                                }
-                                else {
-                                    return inputObject[property];
-                                }
-                            }
-                        };
-                        optionValidator.getOptions().then(function (options) {
-                            var /** @type {?} */ allValide = true;
-                            var /** @type {?} */ values = {};
-                            options.forEach(function (option) {
-                                if (!option.disabled) {
-                                    values[option.value] = true;
-                                }
-                            });
-                            optionValidator.target.forEach(function (value) {
-                                if (values[value] == undefined) {
-                                    allValide = false;
-                                }
-                            });
-                            resolve(allValide);
-                        }).catch(function (error) {
-                            resolve(false);
-                        });
-                    });
-                }
-            }
-        });
-    };
-}
-
-export { PersistableModel, HasConditions, HasDescription, HasLabel, HasPrecision, IsBirthDate, IsCalendar, IsDateRange, IsPassword, IsPhoneNumber, IsRating, IsText, IsNumpad, IsSelect };
-export { ValidatorConstraint, Validate, ValidateNested, ValidateIf, IsDefined, Equals, NotEquals, IsEmpty, IsNotEmpty, IsIn, IsNotIn, IsOptional, IsBoolean, IsDate, IsNumber, IsInt, IsString, IsDateString, IsArray, IsEnum, IsDivisibleBy, IsPositive, IsNegative, Min, Max, MinDate, MaxDate, IsBooleanString, IsNumberString, Contains, NotContains, IsAlpha, IsAlphanumeric, IsAscii, IsBase64, IsByteLength, IsCreditCard, IsCurrency, IsEmail, IsFQDN, IsFullWidth, IsHalfWidth, IsVariableWidth, IsHexColor, IsHexadecimal, IsIP, IsISBN, IsISIN, IsISO8601, IsJSON, IsLowercase, IsMobilePhone, IsMongoId, IsMultibyte, IsSurrogatePair, IsUrl, IsUUID, IsUppercase, Length, MinLength, MaxLength, Matches, IsMilitaryTime, ArrayContains, ArrayNotContains, ArrayNotEmpty, ArrayMinSize, ArrayMaxSize, ArrayUnique } from 'class-validator/decorator/decorators';

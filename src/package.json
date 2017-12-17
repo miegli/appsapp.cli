@@ -1,6 +1,6 @@
 {
   "name": "appsapp-cli",
-  "version": "1.6.24",
+  "version": "1.6.26",
   "license": "MIT",
   "dependencies": {
     "chalk": "^2.3.0",
@@ -34,10 +34,23 @@
     "unirest": "^0.5.1"
   },
   "preferGlobal": true,
-  "bin": {"appsapp": "./cli/appsapp.js"},
+  "bin": {
+    "appsapp": "./cli/appsapp.js"
+  },
   "main": "index.js",
-  "repository": {"type": "git", "url": "https://github.com/miegli/appsapp.cli"},
-  "author": {"name": "Michael Egli", "email": "michael.egli@appsapp.io"},
-  "keywords": ["angular", "ionic"],
-  "bugs": {"url": "https://github.com/miegli/appsapps.cli/issues"}
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/miegli/appsapp.cli"
+  },
+  "author": {
+    "name": "Michael Egli",
+    "email": "michael.egli@appsapp.io"
+  },
+  "keywords": [
+    "angular",
+    "ionic"
+  ],
+  "bugs": {
+    "url": "https://github.com/miegli/appsapps.cli/issues"
+  }
 }

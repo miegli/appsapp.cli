@@ -1,8 +1,8 @@
 (function (global, factory) {
-	typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports, require('rxjs/Observable'), require('class-validator'), require('class-transformer'), require('angular2-uuid'), require('class-validator/decorator/decorators')) :
-	typeof define === 'function' && define.amd ? define(['exports', 'rxjs/Observable', 'class-validator', 'class-transformer', 'angular2-uuid', 'class-validator/decorator/decorators'], factory) :
-	(factory((global['appsapp-cli'] = {}),global.Observable,global.classValidator,global.classTransformer,global.angular2Uuid,global.decorators));
-}(this, (function (exports,Observable,classValidator,classTransformer,angular2Uuid,decorators) { 'use strict';
+	typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports, require('rxjs/Observable'), require('class-validator'), require('class-transformer'), require('angular2-uuid'), require('unirest'), require('class-validator/decorator/decorators')) :
+	typeof define === 'function' && define.amd ? define(['exports', 'rxjs/Observable', 'class-validator', 'class-transformer', 'angular2-uuid', 'unirest', 'class-validator/decorator/decorators'], factory) :
+	(factory((global['appsapp-cli'] = {}),global.Observable,global.classValidator,global.classTransformer,global.angular2Uuid,global.Unirest,global.decorators));
+}(this, (function (exports,Observable,classValidator,classTransformer,angular2Uuid,Unirest,decorators) { 'use strict';
 
 /**
  * @abstract
@@ -1441,7 +1441,65 @@ function IsSelect(options) {
                  * @return {?}
                  */
                 validate: function (value, args) {
-                    return true;
+                    return new Promise(function (resolve, reject) {
+                        var /** @type {?} */ optionValidator = {
+                            target: value,
+                            source: args.constraints[0].value.source,
+                            getOptions: function () {
+                                return new Promise(function (resolve, reject) {
+                                    if (optionValidator.source) {
+                                        Unirest.get(optionValidator.source.url).type('json').end(function (response) {
+                                            var /** @type {?} */ options = [];
+                                            if (response.error) {
+                                                reject(response.error);
+                                            }
+                                            else {
+                                                response.body.forEach(function (item) {
+                                                    options.push({
+                                                        value: optionValidator._getPropertyFromObject(item, optionValidator.source.mapping.value),
+                                                        text: optionValidator._getPropertyFromObject(item, optionValidator.source.mapping.text),
+                                                        disabled: optionValidator.source.mapping.disabled !== undefined ? optionValidator._getPropertyFromObject(item, optionValidator.source.mapping.disabled) : false,
+                                                    });
+                                                });
+                                                resolve(options);
+                                            }
+                                        });
+                                    }
+                                    else {
+                                        resolve(args.constraints[0].value.options);
+                                    }
+                                });
+                            },
+                            _getPropertyFromObject: function (inputObject, property) {
+                                if (typeof property == 'function') {
+                                    return inputObject !== undefined ? property(inputObject) : null;
+                                }
+                                if (property.indexOf(".") > 0) {
+                                    return optionValidator._getPropertyFromObject(inputObject[property.substr(0, property.indexOf("."))], property.substr(property.indexOf(".") + 1));
+                                }
+                                else {
+                                    return inputObject[property];
+                                }
+                            }
+                        };
+                        optionValidator.getOptions().then(function (options) {
+                            var /** @type {?} */ allValide = true;
+                            var /** @type {?} */ values = {};
+                            options.forEach(function (option) {
+                                if (!option.disabled) {
+                                    values[option.value] = true;
+                                }
+                            });
+                            optionValidator.target.forEach(function (value) {
+                                if (values[value] == undefined) {
+                                    allValide = false;
+                                }
+                            });
+                            resolve(allValide);
+                        }).catch(function (error) {
+                            resolve(false);
+                        });
+                    });
                 }
             }
         });
