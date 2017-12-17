@@ -94,13 +94,13 @@ export function IsSelect(options?: {
                             if (allValide) {
                                 resolve(true);
                             } else {
-                                reject(false);
+                                resolve(false);
                             }
 
 
 
                         }).catch((error) => {
-                            reject(error);
+                            resolve(false);
                         });
 
 
