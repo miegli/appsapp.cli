@@ -38,9 +38,11 @@ export function IsSelect(options?: {
                             source: args.constraints[0].value.source,
                             getOptions: () => {
                                 return new Promise(function (resolve, reject) {
+                                    console.log(optionValidator);
                                     if (optionValidator.source) {
                                         Unirest.get(optionValidator.source.url).type('json').end(function (response) {
                                             let options = [];
+                                            console.log(response);
                                             if (response.error) {
                                                 reject(response.error);
                                             } else {
