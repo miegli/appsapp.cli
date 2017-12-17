@@ -69,10 +69,10 @@ function IsSelect(options) {
                                 resolve(true);
                             }
                             else {
-                                reject(false);
+                                resolve(false);
                             }
                         }).catch(function (error) {
-                            reject(error);
+                            resolve(false);
                         });
                     });
                 }
