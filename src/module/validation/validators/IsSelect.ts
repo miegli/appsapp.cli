@@ -87,14 +87,14 @@ export function IsSelect(options?: {
                             });
                             optionValidator.target.forEach((value) => {
                                 console.log('-->',value);
+                                console.log('--->',values[value]);
+                                console.log('---->',values[value] == undefined);
                                 if (values[value] == undefined) {
                                     allValide = false;
                                 }
                             });
 
-                            console.log(values);
-                            console.log(options);
-                            console.log(optionValidator.target);
+                            console.log('------------>',allValide);
 
                             resolve(allValide);
 

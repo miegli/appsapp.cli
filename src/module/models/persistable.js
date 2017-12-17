@@ -686,6 +686,9 @@ var PersistableModel = /** @class */ (function () {
         if (this.getMetadata(property, 'isDateRange').length) {
             return typeof value == 'object' ? value : [];
         }
+        if (this.getMetadata(property, 'isSelect').length) {
+            return typeof value == 'object' ? value : [];
+        }
         return value;
     };
     /**
