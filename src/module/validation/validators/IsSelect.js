@@ -2,6 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 var class_validator_1 = require("class-validator");
 var Unirest = require("unirest");
+var objectHash = require("object-hash");
 function IsSelect(options) {
     return function (object, propertyName) {
         class_validator_1.registerDecorator({
@@ -57,11 +58,11 @@ function IsSelect(options) {
                             var values = {};
                             options.forEach(function (option) {
                                 if (!option.disabled) {
-                                    values[option.value] = true;
+                                    values[typeof option.value == 'object' ? objectHash.sha1(option.value) : option.value] = true;
                                 }
                             });
                             optionValidator.target.forEach(function (value) {
-                                if (values[value] == undefined) {
+                                if (values[typeof value == 'object' ? objectHash.sha1(value) : value] == undefined) {
                                     allValide = false;
                                 }
                             });

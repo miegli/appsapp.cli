@@ -6,6 +6,7 @@ var class_transformer_1 = require("class-transformer");
 var class_validator_2 = require("class-validator");
 var class_validator_3 = require("class-validator");
 var angular2_uuid_1 = require("angular2-uuid");
+var objectHash = require("object-hash");
 var PersistableModel = /** @class */ (function () {
     /**
      * PersistanceManager as an optional argument when changes were persisted to stable database
@@ -33,6 +34,7 @@ var PersistableModel = /** @class */ (function () {
         this.__conditionContraintsProperties = {};
         this.__conditionContraintsPropertiesValue = {};
         this.__conditionContraintsAffectedProperties = {};
+        this.__hashedValues = {};
         this.__metadata = class_validator_2.getFromContainer(class_validator_3.MetadataStorage).getTargetValidationMetadatas(this.constructor, '');
         // check if all loaded metadata has corresponding properties
         this.__metadata.forEach(function (metadata) {
@@ -215,6 +217,8 @@ var PersistableModel = /** @class */ (function () {
         return new Observable_1.Observable(function (observer) {
             self.validate().then(function () {
                 self.setHasPendingChanges(true, action);
+                // post transform properties values for submitting
+                self.transformAllProperties();
                 if (self.__persistenceManager) {
                     self.__persistenceManager.save(self, observer, action).then(function (success) {
                         self.__edited = {};
@@ -674,6 +678,7 @@ var PersistableModel = /** @class */ (function () {
      * @returns {any}
      */
     PersistableModel.prototype.transformTypeFromMetadata = function (property, value) {
+        var self = this;
         if (this.getMetadata(property, 'isDate').length) {
             return value ? new Date(value) : null;
         }
@@ -687,9 +692,27 @@ var PersistableModel = /** @class */ (function () {
             return typeof value == 'object' ? value : [];
         }
         if (this.getMetadata(property, 'isSelect').length) {
-            return typeof value == 'object' ? value : [];
+            var values = typeof value == 'object' ? value : [];
+            var realValues_1 = [];
+            values.forEach(function (val) {
+                realValues_1.push(self.getHashedValue(val));
+            });
+            return realValues_1;
         }
         return value;
+    };
+    /**
+     * Transform all properties
+     * @returns {PersistableModel}
+     */
+    PersistableModel.prototype.transformAllProperties = function () {
+        var self = this;
+        Object.keys(self).forEach(function (property) {
+            if (property.substr(0, 1) !== '_') {
+                self[property] = self.transformTypeFromMetadata(property, self[property]);
+            }
+        });
+        return this;
     };
     /**
      * has model pending changes that are not synchronised yet or not
@@ -1060,6 +1083,45 @@ var PersistableModel = /** @class */ (function () {
     PersistableModel.prototype.notify = function (message, error) {
         this.__notificationProvider(message, error);
         return this;
+    };
+    /**
+     * Get hased values
+     * @Returns object
+     */
+    PersistableModel.prototype.getHashedValues = function () {
+        var values = [];
+        var self = this;
+        Object.keys(this.__hashedValues).forEach(function (hash) {
+            values.push({ value: self.__hashedValues[hash], hash: hash });
+        });
+        return values;
+    };
+    /**
+     * Set hased values
+     * @Returns mixed
+     */
+    PersistableModel.prototype.addHashedValue = function (value, hash) {
+        this.__hashedValues[hash] = value;
+        return this;
+    };
+    /**
+     * Get value from hashed value
+     * @param string hash
+     * @Returns mixed
+     */
+    PersistableModel.prototype.getHashedValue = function (hash) {
+        return this.__hashedValues[hash] !== undefined ? this.__hashedValues[hash] : hash;
+    };
+    /**
+     * Set hashed value
+     * @param string value
+     * @param hash
+     * @Returns string hash
+     */
+    PersistableModel.prototype.setHashedValue = function (value) {
+        var hash = typeof value == 'object' ? objectHash.sha1(value) : value;
+        this.__hashedValues[hash] = value;
+        return hash;
     };
     return PersistableModel;
 }());
