@@ -215,36 +215,30 @@ var PersistableModel = /** @class */ (function () {
             self[property] = self.__edited[property];
         });
         return new Observable_1.Observable(function (observer) {
-            self.validate().then(function () {
-                self.setHasPendingChanges(true, action);
-                // post transform properties values for submitting
-                self.transformAllProperties();
-                if (self.__persistenceManager) {
-                    self.__persistenceManager.save(self, observer, action).then(function (success) {
-                        self.__edited = {};
-                        if (action) {
-                            if (self.isOnline()) {
-                                observer.next(self.getMessage('submitted'));
-                            }
-                            else {
-                                observer.next(self.getMessage('submittedInBackground'));
-                            }
+            self.setHasPendingChanges(true, action);
+            if (self.__persistenceManager) {
+                self.__persistenceManager.save(self, observer, action).then(function (success) {
+                    self.__edited = {};
+                    if (action) {
+                        if (self.isOnline()) {
+                            observer.next(self.getMessage('submitted'));
                         }
                         else {
-                            observer.complete();
+                            observer.next(self.getMessage('submittedInBackground'));
                         }
-                    }).catch(function (error) {
-                        self.__edited = {};
-                        observer.error(error);
-                    });
-                }
-                else {
-                    observer.error('No persistence Manger provided');
+                    }
+                    else {
+                        observer.complete();
+                    }
+                }).catch(function (error) {
                     self.__edited = {};
-                }
-            }).catch(function (error) {
-                observer.error(error);
-            });
+                    observer.error(error);
+                });
+            }
+            else {
+                observer.error('No persistence Manger provided');
+                self.__edited = {};
+            }
         });
     };
     /**
@@ -694,9 +688,11 @@ var PersistableModel = /** @class */ (function () {
         if (this.getMetadata(property, 'isSelect').length) {
             var values = typeof value == 'object' ? value : [];
             var realValues_1 = [];
-            values.forEach(function (val) {
-                realValues_1.push(self.getHashedValue(val));
-            });
+            if (values.length) {
+                values.forEach(function (val) {
+                    realValues_1.push(self.getHashedValue(val));
+                });
+            }
             return realValues_1;
         }
         return value;
