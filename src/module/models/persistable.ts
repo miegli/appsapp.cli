@@ -331,12 +331,9 @@ export abstract class PersistableModel {
 
         return new Observable<any>((observer: Observer<any>) => {
 
-            self.validate().then(() => {
 
                 self.setHasPendingChanges(true, action);
 
-                // post transform properties values for submitting
-                self.transformAllProperties();
 
                 if (self.__persistenceManager) {
                     self.__persistenceManager.save(self, observer, action).then((success) => {
@@ -362,9 +359,6 @@ export abstract class PersistableModel {
                     self.__edited = {};
                 }
 
-            }).catch((error) => {
-                observer.error(error);
-            });
 
         });
 
@@ -971,9 +965,11 @@ export abstract class PersistableModel {
 
             let values = typeof value == 'object' ? value : [];
             let realValues = [];
-            values.forEach((val) => {
-                realValues.push(self.getHashedValue(val));
-            });
+            if (values.length) {
+                values.forEach((val) => {
+                    realValues.push(self.getHashedValue(val));
+                });
+            }
             return realValues;
 
         }
