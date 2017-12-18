@@ -9,6 +9,7 @@ import {MetadataStorage} from "class-validator";
 import {UUID} from "angular2-uuid";
 import {AppsappModuleProviderMessages} from "../interfaces/messages";
 import {HttpClient} from "@angular/common/http";
+import * as objectHash from 'object-hash';
 
 export interface actionEmail {
     name: 'email',
@@ -81,6 +82,7 @@ export abstract class PersistableModel {
     private __conditionContraintsAffectedProperties: any = {};
     private __messages: AppsappModuleProviderMessages;
     private __notificationProvider: any;
+    private __hashedValues: object = {};
 
     /**
      * PersistanceManager as an optional argument when changes were persisted to stable database
@@ -332,6 +334,9 @@ export abstract class PersistableModel {
             self.validate().then(() => {
 
                 self.setHasPendingChanges(true, action);
+
+                // post transform properties values for submitting
+                self.transformAllProperties();
 
                 if (self.__persistenceManager) {
                     self.__persistenceManager.save(self, observer, action).then((success) => {
@@ -664,6 +669,7 @@ export abstract class PersistableModel {
 
     }
 
+
     /**
      * return string representative from given property value
      * @param property
@@ -943,6 +949,8 @@ export abstract class PersistableModel {
      */
     private transformTypeFromMetadata(property, value) {
 
+        let self = this;
+
         if (this.getMetadata(property, 'isDate').length) {
             return value ? new Date(value) : null;
         }
@@ -960,10 +968,35 @@ export abstract class PersistableModel {
         }
 
         if (this.getMetadata(property, 'isSelect').length) {
-            return typeof value == 'object' ? value : [];
+
+            let values = typeof value == 'object' ? value : [];
+            let realValues = [];
+            values.forEach((val) => {
+                realValues.push(self.getHashedValue(val));
+            });
+            return realValues;
+
         }
 
         return value;
+
+    }
+
+    /**
+     * Transform all properties
+     * @returns {PersistableModel}
+     */
+    private transformAllProperties() {
+
+        let self = this;
+
+        Object.keys(self).forEach((property) => {
+            if (property.substr(0, 1) !== '_') {
+                self[property] = self.transformTypeFromMetadata(property, self[property]);
+            }
+        });
+
+        return this;
 
     }
 
@@ -1495,6 +1528,60 @@ export abstract class PersistableModel {
         this.__notificationProvider(message, error);
 
         return this;
+
+    }
+
+
+    /**
+     * Get hased values
+     * @Returns object
+     */
+    public getHashedValues() {
+
+        let values = [];
+        let self = this;
+
+        Object.keys(this.__hashedValues).forEach((hash) => {
+            values.push({value: self.__hashedValues[hash], hash: hash});
+        });
+
+        return values;
+
+    }
+
+    /**
+     * Set hased values
+     * @Returns mixed
+     */
+    public addHashedValue(value,hash) {
+
+        this.__hashedValues[hash] = value;
+        return this;
+
+    }
+
+    /**
+     * Get value from hashed value
+     * @param string hash
+     * @Returns mixed
+     */
+    public getHashedValue(hash) {
+
+        return this.__hashedValues[hash] !== undefined ? this.__hashedValues[hash] : hash;
+    }
+
+    /**
+     * Set hashed value
+     * @param string value
+     * @param hash
+     * @Returns string hash
+     */
+    public setHashedValue(value) {
+
+        let hash = typeof value == 'object' ? objectHash.sha1(value) : value;
+        this.__hashedValues[hash] = value;
+
+        return hash;
 
     }
 

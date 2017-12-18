@@ -1,6 +1,6 @@
 {
   "name": "appsapp-cli",
-  "version": "1.6.32",
+  "version": "1.6.33",
   "license": "MIT",
   "dependencies": {
     "chalk": "^2.3.0",
@@ -31,7 +31,8 @@
     "class-validator": "^0.7.3",
     "firebase": "^4.6.1",
     "fs-extra": "^4.0.2",
-    "unirest": "^0.5.1"
+    "unirest": "^0.5.1",
+    "object-hash": "^1.2.0"
   },
   "preferGlobal": true,
   "bin": {"appsapp": "./cli/appsapp.js"},

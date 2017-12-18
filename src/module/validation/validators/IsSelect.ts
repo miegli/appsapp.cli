@@ -2,6 +2,7 @@ import {registerDecorator, ValidationOptions, ValidationArguments} from "class-v
 import {Observer} from "rxjs/Observer";
 import {Observable} from "rxjs/Observable";
 import * as Unirest from "unirest";
+import * as objectHash from 'object-hash';
 
 export function IsSelect(options?: {
     source?: {
@@ -30,7 +31,7 @@ export function IsSelect(options?: {
             constraints: [{'type': 'isSelect', value: options}],
             validator: {
                 validate(value: any, args: ValidationArguments) {
-                    
+
                     return new Promise(function (resolve, reject) {
 
                         let optionValidator = {
@@ -82,11 +83,11 @@ export function IsSelect(options?: {
                             let values = {};
                             options.forEach((option) => {
                                 if (!option.disabled) {
-                                    values[option.value] = true;
+                                    values[typeof option.value == 'object' ? objectHash.sha1(option.value) : option.value] = true;
                                 }
                             });
                             optionValidator.target.forEach((value) => {
-                                if (values[value] == undefined) {
+                                if (values[typeof value == 'object' ? objectHash.sha1(value) : value] == undefined) {
                                     allValide = false;
                                 }
                             });
@@ -96,7 +97,6 @@ export function IsSelect(options?: {
                             } else {
                                 resolve(false);
                             }
-
 
 
                         }).catch((error) => {
