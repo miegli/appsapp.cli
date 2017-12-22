@@ -963,6 +963,9 @@ export abstract class PersistableModel {
 
         if (this.getMetadata(property, 'isSelect').length) {
 
+            console.log(value, typeof value);
+
+
             let values = typeof value == 'object' ? value : [];
             let realValues = [];
             if (values.length) {

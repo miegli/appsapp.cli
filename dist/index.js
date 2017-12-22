@@ -692,6 +692,7 @@ var PersistableModel = /** @class */ (function () {
             return typeof value == 'object' ? value : [];
         }
         if (this.getMetadata(property, 'isSelect').length) {
+            console.log(value, typeof value);
             var /** @type {?} */ values = typeof value == 'object' ? value : [];
             var /** @type {?} */ realValues_1 = [];
             if (values.length) {
