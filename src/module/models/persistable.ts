@@ -49,7 +49,7 @@ export interface actionCustom {
 }
 
 
-export abstract class PersistableModel {
+export class PersistableModel {
 
     private __httpClient: HttpClient;
     private __isLoadedPromise: Promise<any>;
@@ -410,8 +410,8 @@ export abstract class PersistableModel {
      * @param uuid
      * @returns {PersistableModel}
      */
-    public setUuid(uuid) {
-        this.__uuid = uuid;
+    public setUuid(uuid?) {
+        this.__uuid = uuid !== undefined ? uuid : UUID.UUID();
         return this;
     }
 
@@ -888,6 +888,28 @@ export abstract class PersistableModel {
 
     }
 
+    /**
+     * import dynamic properties
+     * @param {propertiesAsObject}
+     * @returns {Promise<any>}
+     */
+    public importDynamicProperties(propertiesAsObject) {
+
+        let self = this;
+
+        return new Promise(function (resolve, reject) {
+
+            Object.keys(propertiesAsObject).forEach((property) => {
+                self[property] = self.transformTypeFromMetadata(property, propertiesAsObject[property]);
+            });
+
+            resolve(self);
+
+        });
+
+
+    }
+
 
     /**
      * load json data
@@ -1172,6 +1194,7 @@ export abstract class PersistableModel {
         const typeMappings = {
 
             'isString': 'text',
+            'isList': 'list',
             'number': 'numberplain',
             'isPrecision': 'numberplain',
             'isNumber': 'number',
@@ -1200,7 +1223,6 @@ export abstract class PersistableModel {
 
         }
 
-
         this.getMetadata(property).forEach((metadata) => {
 
             if (type == null && typeMappings[metadata.type] !== undefined) {
@@ -1214,11 +1236,9 @@ export abstract class PersistableModel {
 
         });
 
-
         if (!type) {
             type = typeMappings[typeof this[property]] !== undefined ? typeMappings[typeof this[property]] : null;
         }
-
 
         return type ? type : 'text';
 

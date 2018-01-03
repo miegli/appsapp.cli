@@ -35,7 +35,7 @@ export interface actionCustom {
     };
     additionalActions?: [actionEmail | actionWebhook | actionGoogleSheets | actionCustom];
 }
-export declare abstract class PersistableModel {
+export declare class PersistableModel {
     private __httpClient;
     private __isLoadedPromise;
     private __observer;
@@ -147,7 +147,7 @@ export declare abstract class PersistableModel {
      * @param uuid
      * @returns {PersistableModel}
      */
-    setUuid(uuid: any): this;
+    setUuid(uuid?: any): this;
     /**
      * get uuid
      * @returns {string}
@@ -291,6 +291,12 @@ export declare abstract class PersistableModel {
      * @returns {boolean}
      */
     private setHasNoChanges(property?);
+    /**
+     * import dynamic properties
+     * @param {propertiesAsObject}
+     * @returns {Promise<any>}
+     */
+    importDynamicProperties(propertiesAsObject: any): Promise<{}>;
     /**
      * load json data
      * @param {object|string} stringified or real json object

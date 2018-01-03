@@ -6,9 +6,6 @@ import { sha1 } from 'object-hash';
 import { get } from 'unirest';
 
 
-/**
- * @abstract
- */
 var PersistableModel = /** @class */ (function () {
     /**
      * PersistanceManager as an optional argument when changes were persisted to stable database
@@ -277,11 +274,11 @@ var PersistableModel = /** @class */ (function () {
     };
     /**
      * set uuid
-     * @param {?} uuid
+     * @param {?=} uuid
      * @return {?}
      */
     PersistableModel.prototype.setUuid = function (uuid) {
-        this.__uuid = uuid;
+        this.__uuid = uuid !== undefined ? uuid : UUID.UUID();
         return this;
     };
     /**
@@ -640,6 +637,20 @@ var PersistableModel = /** @class */ (function () {
         return this;
     };
     /**
+     * import dynamic properties
+     * @param {?} propertiesAsObject
+     * @return {?}
+     */
+    PersistableModel.prototype.importDynamicProperties = function (propertiesAsObject) {
+        var /** @type {?} */ self = this;
+        return new Promise(function (resolve, reject) {
+            Object.keys(propertiesAsObject).forEach(function (property) {
+                self[property] = self.transformTypeFromMetadata(property, propertiesAsObject[property]);
+            });
+            resolve(self);
+        });
+    };
+    /**
      * load json data
      * @param {?} json
      * @return {?}
@@ -846,6 +857,7 @@ var PersistableModel = /** @class */ (function () {
         var /** @type {?} */ type = null;
         var /** @type {?} */ typeMappings = {
             'isString': 'text',
+            'isList': 'list',
             'number': 'numberplain',
             'isPrecision': 'numberplain',
             'isNumber': 'number',
@@ -1579,5 +1591,30 @@ function IsSelect(options) {
     };
 }
 
-export { PersistableModel, HasConditions, HasDescription, HasLabel, HasPrecision, IsBirthDate, IsCalendar, IsDateRange, IsPassword, IsPhoneNumber, IsRating, IsText, IsNumpad, IsSelect };
+/**
+ * @param {?} typeOfItems
+ * @return {?}
+ */
+function IsList(typeOfItems) {
+    return function (object, propertyName) {
+        registerDecorator({
+            name: "isList",
+            target: object.constructor,
+            propertyName: propertyName,
+            constraints: [{ 'type': 'isList', 'value': typeOfItems }],
+            validator: {
+                /**
+                 * @param {?} value
+                 * @param {?} args
+                 * @return {?}
+                 */
+                validate: function (value, args) {
+                    return true;
+                }
+            }
+        });
+    };
+}
+
+export { PersistableModel, HasConditions, HasDescription, HasLabel, HasPrecision, IsBirthDate, IsCalendar, IsDateRange, IsPassword, IsPhoneNumber, IsRating, IsText, IsNumpad, IsSelect, IsList };
 export { ValidatorConstraint, Validate, ValidateNested, ValidateIf, IsDefined, Equals, NotEquals, IsEmpty, IsNotEmpty, IsIn, IsNotIn, IsOptional, IsBoolean, IsDate, IsNumber, IsInt, IsString, IsDateString, IsArray, IsEnum, IsDivisibleBy, IsPositive, IsNegative, Min, Max, MinDate, MaxDate, IsBooleanString, IsNumberString, Contains, NotContains, IsAlpha, IsAlphanumeric, IsAscii, IsBase64, IsByteLength, IsCreditCard, IsCurrency, IsEmail, IsFQDN, IsFullWidth, IsHalfWidth, IsVariableWidth, IsHexColor, IsHexadecimal, IsIP, IsISBN, IsISIN, IsISO8601, IsJSON, IsLowercase, IsMobilePhone, IsMongoId, IsMultibyte, IsSurrogatePair, IsUrl, IsUUID, IsUppercase, Length, MinLength, MaxLength, Matches, IsMilitaryTime, ArrayContains, ArrayNotContains, ArrayNotEmpty, ArrayMinSize, ArrayMaxSize, ArrayUnique } from 'class-validator/decorator/decorators';

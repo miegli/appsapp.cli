@@ -237,7 +237,8 @@ gulp.task('compile', function () {
     function (err) {
       if (err) {
         console.log('ERROR:', err.message);
-        deleteFolders([distFolder, tmpFolder, buildFolder]);
+        deleteFolders([tmpFolder, buildFolder]);
+        //deleteFolders([distFolder, tmpFolder, buildFolder]);
       } else {
         console.log('Compilation finished succesfully');
       }

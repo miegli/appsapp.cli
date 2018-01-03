@@ -4,9 +4,6 @@
 	(factory((global['appsapp-cli'] = {}),global.Observable,global.classValidator,global.classTransformer,global.angular2Uuid,global.objectHash,global.Unirest,global.decorators));
 }(this, (function (exports,Observable,classValidator,classTransformer,angular2Uuid,objectHash,Unirest,decorators) { 'use strict';
 
-/**
- * @abstract
- */
 var PersistableModel = /** @class */ (function () {
     /**
      * PersistanceManager as an optional argument when changes were persisted to stable database
@@ -275,11 +272,11 @@ var PersistableModel = /** @class */ (function () {
     };
     /**
      * set uuid
-     * @param {?} uuid
+     * @param {?=} uuid
      * @return {?}
      */
     PersistableModel.prototype.setUuid = function (uuid) {
-        this.__uuid = uuid;
+        this.__uuid = uuid !== undefined ? uuid : angular2Uuid.UUID.UUID();
         return this;
     };
     /**
@@ -638,6 +635,20 @@ var PersistableModel = /** @class */ (function () {
         return this;
     };
     /**
+     * import dynamic properties
+     * @param {?} propertiesAsObject
+     * @return {?}
+     */
+    PersistableModel.prototype.importDynamicProperties = function (propertiesAsObject) {
+        var /** @type {?} */ self = this;
+        return new Promise(function (resolve, reject) {
+            Object.keys(propertiesAsObject).forEach(function (property) {
+                self[property] = self.transformTypeFromMetadata(property, propertiesAsObject[property]);
+            });
+            resolve(self);
+        });
+    };
+    /**
      * load json data
      * @param {?} json
      * @return {?}
@@ -844,6 +855,7 @@ var PersistableModel = /** @class */ (function () {
         var /** @type {?} */ type = null;
         var /** @type {?} */ typeMappings = {
             'isString': 'text',
+            'isList': 'list',
             'number': 'numberplain',
             'isPrecision': 'numberplain',
             'isNumber': 'number',
@@ -1577,6 +1589,31 @@ function IsSelect(options) {
     };
 }
 
+/**
+ * @param {?} typeOfItems
+ * @return {?}
+ */
+function IsList(typeOfItems) {
+    return function (object, propertyName) {
+        classValidator.registerDecorator({
+            name: "isList",
+            target: object.constructor,
+            propertyName: propertyName,
+            constraints: [{ 'type': 'isList', 'value': typeOfItems }],
+            validator: {
+                /**
+                 * @param {?} value
+                 * @param {?} args
+                 * @return {?}
+                 */
+                validate: function (value, args) {
+                    return true;
+                }
+            }
+        });
+    };
+}
+
 exports.PersistableModel = PersistableModel;
 exports.HasConditions = HasConditions;
 exports.HasDescription = HasDescription;
@@ -1591,6 +1628,7 @@ exports.IsRating = IsRating;
 exports.IsText = IsText;
 exports.IsNumpad = IsNumpad;
 exports.IsSelect = IsSelect;
+exports.IsList = IsList;
 exports.ValidatorConstraint = decorators.ValidatorConstraint;
 exports.Validate = decorators.Validate;
 exports.ValidateNested = decorators.ValidateNested;
