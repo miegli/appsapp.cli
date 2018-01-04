@@ -53,6 +53,12 @@ var PersistableModel = /** @class */ (function () {
         /**
          * create observerable and observer for handling the models data changes
          */
+        this.__editedObservable = new Observable$1(function (observer) {
+            self.__editedObserver = observer;
+        });
+        /**
+         * create observerable and observer for handling the models data changes
+         */
         this.__observable = new Observable$1(function (observer) {
             self.__observer = observer;
             self.__observer.next(_this);
@@ -438,6 +444,9 @@ var PersistableModel = /** @class */ (function () {
     PersistableModel.prototype.setProperty = function (property, value) {
         this[property] = value;
         this.__edited[property] = value;
+        if (this.__editedObserver) {
+            this.__editedObserver.next({ property: property, value: value, model: this });
+        }
         this.executeConditionValidatorCircular(property);
         return this;
     };
@@ -702,8 +711,31 @@ var PersistableModel = /** @class */ (function () {
         if (this.getMetadata(property, 'isDateRange').length) {
             return typeof value == 'object' ? value : [];
         }
+        if (this.getMetadata(property, 'isList').length) {
+            var /** @type {?} */ valueAsObjects_1 = [];
+            if (value.length) {
+                value.forEach(function (itemOriginal) {
+                    if (itemOriginal instanceof PersistableModel == false && self.getAppsAppModuleProvider()) {
+                        var /** @type {?} */ item_1 = self.getAppsAppModuleProvider().new(self.getMetadataValue(property, 'isList'));
+                        item_1.loadJson(itemOriginal);
+                        item_1.setParent(self);
+                        item_1.loaded().then(function (m) {
+                            item_1.getChangesObserverable().subscribe(function (next) {
+                                if (next.model.getParent()) {
+                                    next.model.getParent().setProperty(property, self.getPropertyValue(property, true));
+                                }
+                            });
+                        });
+                        valueAsObjects_1.push(item_1);
+                    }
+                    else {
+                        valueAsObjects_1.push(itemOriginal);
+                    }
+                });
+            }
+            return valueAsObjects_1;
+        }
         if (this.getMetadata(property, 'isSelect').length) {
-            console.log(value, typeof value);
             var /** @type {?} */ values = typeof value == 'object' ? value : [];
             var /** @type {?} */ realValues_1 = [];
             if (values.length) {
@@ -956,12 +988,6 @@ var PersistableModel = /** @class */ (function () {
                 }
             });
         }
-        // if (!prepare) {
-        //   Object.keys(self.__conditionActionIfMatchesRemovedProperties).forEach((property) => {
-        //     console.log(property);
-        //     self.setProperty(property, null);
-        //   });
-        // }
         return this;
     };
     /**
@@ -1149,6 +1175,45 @@ var PersistableModel = /** @class */ (function () {
         var /** @type {?} */ hash = typeof value == 'object' ? sha1(value) : value;
         this.__hashedValues[hash] = value;
         return hash;
+    };
+    /**
+     * set appsAppModuleProvider
+     * @param {?} appsAppModuleProvider
+     * @return {?}
+     */
+    PersistableModel.prototype.setAppsAppModuleProvider = function (appsAppModuleProvider) {
+        this.__appsAppModuleProvider = appsAppModuleProvider;
+        return this;
+    };
+    /**
+     * set appsAppModuleProvider
+     * @return {?}
+     */
+    PersistableModel.prototype.getAppsAppModuleProvider = function () {
+        return this.__appsAppModuleProvider;
+    };
+    /**
+     * set parent model
+     * @param {?} parentModel
+     * @return {?}
+     */
+    PersistableModel.prototype.setParent = function (parentModel) {
+        this.__parent = parentModel;
+        return this;
+    };
+    /**
+     * get parent model
+     * @return {?}
+     */
+    PersistableModel.prototype.getParent = function () {
+        return this.__parent;
+    };
+    /**
+     * get changes observerable
+     * @return {?}
+     */
+    PersistableModel.prototype.getChangesObserverable = function () {
+        return this.__editedObservable;
     };
     return PersistableModel;
 }());
@@ -1609,7 +1674,49 @@ function IsList(typeOfItems) {
                  * @return {?}
                  */
                 validate: function (value, args) {
-                    return true;
+                    return new Promise(function (resolve, reject) {
+                        var /** @type {?} */ requiredValidations = value.length;
+                        var /** @type {?} */ proceededValidations = 0;
+                        var /** @type {?} */ allValide = true;
+                        value.forEach(function (itemOriginal) {
+                            var /** @type {?} */ item = null;
+                            if (itemOriginal instanceof typeOfItems == false) {
+                                try {
+                                    item = new typeOfItems();
+                                    item.loadJson(itemOriginal).then().catch();
+                                }
+                                catch (e) {
+                                    item = new itemOriginal.constructor();
+                                }
+                            }
+                            else {
+                                item = itemOriginal;
+                            }
+                            if (item.validate !== undefined && typeof item.validate == 'function') {
+                                item.validate().then(function (isSuccess) {
+                                    // validation sucess, so resolve true
+                                    proceededValidations++;
+                                    if (proceededValidations >= requiredValidations) {
+                                        resolve(allValide);
+                                    }
+                                }).catch(function (error) {
+                                    // validation error, so reject
+                                    allValide = false;
+                                    proceededValidations++;
+                                    if (proceededValidations >= requiredValidations) {
+                                        resolve(allValide);
+                                    }
+                                });
+                            }
+                            else {
+                                // can't be validated, so resolve true
+                                proceededValidations++;
+                                if (proceededValidations >= requiredValidations) {
+                                    resolve(allValide);
+                                }
+                            }
+                        });
+                    });
                 }
             }
         });

@@ -278,7 +278,7 @@ var PersistableModel = /** @class */ (function () {
      * @returns {PersistableModel}
      */
     PersistableModel.prototype.setUuid = function (uuid) {
-        this.__uuid = uuid;
+        this.__uuid = uuid !== undefined ? uuid : angular2_uuid_1.UUID.UUID();
         return this;
     };
     /**
@@ -634,6 +634,20 @@ var PersistableModel = /** @class */ (function () {
         return this;
     };
     /**
+     * import dynamic properties
+     * @param {propertiesAsObject}
+     * @returns {Promise<any>}
+     */
+    PersistableModel.prototype.importDynamicProperties = function (propertiesAsObject) {
+        var self = this;
+        return new Promise(function (resolve, reject) {
+            Object.keys(propertiesAsObject).forEach(function (property) {
+                self[property] = self.transformTypeFromMetadata(property, propertiesAsObject[property]);
+            });
+            resolve(self);
+        });
+    };
+    /**
      * load json data
      * @param {object|string} stringified or real json object
      * @returns {Promise<any>}
@@ -839,6 +853,7 @@ var PersistableModel = /** @class */ (function () {
         var type = null;
         var typeMappings = {
             'isString': 'text',
+            'isList': 'list',
             'number': 'numberplain',
             'isPrecision': 'numberplain',
             'isNumber': 'number',

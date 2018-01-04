@@ -16,11 +16,14 @@ const base64 = require('base-64');
 build = function (program) {
 
 
-
     return new Promise(function (resolve, reject) {
 
         gulp.task("compile", function () {
-            var tsProject = ts.createProject(files.getCurrentDirectory()+"/tsconfig.json",{target: 'es5', module: "commonjs", noResolve: false});
+            var tsProject = ts.createProject(files.getCurrentDirectory() + "/tsconfig.json", {
+                target: 'es5',
+                module: "commonjs",
+                noResolve: false
+            });
 
             return tsProject.src()
                 .pipe(tsProject())
@@ -31,7 +34,7 @@ build = function (program) {
 
 
             findModels().then((next) => {
-              resolve(next);
+                resolve(next);
             });
 
         });
@@ -52,38 +55,39 @@ findModels = function () {
         };
 
 
-
         buildFiles(files.getCurrentDirectory(), function (err, res) {
             "use strict";
             let build = {};
 
-            res.forEach((file) => {
+            if (res) {
+                res.forEach((file) => {
 
 
-                var string = fs.readFileSync(file).toString();
-                var result = string.split(/exports\.+[\w]+? = [\w]+?;/g); // String.prototype.split calls re[@@split].
+                    var string = fs.readFileSync(file).toString();
+                    var result = string.split(/exports\.+[\w]+? = [\w]+?;/g); // String.prototype.split calls re[@@split].
 
-                result.forEach((line) => {
+                    result.forEach((line) => {
 
 
-                    var regex = /var ([\w])+? = [^]+?PersistableModel\)\);/g;
-                    var match = regex.exec(line);
-                    if (match) {
+                        var regex = /var ([\w])+? = [^]+?PersistableModel\)\);/g;
+                        var match = regex.exec(line);
+                        if (match) {
 
-                        var regex2 = /^var (\w+?) =/gm;
-                        var match2 = regex2.exec(match[0]);
+                            var regex2 = /^var (\w+?) =/gm;
+                            var match2 = regex2.exec(match[0]);
 
-                        if (match2 && match2.length == 2) {
-                            var classname = match2[1];
-                            build[classname] = base64.encode((injectRequire(match[0].replace("var " + classname + " =", "global." + classname + " ="), string)));
+                            if (match2 && match2.length == 2) {
+                                var classname = match2[1];
+                                build[classname] = base64.encode((injectRequire(match[0].replace("var " + classname + " =", "global." + classname + " ="), string)));
+                            }
                         }
-                    }
+
+
+                    });
 
 
                 });
-
-
-            });
+            }
 
 
             var db = admin.database();

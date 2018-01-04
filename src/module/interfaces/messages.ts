@@ -7,5 +7,7 @@ export interface AppsappModuleProviderMessages {
     submittedInBackground: string,
     disconnected: string,
     connected: string,
-    error: string
+    error: string,
+    delete: string,
+    add: string
 };

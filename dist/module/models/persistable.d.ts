@@ -50,6 +50,8 @@ export declare class PersistableModel {
     private __validator;
     private __validatorObserver;
     private __edited;
+    private __editedObserver;
+    private __editedObservable;
     private __temp;
     private __forceUpdateProperty;
     private __persistenceManager;
@@ -66,7 +68,9 @@ export declare class PersistableModel {
     private __conditionContraintsPropertiesValue;
     private __conditionContraintsAffectedProperties;
     private __messages;
+    private __appsAppModuleProvider;
     private __notificationProvider;
+    private __parent;
     private __hashedValues;
     /**
      * PersistanceManager as an optional argument when changes were persisted to stable database
@@ -447,4 +451,31 @@ export declare class PersistableModel {
      * @Returns string hash
      */
     setHashedValue(value: any): any;
+    /**
+     * set appsAppModuleProvider
+     * @param appsAppModuleProvider
+     * @returns {this}
+     */
+    private setAppsAppModuleProvider(appsAppModuleProvider);
+    /**
+     * set appsAppModuleProvider
+     * @returns {any}
+     */
+    getAppsAppModuleProvider(): any;
+    /**
+     * set parent model
+     * @param parentModel
+     * @returns {this}
+     */
+    setParent(parentModel: any): this;
+    /**
+     * get parent model
+     * @returns {any}
+     */
+    getParent(): any;
+    /**
+     * get changes observerable
+     * @returns {Observable<any>}
+     */
+    getChangesObserverable(): Observable<any>;
 }

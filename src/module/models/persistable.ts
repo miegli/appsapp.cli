@@ -65,6 +65,8 @@ export class PersistableModel {
     private __validator = {};
     private __validatorObserver = {};
     private __edited = {};
+    private __editedObserver: Observer<any>;
+    private __editedObservable: Observable<any>;
     private __temp = {};
     private __forceUpdateProperty = {};
     private __persistenceManager: any;
@@ -81,7 +83,9 @@ export class PersistableModel {
     private __conditionContraintsPropertiesValue: any = {};
     private __conditionContraintsAffectedProperties: any = {};
     private __messages: AppsappModuleProviderMessages;
+    private __appsAppModuleProvider: any;
     private __notificationProvider: any;
+    private __parent: any;
     private __hashedValues: object = {};
 
     /**
@@ -110,6 +114,14 @@ export class PersistableModel {
 
 
         let self = this;
+
+
+        /**
+         * create observerable and observer for handling the models data changes
+         */
+        this.__editedObservable = new Observable<any>((observer: Observer<any>) => {
+            self.__editedObserver = observer;
+        });
 
         /**
          * create observerable and observer for handling the models data changes
@@ -620,6 +632,9 @@ export class PersistableModel {
 
         this[property] = value;
         this.__edited[property] = value;
+        if (this.__editedObserver) {
+            this.__editedObserver.next({property: property, value: value, model: this});
+        }
         this.executeConditionValidatorCircular(property);
         return this;
     }
@@ -983,10 +998,33 @@ export class PersistableModel {
             return typeof value == 'object' ? value : [];
         }
 
+        if (this.getMetadata(property, 'isList').length) {
+            let valueAsObjects = [];
+            if (value.length) {
+                value.forEach((itemOriginal) => {
+                   if (itemOriginal instanceof PersistableModel == false && self.getAppsAppModuleProvider()) {
+                       let item = self.getAppsAppModuleProvider().new(self.getMetadataValue(property, 'isList'));
+                       item.loadJson(itemOriginal);
+                       item.setParent(self);
+                       item.loaded().then((m) => {
+                           item.getChangesObserverable().subscribe((next) => {
+                               if (next.model.getParent()) {
+                                   next.model.getParent().setProperty(property,self.getPropertyValue(property, true));
+                               }
+
+                           })
+                       });
+                       valueAsObjects.push(item);
+                   } else {
+                     valueAsObjects.push(itemOriginal);
+                   }
+                });
+            }
+
+            return valueAsObjects;
+        }
+
         if (this.getMetadata(property, 'isSelect').length) {
-
-            console.log(value, typeof value);
-
 
             let values = typeof value == 'object' ? value : [];
             let realValues = [];
@@ -1332,14 +1370,6 @@ export class PersistableModel {
         }
 
 
-        // if (!prepare) {
-        //   Object.keys(self.__conditionActionIfMatchesRemovedProperties).forEach((property) => {
-        //     console.log(property);
-        //     self.setProperty(property, null);
-        //   });
-        // }
-
-
         return this;
 
     }
@@ -1604,5 +1634,50 @@ export class PersistableModel {
 
     }
 
+    /**
+     * set appsAppModuleProvider
+     * @param appsAppModuleProvider
+     * @returns {this}
+     */
+    private setAppsAppModuleProvider(appsAppModuleProvider) {
+
+        this.__appsAppModuleProvider = appsAppModuleProvider;
+
+        return this;
+    }
+
+    /**
+     * set appsAppModuleProvider
+     * @returns {any}
+     */
+    public getAppsAppModuleProvider() {
+        return this.__appsAppModuleProvider;
+    }
+
+    /**
+     * set parent model
+     * @param parentModel
+     * @returns {this}
+     */
+    public setParent(parentModel) {
+        this.__parent = parentModel;
+        return this;
+    }
+
+    /**
+     * get parent model
+     * @returns {any}
+     */
+    public getParent() {
+        return this.__parent;
+    }
+
+    /**
+     * get changes observerable
+     * @returns {Observable<any>}
+     */
+    public getChangesObserverable() {
+        return this.__editedObservable;
+    }
 
 }

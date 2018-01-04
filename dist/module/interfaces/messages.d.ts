@@ -8,4 +8,6 @@ export interface AppsappModuleProviderMessages {
     disconnected: string;
     connected: string;
     error: string;
+    delete: string;
+    add: string;
 }
