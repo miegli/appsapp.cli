@@ -446,11 +446,11 @@ var PersistableModel = /** @class */ (function () {
         this[property] = value;
         this.__edited[property] = value;
         var /** @type {?} */ event = { property: property, value: value, model: this };
-        this.executeChangesWithCallback(event);
         if (this.__editedObserver) {
             this.__editedObserver.next(event);
         }
         this.executeConditionValidatorCircular(property);
+        this.executeChangesWithCallback(event);
         return this;
     };
     /**
