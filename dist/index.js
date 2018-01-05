@@ -1680,17 +1680,12 @@ function IsList(typeOfItems) {
                         var /** @type {?} */ allValide = true;
                         value.forEach(function (itemOriginal) {
                             var /** @type {?} */ item = null;
-                            if (typeof itemOriginal !== 'object' || itemOriginal instanceof typeOfItems == false) {
-                                try {
-                                    item = typeof global == 'undefined' ? new typeOfItems() : new global[typeOfItems]();
-                                    item.loadJson(itemOriginal).then().catch();
-                                }
-                                catch (e) {
-                                    item = new itemOriginal.constructor();
-                                }
+                            try {
+                                item = typeof global == 'undefined' ? new typeOfItems() : new global[typeOfItems]();
+                                item.loadJson(itemOriginal).then().catch();
                             }
-                            else {
-                                item = itemOriginal;
+                            catch (e) {
+                                item = new itemOriginal.constructor();
                             }
                             if (item.validate !== undefined && typeof item.validate == 'function') {
                                 item.validate().then(function (isSuccess) {
