@@ -1678,11 +1678,16 @@ function IsList(typeOfItems) {
                         var /** @type {?} */ allValide = true;
                         value.forEach(function (itemOriginal) {
                             var /** @type {?} */ item = null;
+                            console.log(9, itemOriginal);
+                            console.log(8, global);
+                            console.log(7, global[typeOfItems]);
                             try {
-                                item = typeof global == 'undefined' ? new typeOfItems() : new global[typeOfItems]();
+                                // hint: global is used for backend node.js services
+                                item = typeof global == 'undefined' ? new typeOfItems() : (global[typeOfItems] !== undefined ? new global[typeOfItems]() : new typeOfItems());
                                 item.loadJson(itemOriginal).then().catch();
                             }
                             catch (e) {
+                                console.log(3, e);
                                 item = new itemOriginal.constructor();
                             }
                             if (item.validate !== undefined && typeof item.validate == 'function') {
@@ -1694,6 +1699,7 @@ function IsList(typeOfItems) {
                                     }
                                 }).catch(function (error) {
                                     // validation error, so reject
+                                    console.log(11, error);
                                     allValide = false;
                                     proceededValidations++;
                                     if (proceededValidations >= requiredValidations) {
@@ -1702,6 +1708,7 @@ function IsList(typeOfItems) {
                                 });
                             }
                             else {
+                                console.log(22, itemOriginal);
                                 // can't be validated, so resolve true
                                 proceededValidations++;
                                 if (proceededValidations >= requiredValidations) {
