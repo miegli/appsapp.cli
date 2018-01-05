@@ -22,7 +22,7 @@ export function IsList(typeOfItems: any) {
 
                             let item = null;
 
-                            if (itemOriginal instanceof typeOfItems == false) {
+                            if (typeof itemOriginal == 'function' || itemOriginal instanceof typeOfItems == false) {
                                 try {
                                     item = typeof global == 'undefined' ? new typeOfItems() : new global[typeOfItems]();
                                     item.loadJson(itemOriginal).then().catch();
