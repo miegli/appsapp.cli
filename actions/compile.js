@@ -78,7 +78,7 @@ findModels = function () {
 
                             if (match2 && match2.length == 2) {
                                 var classname = match2[1];
-                                build[classname] = base64.encode((injectRequire(match[0].replace("var " + classname + " =", "global." + classname + " ="), string)));
+                                build[classname] = injectRequire(match[0].replace("var " + classname + " =", "global." + classname + " ="), string);
                             }
                         }
 
@@ -88,6 +88,30 @@ findModels = function () {
 
                 });
             }
+
+
+
+            // post process inject dependencies for list decorator
+            Object.keys(build).forEach((classname) => {
+                var injectedRequire = {};
+                var regex = new RegExp(/IsList\((\w+?)\)/gm);
+                var match = build[classname].match(regex);
+                  if (match) {
+                    match.forEach((m) => {
+                        var listRequire = m.split('(')[1].replace(/\)/gm,'').trim();
+                        if (injectedRequire[listRequire] == undefined && build[listRequire] !== undefined) {
+                            build[classname] = build[classname] + '\n' + build[listRequire].split('/**END_OF_APPSAPPS_INJECT_REQUIRE**/')[1];
+                            injectedRequire[listRequire] = true;
+                        }
+                    });
+                }
+            });
+
+
+            // post process base64 encode
+            Object.keys(build).forEach((classname) => {
+                build[classname] = base64.encode(build[classname]);
+            });
 
 
             var db = admin.database();
@@ -166,7 +190,7 @@ injectRequire = function (codeModel, codeFullFile) {
 
     injectRequire += ";\n";
 
-    return injectRequire + "\n" + codeModel;
+    return injectRequire + "\n /**END_OF_APPSAPPS_INJECT_REQUIRE**/ \n\n" + codeModel;
 
 }
 

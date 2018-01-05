@@ -54,6 +54,12 @@ var PersistableModel = /** @class */ (function () {
         /**
          * create observerable and observer for handling the models data changes
          */
+        this.__editedObservable = new Observable_1.Observable(function (observer) {
+            self.__editedObserver = observer;
+        });
+        /**
+         * create observerable and observer for handling the models data changes
+         */
         this.__observable = new Observable_1.Observable(function (observer) {
             self.__observer = observer;
             self.__observer.next(_this);
@@ -435,6 +441,9 @@ var PersistableModel = /** @class */ (function () {
     PersistableModel.prototype.setProperty = function (property, value) {
         this[property] = value;
         this.__edited[property] = value;
+        if (this.__editedObserver) {
+            this.__editedObserver.next({ property: property, value: value, model: this });
+        }
         this.executeConditionValidatorCircular(property);
         return this;
     };
@@ -699,8 +708,31 @@ var PersistableModel = /** @class */ (function () {
         if (this.getMetadata(property, 'isDateRange').length) {
             return typeof value == 'object' ? value : [];
         }
+        if (this.getMetadata(property, 'isList').length) {
+            var valueAsObjects_1 = [];
+            if (value.length) {
+                value.forEach(function (itemOriginal) {
+                    if (itemOriginal instanceof PersistableModel == false && self.getAppsAppModuleProvider()) {
+                        var item_1 = self.getAppsAppModuleProvider().new(self.getMetadataValue(property, 'isList'));
+                        item_1.loadJson(itemOriginal);
+                        item_1.setParent(self);
+                        item_1.loaded().then(function (m) {
+                            item_1.getChangesObserverable().subscribe(function (next) {
+                                if (next.model.getParent()) {
+                                    next.model.getParent().setProperty(property, self.getPropertyValue(property, true));
+                                }
+                            });
+                        });
+                        valueAsObjects_1.push(item_1);
+                    }
+                    else {
+                        valueAsObjects_1.push(itemOriginal);
+                    }
+                });
+            }
+            return valueAsObjects_1;
+        }
         if (this.getMetadata(property, 'isSelect').length) {
-            console.log(value, typeof value);
             var values = typeof value == 'object' ? value : [];
             var realValues_1 = [];
             if (values.length) {
@@ -952,12 +984,6 @@ var PersistableModel = /** @class */ (function () {
                 }
             });
         }
-        // if (!prepare) {
-        //   Object.keys(self.__conditionActionIfMatchesRemovedProperties).forEach((property) => {
-        //     console.log(property);
-        //     self.setProperty(property, null);
-        //   });
-        // }
         return this;
     };
     PersistableModel.prototype.calculateCircularCondition = function (property, chain, counter) {
@@ -1134,6 +1160,45 @@ var PersistableModel = /** @class */ (function () {
         var hash = typeof value == 'object' ? objectHash.sha1(value) : value;
         this.__hashedValues[hash] = value;
         return hash;
+    };
+    /**
+     * set appsAppModuleProvider
+     * @param appsAppModuleProvider
+     * @returns {this}
+     */
+    PersistableModel.prototype.setAppsAppModuleProvider = function (appsAppModuleProvider) {
+        this.__appsAppModuleProvider = appsAppModuleProvider;
+        return this;
+    };
+    /**
+     * set appsAppModuleProvider
+     * @returns {any}
+     */
+    PersistableModel.prototype.getAppsAppModuleProvider = function () {
+        return this.__appsAppModuleProvider;
+    };
+    /**
+     * set parent model
+     * @param parentModel
+     * @returns {this}
+     */
+    PersistableModel.prototype.setParent = function (parentModel) {
+        this.__parent = parentModel;
+        return this;
+    };
+    /**
+     * get parent model
+     * @returns {any}
+     */
+    PersistableModel.prototype.getParent = function () {
+        return this.__parent;
+    };
+    /**
+     * get changes observerable
+     * @returns {Observable<any>}
+     */
+    PersistableModel.prototype.getChangesObserverable = function () {
+        return this.__editedObservable;
     };
     return PersistableModel;
 }());
