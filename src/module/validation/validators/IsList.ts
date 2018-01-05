@@ -1,5 +1,6 @@
 import {registerDecorator, ValidationArguments} from "class-validator";
 import {PersistableModel} from "../../models/persistable";
+declare var global: any
 
 export function IsList(typeOfItems: any) {
     return function (object: Object, propertyName: string) {
