@@ -1,1 +1,1 @@
-export declare function IsList(typeOfItems: any): (object: Object, propertyName: string) => void;
+export declare function IsList(typeOfItems: any, uniqueItems?: boolean): (object: Object, propertyName: string) => void;

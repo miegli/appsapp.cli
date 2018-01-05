@@ -17,7 +17,8 @@ function IsList(typeOfItems) {
                         value.forEach(function (itemOriginal) {
                             var item = null;
                             try {
-                                item = typeof global == 'undefined' ? new typeOfItems() : new global[typeOfItems]();
+                                // hint: global is used for backend node.js services
+                                item = typeof global == 'undefined' ? new typeOfItems() : (global[typeOfItems] !== undefined ? new global[typeOfItems]() : new typeOfItems());
                                 item.loadJson(itemOriginal).then().catch();
                             }
                             catch (e) {

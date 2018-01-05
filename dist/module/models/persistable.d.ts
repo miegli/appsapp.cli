@@ -52,6 +52,7 @@ export declare class PersistableModel {
     private __edited;
     private __editedObserver;
     private __editedObservable;
+    private __editedObservableCallbacks;
     private __temp;
     private __forceUpdateProperty;
     private __persistenceManager;
@@ -370,9 +371,11 @@ export declare class PersistableModel {
      * get metadata contraints value
      * @param property
      * @param type
+     * @param metadata
+     * @param string constraints
      * @returns {any}
      */
-    getMetadataValue(property: any, type: any): any;
+    getMetadataValue(property?: any, type?: any, metadataInput?: any, constraints?: any): any;
     /**
      * resolves input type for given property
      * @param {string} property
@@ -478,4 +481,15 @@ export declare class PersistableModel {
      * @returns {Observable<any>}
      */
     getChangesObserverable(): Observable<any>;
+    /**
+     * execute changes with callback
+     * @param event
+     * @returns {this}
+     */
+    private executeChangesWithCallback(event);
+    /**
+     * get changes with callback
+     * @returns {this}
+     */
+    getChangesWithCallback(callback: any): this;
 }
