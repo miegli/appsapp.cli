@@ -18,7 +18,7 @@ function IsList(typeOfItems) {
                             var item = null;
                             if (itemOriginal instanceof typeOfItems == false) {
                                 try {
-                                    item = new typeOfItems();
+                                    item = typeOfItems !== undefined ? new typeOfItems() : new global[typeOfItems]();
                                     item.loadJson(itemOriginal).then().catch();
                                 }
                                 catch (e) {
