@@ -1,5 +1,6 @@
 import {registerDecorator, ValidationArguments} from "class-validator";
 import {PersistableModel} from "../../models/persistable";
+
 declare var global: any
 
 export function IsList(typeOfItems: any) {
@@ -22,17 +23,13 @@ export function IsList(typeOfItems: any) {
 
                             let item = null;
 
-                            if (typeof itemOriginal !== 'object' || itemOriginal instanceof typeOfItems == false) {
-                                try {
-                                    item = typeof global == 'undefined' ? new typeOfItems() : new global[typeOfItems]();
-                                    item.loadJson(itemOriginal).then().catch();
-                                } catch (e) {
-                                    item = new itemOriginal.constructor();
-                                }
-
-                            } else {
-                                item = itemOriginal;
+                            try {
+                                item = typeof global == 'undefined' ? new typeOfItems() : new global[typeOfItems]();
+                                item.loadJson(itemOriginal).then().catch();
+                            } catch (e) {
+                                item = new itemOriginal.constructor();
                             }
+
 
                             if (item.validate !== undefined && typeof item.validate == 'function') {
                                 item.validate().then((isSuccess) => {

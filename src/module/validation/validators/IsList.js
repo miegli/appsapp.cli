@@ -16,7 +16,7 @@ function IsList(typeOfItems) {
                         var allValide = true;
                         value.forEach(function (itemOriginal) {
                             var item = null;
-                            if (typeof itemOriginal == 'function' || itemOriginal instanceof typeOfItems == false) {
+                            if (typeof itemOriginal !== 'object' || itemOriginal instanceof typeOfItems == false) {
                                 try {
                                     item = typeof global == 'undefined' ? new typeOfItems() : new global[typeOfItems]();
                                     item.loadJson(itemOriginal).then().catch();
