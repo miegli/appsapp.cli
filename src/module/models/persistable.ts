@@ -71,7 +71,7 @@ export class PersistableModel {
     private __temp = {};
     private __forceUpdateProperty = {};
     private __persistenceManager: any;
-    private __isOnline: boolean = false;
+    private __isOnline: boolean = true;
     private __validationErrors: any = {};
     private __metadata = [];
     private _hasPendingChanges: boolean = false;
