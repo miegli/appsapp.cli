@@ -47,17 +47,18 @@ encryption = function() {
 
     return new Promise(function (resolve, reject) {
 
-        var replaceBuildFiles = function (src, callback) {
-            glob(src + '/www/build/main.js', callback);
+        var replaceBuildFiles = function (callback) {
+            glob(files.getBuildFile(), callback);
         };
-        replaceBuildFiles(files.getCurrentDirectory(), function (err, res) {
+        replaceBuildFiles(function (err, res) {
+
 
             var status = new Spinner('Perform sha1 hash encryption for build files, please wait...');
             status.start();
 
             if (err || res.length == 0) {
                 status.stop();
-                reject('No build files found. Enter something linke "npm run" or "ionic serve" first.');
+                reject('No build files found. Enter something linke "npm run" or "ionic serve" or "ng build" first.');
             } else {
                 let replacements = executeAppsAppEncryption(res);
 

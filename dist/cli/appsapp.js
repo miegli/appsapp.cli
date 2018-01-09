@@ -109,7 +109,7 @@ if (program.watch) {
     encryption(program).then((next) => {
 
         compile(program).then((next) => {
-            var status = new Spinner("Is watching " + files.getCurrentDirectory() + '/www/build/main.js');
+            var status = new Spinner("Is watching " + files.getBuildFile());
             status.start();
         }).catch((error) => {
             console.log(error);
@@ -120,7 +120,7 @@ if (program.watch) {
     });
 
 
-    watch(files.getCurrentDirectory() + '/www/build/main.js', {recursive: true}, function (evt, name) {
+    watch(files.getBuildFile(), {recursive: true}, function (evt, name) {
 
         compile(program).then((next) => {
 
