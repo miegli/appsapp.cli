@@ -33,14 +33,11 @@ module.exports = {
 
     getBuildFile: function() {
 
-        if (fs.statSync(this.getCurrentDirectory()+'/.angular-cli.json').isFile()) {
+        if (fs.existsSync(this.getCurrentDirectory()+'/.angular-cli.json')) {
             return this.getCurrentDirectory() + '/dist/main.bundle.js';
         } else {
             return this.getCurrentDirectory() + '/www/build/main.js';
         }
-
-
-
 
     }
 };
