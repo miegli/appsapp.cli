@@ -1,0 +1,135 @@
+0 info it worked if it ends with ok
+1 verbose cli [ '/usr/local/bin/node',
+1 verbose cli   '/usr/local/bin/npm',
+1 verbose cli   'version',
+1 verbose cli   'patch' ]
+2 info using npm@3.10.10
+3 info using node@v6.11.1
+4 info git [ 'status', '--porcelain' ]
+5 info lifecycle appsapp-cli@1.6.57~preversion: appsapp-cli@1.6.57
+6 verbose lifecycle appsapp-cli@1.6.57~preversion: unsafe-perm in lifecycle true
+7 verbose lifecycle appsapp-cli@1.6.57~preversion: PATH: /usr/local/lib/node_modules/npm/bin/node-gyp-bin:/Users/pamegli/Documents/projects/appsapp.myApp/appsapp/node_modules/.bin:/Applications/MAMP/bin/php/php7.0.20/bin:/usr/local/bin:/Library/Java/JavaVirtualMachines/jdk1.8.0_131.jdk/Contents/Home/bin:/opt/local/bin:/opt/local/sbin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/opt/X11/bin:/Users/pamegli/Library/Android/sdk/tools:/Users/pamegli/Library/Android/sdk/platform-tools:/Applications/Android Studio.app/sdk/platform-tools:/Applications/Android Studio.app/sdk/tools:/Users/pamegli/Library/Android/sdk/tools:/Users/pamegli/Library/Android/sdk/platform-tools
+8 verbose lifecycle appsapp-cli@1.6.57~preversion: CWD: /Users/pamegli/Documents/projects/appsapp.myApp/appsapp
+9 silly lifecycle appsapp-cli@1.6.57~preversion: Args: [ '-c', 'npm test' ]
+10 silly lifecycle appsapp-cli@1.6.57~preversion: Returned: code: 0  signal: null
+11 verbose version.write data { name: 'appsapp-cli',
+11 verbose version.write   version: '1.6.57',
+11 verbose version.write   license: 'MIT',
+11 verbose version.write   scripts:
+11 verbose version.write    { build: 'gulp build',
+11 verbose version.write      'build:watch': 'gulp',
+11 verbose version.write      docs: 'npm run docs:build',
+11 verbose version.write      'docs:build': 'compodoc -p tsconfig.json -n appsapp-module -d docs --hideGenerator',
+11 verbose version.write      'docs:serve': 'npm run docs:build -- -s',
+11 verbose version.write      'docs:watch': 'npm run docs:build -- -s -w',
+11 verbose version.write      lint: 'tslint --type-check --project tsconfig.json src/**/*.ts',
+11 verbose version.write      lite: 'lite-server',
+11 verbose version.write      'playground:build': 'tsc -p playground -w',
+11 verbose version.write      playground: 'concurrently "npm run build:watch" "npm run playground:build" "npm run lite"',
+11 verbose version.write      test: 'tsc',
+11 verbose version.write      p: 'git add . && git commit -m \'new release\' && git push && npm i && npm run build && npm publish dist',
+11 verbose version.write      preversion: 'npm test',
+11 verbose version.write      version: 'npm run build && git add -A dist',
+11 verbose version.write      postversion: 'git push && git push --tags && npm publish dist' },
+11 verbose version.write   devDependencies:
+11 verbose version.write    { '@angular/common': '^4.0.0',
+11 verbose version.write      '@angular/compiler': '^4.0.0',
+11 verbose version.write      '@angular/compiler-cli': '^4.0.0',
+11 verbose version.write      '@angular/core': '^4.0.0',
+11 verbose version.write      '@angular/platform-browser': '^4.0.0',
+11 verbose version.write      '@angular/platform-browser-dynamic': '^4.0.0',
+11 verbose version.write      '@compodoc/compodoc': '^1.0.0-beta.10',
+11 verbose version.write      '@types/jasmine': '2.5.38',
+11 verbose version.write      '@types/node': '~6.0.60',
+11 verbose version.write      'angular-in-memory-web-api': '^0.3.2',
+11 verbose version.write      codelyzer: '~2.0.0',
+11 verbose version.write      concurrently: '^3.4.0',
+11 verbose version.write      'core-js': '^2.4.1',
+11 verbose version.write      del: '^2.2.2',
+11 verbose version.write      gulp: '^3.9.1',
+11 verbose version.write      'gulp-rename': '^1.2.2',
+11 verbose version.write      'gulp-rollup': '^2.15.0',
+11 verbose version.write      'jasmine-core': '~2.5.2',
+11 verbose version.write      'jasmine-spec-reporter': '~3.2.0',
+11 verbose version.write      karma: '~1.4.1',
+11 verbose version.write      'karma-chrome-launcher': '~2.0.0',
+11 verbose version.write      'karma-cli': '~1.0.1',
+11 verbose version.write      'karma-coverage-istanbul-reporter': '^0.2.0',
+11 verbose version.write      'karma-jasmine': '~1.1.0',
+11 verbose version.write      'karma-jasmine-html-reporter': '^0.2.2',
+11 verbose version.write      'lite-server': '^2.3.0',
+11 verbose version.write      'node-sass': '^4.5.2',
+11 verbose version.write      'node-sass-tilde-importer': '^1.0.0',
+11 verbose version.write      'node-watch': '^0.5.2',
+11 verbose version.write      protractor: '~5.1.0',
+11 verbose version.write      rollup: '^0.49.3',
+11 verbose version.write      'run-sequence': '^1.2.2',
+11 verbose version.write      rxjs: '^5.1.0',
+11 verbose version.write      systemjs: '^0.20.12',
+11 verbose version.write      'ts-node': '~2.0.0',
+11 verbose version.write      tslint: '~4.5.0',
+11 verbose version.write      'zone.js': '^0.8.4',
+11 verbose version.write      typescript: '^2.6.1' },
+11 verbose version.write   dependencies:
+11 verbose version.write    { chalk: '^2.3.0',
+11 verbose version.write      clear: '0.0.1',
+11 verbose version.write      clui: '^0.3.6',
+11 verbose version.write      commander: '^2.11.0',
+11 verbose version.write      figlet: '^1.2.0',
+11 verbose version.write      'firebase-admin': '^5.5.0',
+11 verbose version.write      github: '^12.0.1',
+11 verbose version.write      glob: '^7.1.2',
+11 verbose version.write      inquirer: '^4.0.0',
+11 verbose version.write      lodash: '^4.17.4',
+11 verbose version.write      minimist: '^1.2.0',
+11 verbose version.write      preferences: '^1.0.0',
+11 verbose version.write      'replace-in-file': '^3.0.0',
+11 verbose version.write      sha1: '^1.1.1',
+11 verbose version.write      'simple-git': '^1.81.1',
+11 verbose version.write      touch: '^3.1.0',
+11 verbose version.write      gulp: '^3.9.1',
+11 verbose version.write      'gulp-typescript': '^3.2.3',
+11 verbose version.write      rxjs: '^5.5.2',
+11 verbose version.write      'base-64': '^0.1.0',
+11 verbose version.write      'node-cmd': '^3.0.0',
+11 verbose version.write      'node-watch': '^0.5.5',
+11 verbose version.write      'angular2-uuid': '^1.1.1',
+11 verbose version.write      angularfire2: '=5.0.0-rc.5-next',
+11 verbose version.write      'class-transformer': '^0.1.8',
+11 verbose version.write      'class-validator': '^0.7.3',
+11 verbose version.write      'fs-extra': '^4.0.2',
+11 verbose version.write      'json-stringify-pretty-compact': '^1.0.4',
+11 verbose version.write      unirest: '^0.5.1',
+11 verbose version.write      'object-hash': '^1.2.0' },
+11 verbose version.write   preferGlobal: true,
+11 verbose version.write   bin: { appsapp: 'cli/appsapp.js' },
+11 verbose version.write   main: 'index.js',
+11 verbose version.write   repository: { type: 'git', url: 'https://github.com/miegli/appsapp.cli' },
+11 verbose version.write   author: { name: 'Michael Egli', email: 'michael.egli@appsapp.io' },
+11 verbose version.write   keywords: [ 'angular', 'ionic' ],
+11 verbose version.write   bugs: { url: 'https://github.com/miegli/appsapps.cli/issues' } } to package.json
+12 info lifecycle appsapp-cli@1.6.57~version: appsapp-cli@1.6.57
+13 verbose lifecycle appsapp-cli@1.6.57~version: unsafe-perm in lifecycle true
+14 verbose lifecycle appsapp-cli@1.6.57~version: PATH: /usr/local/lib/node_modules/npm/bin/node-gyp-bin:/Users/pamegli/Documents/projects/appsapp.myApp/appsapp/node_modules/.bin:/Applications/MAMP/bin/php/php7.0.20/bin:/usr/local/bin:/Library/Java/JavaVirtualMachines/jdk1.8.0_131.jdk/Contents/Home/bin:/opt/local/bin:/opt/local/sbin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/opt/X11/bin:/Users/pamegli/Library/Android/sdk/tools:/Users/pamegli/Library/Android/sdk/platform-tools:/Applications/Android Studio.app/sdk/platform-tools:/Applications/Android Studio.app/sdk/tools:/Users/pamegli/Library/Android/sdk/tools:/Users/pamegli/Library/Android/sdk/platform-tools
+15 verbose lifecycle appsapp-cli@1.6.57~version: CWD: /Users/pamegli/Documents/projects/appsapp.myApp/appsapp
+16 silly lifecycle appsapp-cli@1.6.57~version: Args: [ '-c', 'npm run build && git add -A dist' ]
+17 silly lifecycle appsapp-cli@1.6.57~version: Returned: code: 0  signal: null
+18 info git [ 'add',
+18 info git   '/Users/pamegli/Documents/projects/appsapp.myApp/appsapp/package.json' ]
+19 info git [ 'commit', '-m', '1.6.57' ]
+20 verbose stack Error: stdout maxBuffer exceeded
+20 verbose stack     at Socket.<anonymous> (child_process.js:257:14)
+20 verbose stack     at emitOne (events.js:96:13)
+20 verbose stack     at Socket.emit (events.js:188:7)
+20 verbose stack     at readableAddChunk (_stream_readable.js:176:18)
+20 verbose stack     at Socket.Readable.push (_stream_readable.js:134:10)
+20 verbose stack     at Pipe.onread (net.js:547:20)
+21 verbose cwd /Users/pamegli/Documents/projects/appsapp.myApp/appsapp
+22 error Darwin 16.7.0
+23 error argv "/usr/local/bin/node" "/usr/local/bin/npm" "version" "patch"
+24 error node v6.11.1
+25 error npm  v3.10.10
+26 error stdout maxBuffer exceeded
+27 error If you need help, you may report this error at:
+27 error     <https://github.com/npm/npm/issues>
+28 verbose exit [ 1, true ]
