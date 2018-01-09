@@ -20,6 +20,7 @@ var PersistableModel = /** @class */ (function () {
         this.__validator = {};
         this.__validatorObserver = {};
         this.__edited = {};
+        this.__editedObservableCallbacks = [];
         this.__temp = {};
         this.__forceUpdateProperty = {};
         this.__isOnline = false;
@@ -441,10 +442,12 @@ var PersistableModel = /** @class */ (function () {
     PersistableModel.prototype.setProperty = function (property, value) {
         this[property] = value;
         this.__edited[property] = value;
+        var event = { property: property, value: value, model: this };
         if (this.__editedObserver) {
-            this.__editedObserver.next({ property: property, value: value, model: this });
+            this.__editedObserver.next(event);
         }
         this.executeConditionValidatorCircular(property);
+        this.executeChangesWithCallback(event);
         return this;
     };
     /**
@@ -852,26 +855,44 @@ var PersistableModel = /** @class */ (function () {
      * get metadata contraints value
      * @param property
      * @param type
+     * @param metadata
+     * @param string constraints
      * @returns {any}
      */
-    PersistableModel.prototype.getMetadataValue = function (property, type) {
-        if (this.getMetadata(property, type)[0] && this.getMetadata(property, type)[0].constraints) {
-            if (this.getMetadata(property, type)[0].constraints.length == 1) {
-                if (this.getMetadata(property, type)[0].constraints[0].type && Object.keys(this.getMetadata(property, type)[0].constraints[0]).indexOf('value')) {
-                    return this.getMetadata(property, type)[0].constraints[0].value == undefined ? true : this.getMetadata(property, type)[0].constraints[0].value;
-                }
-                return this.getMetadata(property, type)[0].constraints[0];
-            }
-            else {
-                return this.getMetadata(property, type)[0].constraints;
+    PersistableModel.prototype.getMetadataValue = function (property, type, metadataInput, constraints) {
+        var metadata = null;
+        if (metadataInput == undefined) {
+            metadata = this.getMetadata(property, type)[0];
+        }
+        else {
+            if (metadataInput.length) {
+                metadataInput.forEach(function (m) {
+                    if (m.constraints && m.constraints[0].type == type) {
+                        metadata = m;
+                    }
+                });
             }
         }
-        if (this.getMetadata(property, type)[0] && this.getMetadata(property, type)[0].validationTypeOptions) {
-            if (this.getMetadata(property, type)[0].validationTypeOptions.length == 1) {
-                return this.getMetadata(property, type)[0].validationTypeOptions[0];
+        if (constraints == undefined) {
+            constraints = 'value';
+        }
+        if (metadata && metadata.constraints) {
+            if (metadata.constraints.length == 1) {
+                if (metadata.constraints[0].type && Object.keys(metadata.constraints[0]).indexOf(constraints)) {
+                    return metadata.constraints[0][constraints] == undefined ? true : metadata.constraints[0][constraints];
+                }
+                return metadata.constraints[0];
             }
             else {
-                return this.getMetadata(property, type)[0].validationTypeOptions;
+                return metadata.constraints;
+            }
+        }
+        if (metadata && metadata.validationTypeOptions) {
+            if (metadata.validationTypeOptions.length == 1) {
+                return metadata.validationTypeOptions[0];
+            }
+            else {
+                return metadata.validationTypeOptions;
             }
         }
         return null;
@@ -1199,6 +1220,25 @@ var PersistableModel = /** @class */ (function () {
      */
     PersistableModel.prototype.getChangesObserverable = function () {
         return this.__editedObservable;
+    };
+    /**
+     * execute changes with callback
+     * @param event
+     * @returns {this}
+     */
+    PersistableModel.prototype.executeChangesWithCallback = function (event) {
+        this.__editedObservableCallbacks.forEach(function (callback) {
+            callback(event);
+        });
+        return this;
+    };
+    /**
+     * get changes with callback
+     * @returns {this}
+     */
+    PersistableModel.prototype.getChangesWithCallback = function (callback) {
+        this.__editedObservableCallbacks.push(callback);
+        return this;
     };
     return PersistableModel;
 }());

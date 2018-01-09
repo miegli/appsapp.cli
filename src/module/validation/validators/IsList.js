@@ -1,13 +1,13 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var class_validator_1 = require("class-validator");
-function IsList(typeOfItems) {
+function IsList(typeOfItems, uniqueItems) {
     return function (object, propertyName) {
         class_validator_1.registerDecorator({
             name: "isList",
             target: object.constructor,
             propertyName: propertyName,
-            constraints: [{ 'type': 'isList', 'value': typeOfItems }],
+            constraints: [{ 'type': 'isList', 'value': typeOfItems, 'uniqueItems': uniqueItems == undefined ? false : uniqueItems }],
             validator: {
                 validate: function (value, args) {
                     return new Promise(function (resolve, reject) {
@@ -18,7 +18,7 @@ function IsList(typeOfItems) {
                             var item = null;
                             try {
                                 // hint: global is used for backend node.js services
-                                item = typeof global == 'undefined' ? new typeOfItems() : (global[typeOfItems] !== undefined ? new global[typeOfItems]() : new typeOfItems());
+                                item = typeof global == 'undefined' ? new typeOfItems() : (typeof typeOfItems == 'string' && global[typeOfItems] !== undefined ? new global[typeOfItems]() : new typeOfItems());
                                 item.loadJson(itemOriginal).then().catch();
                             }
                             catch (e) {
