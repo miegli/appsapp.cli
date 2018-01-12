@@ -275,6 +275,7 @@ function dispatchEvent(original, identifier, actiondata) {
                             state: 'error',
                             message: 'Validation error, please try again. If this error persists, please contact the system administrator.'
                         }).then(function () {
+                            console.log(error);
                             reject(error);
                         });
                     } else {
