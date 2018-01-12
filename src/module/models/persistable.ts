@@ -11,6 +11,8 @@ import {AppsappModuleProviderMessages} from "../interfaces/messages";
 import {HttpClient} from "@angular/common/http";
 import * as objectHash from 'object-hash';
 
+declare var global: any;
+
 export interface actionEmail {
     name: 'email',
     data: {
@@ -71,7 +73,7 @@ export class PersistableModel {
     private __temp = {};
     private __forceUpdateProperty = {};
     private __persistenceManager: any;
-    private __isOnline: boolean = true;
+    private __isOnline: boolean = false;
     private __validationErrors: any = {};
     private __metadata = [];
     private _hasPendingChanges: boolean = false;
@@ -1726,6 +1728,14 @@ export class PersistableModel {
     public getChangesWithCallback(callback) {
         this.__editedObservableCallbacks.push(callback);
         return this;
+    }
+
+    /**
+     * Check if model is initialized in backend mode
+     * @returns {boolean}
+     */
+    public isInBackendMode() {
+        return global[this.constructor.name] === undefined ? false : true;
     }
 
 }
