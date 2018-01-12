@@ -46,6 +46,11 @@ function HasConditions(options, actionIfMatches, validationOptions) {
                             }
                         });
                     }
+                    // if is in backend service mode, so override property value and condition validator state
+                    if (!state && args.object.isInBackendMode()) {
+                        args.object[args.property] = null;
+                        return true;
+                    }
                     return state;
                 }
             }

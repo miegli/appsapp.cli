@@ -23,7 +23,7 @@ var PersistableModel = /** @class */ (function () {
         this.__editedObservableCallbacks = [];
         this.__temp = {};
         this.__forceUpdateProperty = {};
-        this.__isOnline = true;
+        this.__isOnline = false;
         this.__validationErrors = {};
         this.__metadata = [];
         this._hasPendingChanges = false;
@@ -1239,6 +1239,13 @@ var PersistableModel = /** @class */ (function () {
     PersistableModel.prototype.getChangesWithCallback = function (callback) {
         this.__editedObservableCallbacks.push(callback);
         return this;
+    };
+    /**
+     * Check if model is initialized in backend mode
+     * @returns {boolean}
+     */
+    PersistableModel.prototype.isInBackendMode = function () {
+        return global[this.constructor.name] === undefined ? false : true;
     };
     return PersistableModel;
 }());
