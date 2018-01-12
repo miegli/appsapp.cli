@@ -67,9 +67,15 @@ export function HasConditions(options: [{
             });
           }
 
-          // if is in backend service mode, so override property value and condition validator state
+          /**
+           *  if is in backend service mode, so override property value and condition validator state
+           */
           if (!state && args.object.isInBackendMode()) {
-              args.object[args.property] = null;
+              try {
+                delete args.object[args.property];
+              } catch (e) {
+                return false;
+              }
               return true;
           }
 
