@@ -231,45 +231,63 @@ exports.connectEvents = functions.database.ref('_events/{actionid}').onCreate(ev
         'target': original.target ? original.target : null
     };
 
-    /**
-     * Call action by given event queue object
-     */
-    return new Promise(function (resolve, reject) {
-
-        call(actiondata, original.snapshot !== undefined ? original.snapshot : null).then((data) => {
-
-            admin.database().ref('_events/' + identifier).remove().then(function () {
-                if (actiondata.target !== undefined && actiondata.target) {
-                    admin.database().ref(actiondata.target + "/action/" + actiondata.actionid).set(data).then(function () {
-                        admin.database().ref(actiondata.target + "/action/" + actiondata.actionid).remove().then();
-                        resolve(data);
-                    });
-                } else {
-                    resolve(data);
-                }
-            });
-            resolve(data);
-        }).catch((error) => {
-
-            admin.database().ref('_events/' + identifier).remove().then(function () {
-                if (actiondata.target !== undefined && actiondata.target) {
-                    admin.database().ref(actiondata.target + "/action/" + actiondata.actionid).set({
-                        state: 'error',
-                        message: 'Validation error, please try again. If this error persists, please contact the system administrator.'
-                    }).then(function () {
-                        reject(error);
-                    });
-                } else {
-                    reject(error);
-                }
-            });
-
-        });
-
+    return dispatchEvent(original, identifier, actiondata).then(function () {
+        return true;
+    }).catch(function (error) {
+        return error;
     });
+
 
 });
 
+
+
+
+/**
+ * Call action by given event queue object
+ */
+function dispatchEvent(original, identifier, actiondata) {
+
+    return new Promise(function (resolve, reject) {
+
+        const date = new Date();
+
+        admin.database().ref('_events/' + identifier + "/dispatched").set(date.getTime()).then(function () {
+            call(actiondata, original.snapshot !== undefined ? original.snapshot : null).then((data) => {
+
+                admin.database().ref('_events/' + identifier).remove().then(function () {
+                    if (actiondata.target !== undefined && actiondata.target) {
+                        admin.database().ref(actiondata.target + "/action/" + actiondata.actionid).set(data).then(function () {
+                            admin.database().ref(actiondata.target + "/action/" + actiondata.actionid).remove().then();
+                            resolve(data);
+                        });
+                    } else {
+                        resolve(data);
+                    }
+                }).catch((error) => {
+                    reject(error);
+                });
+
+            }).catch((error) => {
+                admin.database().ref('_events/' + identifier).remove().then(function () {
+                    if (actiondata.target !== undefined && actiondata.target) {
+                        admin.database().ref(actiondata.target + "/action/" + actiondata.actionid).set({
+                            state: 'error',
+                            message: 'Validation error, please try again. If this error persists, please contact the system administrator.'
+                        }).then(function () {
+                            reject(error);
+                        });
+                    } else {
+                        reject(error);
+                    }
+                }).catch((error) => {
+                    reject(error);
+                });
+            });
+        });
+
+    });
+}
 
 /**
  * generic call of pre defined actions
