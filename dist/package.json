@@ -1,6 +1,6 @@
 {
   "name": "appsapp-cli",
-  "version": "1.6.62",
+  "version": "1.6.63",
   "license": "MIT",
   "dependencies": {
     "chalk": "^2.3.0",
