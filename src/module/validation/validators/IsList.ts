@@ -19,6 +19,9 @@ export function IsList(typeOfItems: any, uniqueItems?:boolean) {
                         let proceededValidations = 0;
                         let allValide = true;
 
+                        if (value.length == 0) {
+                            resolve(true);
+                        }
                         value.forEach((itemOriginal) => {
 
                             let item = null;
