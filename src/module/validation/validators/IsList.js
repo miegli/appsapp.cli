@@ -14,6 +14,9 @@ function IsList(typeOfItems, uniqueItems) {
                         var requiredValidations = value.length;
                         var proceededValidations = 0;
                         var allValide = true;
+                        if (value.length == 0) {
+                            resolve(true);
+                        }
                         value.forEach(function (itemOriginal) {
                             var item = null;
                             try {
