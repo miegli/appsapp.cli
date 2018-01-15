@@ -1739,6 +1739,9 @@ function IsList(typeOfItems, uniqueItems) {
                         var /** @type {?} */ requiredValidations = value.length;
                         var /** @type {?} */ proceededValidations = 0;
                         var /** @type {?} */ allValide = true;
+                        if (value.length == 0) {
+                            resolve(true);
+                        }
                         value.forEach(function (itemOriginal) {
                             var /** @type {?} */ item = null;
                             try {
