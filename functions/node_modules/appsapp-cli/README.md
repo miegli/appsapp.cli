@@ -1,9 +1,10 @@
 # appsapp-cli
 
+This command line program is the important counterpart of appsapp-module for connecting built-in or custom backend services. 
 
 ## Install
 
-Appsapp-cli is an important dependency for https://www.npmjs.com/package/appsapp-module if you want to use the awesome backend services. Install the package by running: 
+Install the package by running: 
 
 ```bash
 $ npm -g install appsapp-cli

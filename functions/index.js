@@ -27,6 +27,8 @@
 const functions = require('firebase-functions');
 const admin = require('firebase-admin');
 admin.initializeApp(functions.config().firebase);
+
+
 const uuidV1 = require('uuid/v1');
 const request = require('request-promise');
 const base64 = require('base-64');
@@ -189,6 +191,7 @@ exports.watchConfigConstructorUpdates = functions.database.ref('_config/{object}
             Object.keys(actions).forEach((action) => {
 
                 if (action !== 'constructor') {
+                    console.log(action);
                     call({
                         'object': event.params.object,
                         'action': {name: action}
@@ -314,6 +317,7 @@ function call(action, data) {
 
                         eval(base64.decode(config.constructor));
                         model = new global[action.object];
+
 
                         model.loadJson(data).then(() => {
 

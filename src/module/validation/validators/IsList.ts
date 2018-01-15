@@ -22,6 +22,7 @@ export function IsList(typeOfItems: any, uniqueItems?:boolean) {
                         if (value.length == 0) {
                             resolve(true);
                         }
+
                         value.forEach((itemOriginal) => {
 
                             let item = null;

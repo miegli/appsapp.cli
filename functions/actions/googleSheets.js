@@ -150,11 +150,13 @@ function updateSheet(spreadsheet, data, auth, model, config) {
                     return;
                 }
 
+
                 var namedRanges = response.namedRanges ? response.namedRanges : [];
                 var properties = model.getProperties();
                 var knownRanges = {};
                 var knownRangesStartColumnsIndex = {};
                 var nextRowIndex = spreadsheet && spreadsheet.sheets && spreadsheet.sheets[0].data && spreadsheet.sheets[0].data[0].rowData ? spreadsheet.sheets[0].data[0].rowData.length : 1;
+
 
                 namedRanges.forEach((namedRange) => {
                     if (properties[namedRange['namedRangeId']] !== undefined) {
@@ -163,7 +165,9 @@ function updateSheet(spreadsheet, data, auth, model, config) {
                     }
                 });
 
-                var columns = {}, newRangesStartColumnsIndex = spreadsheet && spreadsheet.sheets && spreadsheet.sheets[0].data && spreadsheet.sheets[0].data[0].rowData ? spreadsheet.sheets[0].data[0].rowData[0].values.length : namedRanges.length;
+                var columns = {},
+                    newRangesStartColumnsIndex = spreadsheet && spreadsheet.sheets && spreadsheet.sheets[0].data && spreadsheet.sheets[0].data[0].rowData ? spreadsheet.sheets[0].data[0].rowData[0].values.length : namedRanges.length;
+
                 Object.keys(properties).forEach((property) => {
 
 
@@ -207,6 +211,8 @@ function updateSheet(spreadsheet, data, auth, model, config) {
                 })
 
                 resolve(columnsSorted);
+
+                console.log(columnsSorted);
 
 
             });
@@ -402,23 +408,25 @@ function updateSheet(spreadsheet, data, auth, model, config) {
 
         getMergedColumns(spreadsheet, data, auth, model, config).then((COLUMNS) => {
 
-
             var requests = [];
 
-
-            buildNamedRangeRequest(spreadsheet.sheets[0].properties.sheetId, COLUMNS).forEach((request) => {
-                requests.push(request);
-            });
 
             if (data) {
                 buildAddRowRequest(spreadsheet.sheets[0].properties.sheetId, COLUMNS).forEach((request) => {
                     requests.push(request);
                 });
-            }
+            } else {
 
-            buildSheetConfigRequest(config).forEach((request) => {
-                requests.push(request);
-            });
+                buildNamedRangeRequest(spreadsheet.sheets[0].properties.sheetId, COLUMNS).forEach((request) => {
+                    requests.push(request);
+                });
+
+                buildSheetConfigRequest(config).forEach((request) => {
+                    requests.push(request);
+                });
+
+
+            }
 
             buildColumnsSizeRequest(spreadsheet.sheets[0].properties.sheetId, COLUMNS).forEach((request) => {
                 requests.push(request);
@@ -473,11 +481,8 @@ function googleSheets(action, data, config, model) {
                     }
 
                 } else {
-                    resolve({config: {spreadsheet:spreadsheet}, response: {state: 'done'}});
+                    resolve({config: {spreadsheet: spreadsheet}, response: {state: 'done'}});
                 }
-
-
-
 
 
             }).catch((err) => {
