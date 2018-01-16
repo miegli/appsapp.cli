@@ -9,7 +9,7 @@ var Unirest = require('unirest');
 function webhook(action, data) {
     return new Promise(function (resolve, reject) {
 
-        Unirest[action.action.data.method](action.action.data.url).type(action.action.data.type).end(function (response) {
+        Unirest[action.action.data.method](action.action.data.url).type(action.action.data.type).send({data: data, action: action}).end(function (response) {
             if (response.statusType < 3) {
                 resolve({response: {state: 'done', data: response.body}});
             } else {
