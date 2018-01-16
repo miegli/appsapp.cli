@@ -29,6 +29,13 @@ const admin = require('firebase-admin');
 admin.initializeApp(functions.config().firebase);
 
 
+// Initialize the app with a service account, granting admin privileges
+// var serviceAccount = require("/Users/pamegli/Documents/projects/appsapp.myApp/myApp/serviceAccountKey.json");
+// admin.initializeApp({
+//     credential: admin.credential.cert(serviceAccount),
+//     databaseURL: "https://test-32b81.firebaseio.com"
+// });
+
 const uuidV1 = require('uuid/v1');
 const request = require('request-promise');
 const base64 = require('base-64');
@@ -244,8 +251,6 @@ exports.connectEvents = functions.database.ref('_events/{actionid}').onCreate(ev
 });
 
 
-
-
 /**
  * Call action by given event queue object
  */
@@ -288,6 +293,8 @@ function dispatchEvent(original, identifier, actiondata) {
                     reject(error);
                 });
             });
+        }).catch((error) => {
+            reject(error);
         });
 
     });

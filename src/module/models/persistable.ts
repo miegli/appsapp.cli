@@ -37,7 +37,9 @@ export interface actionGoogleSheets {
 export interface actionWebhook {
     name: 'webhook',
     data: {
-        url: string
+        url: string,
+        method: 'get' | 'post' | 'head' | 'put' | 'patch' | 'delete',
+        type: 'json' | 'html' | 'xml'
     },
     additionalActions?: [actionEmail | actionWebhook | actionGoogleSheets | actionCustom]
 }
