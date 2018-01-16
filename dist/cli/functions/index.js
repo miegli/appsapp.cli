@@ -268,7 +268,8 @@ exports.connectQueueUpdate = functions.database.ref('_queue/{actionname}/{action
         'source': original.source,
         'snapshot': original.snapshot !== undefined ? original.snapshot : null,
         'target': original.target ? original.target : null,
-        'targetData': original.targetData
+        'targetData': original.targetData,
+        'targetMessage': original.targetMessage !== undefined ? original.targetMessage : null,
     };
 
 
@@ -277,30 +278,37 @@ exports.connectQueueUpdate = functions.database.ref('_queue/{actionname}/{action
 
         if (identifier !== undefined && actionname !== undefined) {
 
-            admin.database().ref('_queue/' + actionname + '/'+ identifier).remove().then(function () {
+            admin.database().ref('_queue/' + actionname + '/' + identifier).remove().then(function () {
 
                 if (actiondata.action.state !== undefined) {
 
-                    admin.database().ref(actiondata.target + "/action/" + actiondata.actionid).remove().then(() => {
+                    admin.database().ref(actiondata.target + "/action/" + actiondata.actionid).set({
+                        state: actiondata.action.state,
+                        message: actiondata.targetMessage
+                    }).then(function () {
 
-                        if (actiondata.target !== undefined && actiondata.target && actiondata.targetData !== undefined) {
-                            admin.database().ref(actiondata.target + "/data").set(actiondata.targetData).then(function () {
+                        admin.database().ref(actiondata.target + "/action/" + actiondata.actionid).remove().then(() => {
+
+                            if (actiondata.target !== undefined && actiondata.target && actiondata.targetData !== undefined) {
+                                admin.database().ref(actiondata.target + "/data").set(actiondata.targetData).then(function () {
+                                    admin.database().ref(actiondata.target + "/action/" + actiondata.actionid).remove().then(() => {
+                                        resolve(true);
+                                    });
+                                });
+                            }
+
+                            if (actiondata.target !== undefined && actiondata.target && actiondata.targetData === undefined) {
                                 admin.database().ref(actiondata.target + "/action/" + actiondata.actionid).remove().then(() => {
                                     resolve(true);
                                 });
-                            });
-                        }
+                            }
 
-                        if (actiondata.target !== undefined && actiondata.target && actiondata.targetData === undefined) {
-                            admin.database().ref(actiondata.target + "/action/" + actiondata.actionid).remove().then(() => {
-                                resolve(true);
-                            });
-                        }
+                        }).catch((error) => {
+                                reject(error);
+                            }
+                        );
 
-                    }).catch((error) => {
-                            reject(error);
-                        }
-                    );
+                    });
 
 
                 } else {
