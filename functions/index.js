@@ -28,7 +28,6 @@ const functions = require('firebase-functions');
 const admin = require('firebase-admin');
 admin.initializeApp(functions.config().firebase);
 
-
 // Initialize the app with a service account, granting admin privileges
 // var serviceAccount = require("/Users/pamegli/Documents/projects/appsapp.myApp/myApp/serviceAccountKey.json");
 // admin.initializeApp({
@@ -198,7 +197,6 @@ exports.watchConfigConstructorUpdates = functions.database.ref('_config/{object}
             Object.keys(actions).forEach((action) => {
 
                 if (action !== 'constructor') {
-                    console.log(action);
                     call({
                         'object': event.params.object,
                         'action': {name: action}
@@ -237,7 +235,7 @@ exports.connectEvents = functions.database.ref('_events/{actionid}').onCreate(ev
         'action': original.action,
         'actionid': original.actionid,
         'source': original.source,
-        'snapshot': null,
+        'snapshot': original.snapshot !== undefined ? original.snapshot : null,
         'target': original.target ? original.target : null
     };
 
@@ -247,6 +245,77 @@ exports.connectEvents = functions.database.ref('_events/{actionid}').onCreate(ev
         return error;
     });
 
+
+});
+
+/**
+ * Connect realtime database for watching queued events
+ */
+exports.connectQueueUpdate = functions.database.ref('_queue/{actionname}/{actionid}').onUpdate(event => {
+
+    const original = event.data.val();
+    const identifier = event.params.actionid;
+    const actionname = event.params.actionname;
+
+    const actiondata = {
+        'date': original.date,
+        'project': original.project,
+        'object': original.object,
+        'objectid': original.objectid,
+        'user': original.user,
+        'action': original.action,
+        'actionid': original.actionid,
+        'source': original.source,
+        'snapshot': original.snapshot !== undefined ? original.snapshot : null,
+        'target': original.target ? original.target : null,
+        'targetData': original.targetData
+    };
+
+
+    return new Promise(function (resolve, reject) {
+
+
+        if (identifier !== undefined && actionname !== undefined) {
+
+            admin.database().ref('_queue/' + actionname + '/'+ identifier).remove().then(function () {
+
+                if (actiondata.action.state !== undefined) {
+
+                    admin.database().ref(actiondata.target + "/action/" + actiondata.actionid).remove().then(() => {
+
+                        if (actiondata.target !== undefined && actiondata.target && actiondata.targetData !== undefined) {
+                            admin.database().ref(actiondata.target + "/data").set(actiondata.targetData).then(function () {
+                                admin.database().ref(actiondata.target + "/action/" + actiondata.actionid).remove().then(() => {
+                                    resolve(true);
+                                });
+                            });
+                        }
+
+                        if (actiondata.target !== undefined && actiondata.target && actiondata.targetData === undefined) {
+                            admin.database().ref(actiondata.target + "/action/" + actiondata.actionid).remove().then(() => {
+                                resolve(true);
+                            });
+                        }
+
+                    }).catch((error) => {
+                            reject(error);
+                        }
+                    );
+
+
+                } else {
+                    reject('no action state given');
+                }
+
+
+            });
+
+        } else {
+            reject('event identifier or action name not set');
+        }
+
+
+    });
 
 });
 
@@ -261,6 +330,7 @@ function dispatchEvent(original, identifier, actiondata) {
         const date = new Date();
 
         admin.database().ref('_events/' + identifier + "/dispatched").set(date.getTime()).then(function () {
+
             call(actiondata, original.snapshot !== undefined ? original.snapshot : null).then((data) => {
 
                 admin.database().ref('_events/' + identifier).remove().then(function () {
@@ -377,6 +447,8 @@ function call(action, data) {
 
             });
 
+        } else {
+            reject('internal error: action unknown');
         }
 
     });
