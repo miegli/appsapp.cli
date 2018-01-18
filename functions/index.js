@@ -251,7 +251,7 @@ exports.connectEvents = functions.database.ref('_events/{actionid}').onCreate(ev
 /**
  * Connect realtime database for watching queued events
  */
-exports.connectQueueUpdate = functions.database.ref('_queue/{actionname}/{actionid}').onUpdate(event => {
+exports.connectQueueUpdate = functions.database.ref('_queue/{actionid}').onUpdate(event => {
 
     const original = event.data.val();
     const identifier = event.params.actionid;
@@ -278,7 +278,7 @@ exports.connectQueueUpdate = functions.database.ref('_queue/{actionname}/{action
 
         if (identifier !== undefined && actionname !== undefined) {
 
-            admin.database().ref('_queue/' + actionname + '/' + identifier).remove().then(function () {
+            admin.database().ref('_queue/' + identifier).remove().then(function () {
 
                 if (actiondata.action.state !== undefined) {
 
