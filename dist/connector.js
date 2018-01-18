@@ -309,7 +309,7 @@ class connector {
 
 }
 
-module.exports = new firebaseFunctionsConnector;
+module.exports = new connector;
 
 /**
  *
