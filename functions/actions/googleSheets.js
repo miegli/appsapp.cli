@@ -166,7 +166,7 @@ function updateSheet(spreadsheet, data, auth, model, config) {
                 });
 
                 var columns = {},
-                    newRangesStartColumnsIndex = spreadsheet && spreadsheet.sheets && spreadsheet.sheets[0].data && spreadsheet.sheets[0].data[0].rowData ? spreadsheet.sheets[0].data[0].rowData[0].values.length : namedRanges.length;
+                    newRangesStartColumnsIndex = spreadsheet && spreadsheet.sheets && spreadsheet.sheets[0].data && spreadsheet.sheets[0].data[0].rowData ? (spreadsheet.sheets[0].data[0].rowData[0].values !== undefined ? spreadsheet.sheets[0].data[0].rowData[0].values.length : namedRanges.length) : namedRanges.length;
 
                 Object.keys(properties).forEach((property) => {
 
