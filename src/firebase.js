@@ -144,107 +144,54 @@ class firebaseFunctionsConnector {
         /**
          * watch for events and connect signal slots
          */
+        var self = this;
+
+        this.db.ref("_queue").on(
+            "child_added",
+           function(snapshot) {
+               self.executeQueue(snapshot);
+           }
+        );
+
+    }
+
+
+    /**
+     *
+     * execute queue from snapshot data
+     * @param snapshot
+     * @return void
+     *
+     */
+    executeQueue(snapshot) {
+
         var db = this.admin.database();
         var firestore = this.admin.firestore();
         var self = this;
+        var e = snapshot.val();
+        var eventId = snapshot.key;
 
-        this.db.ref("_events").on(
-            "child_added",
-            function (snapshot) {
+    console.log(e);
 
-                var e = snapshot.val();
-                var eventId = snapshot.key;
+        self.watchers.forEach(function (watcher) {
 
-                self.watchers.forEach(function (watcher) {
+            if (
+                (e.object === watcher.object || watcher.object === null) &&
+                (e.project === watcher.project || watcher.project === null) &&
+                (e.source === watcher.source || watcher.source === null) &&
+                (e.action === watcher.action || watcher.action === null)
+            ) {
 
-                    if (
-                        (e.object === watcher.object || watcher.object === null) &&
-                        (e.project === watcher.project || watcher.project === null) &&
-                        (e.source === watcher.source || watcher.source === null) &&
-                        (e.action === watcher.action || watcher.action === null)
-                    ) {
-
-                        var deferred = new Deferred();
+                var deferred = new Deferred();
 
 
-                        switch (e.action) {
+                switch (e.action) {
 
-                            case 'write':
+                    case 'write':
 
-                                if (e.source == 'firestore') {
+                        if (e.source == 'firestore') {
 
-                                    firestore.doc('session/' + e.user + '/' + e.project + '/' + e.object + '/' + e.objectid + '/data').get().then((doc) => {
-                                        watcher.callback({
-                                                user: e.user,
-                                                object: e.object,
-                                                objectId: e.objectid,
-                                                project: e.project,
-                                                action: e.action,
-                                                source: e.source,
-                                                eventId: null,
-                                                data: doc.data()
-                                            },
-                                            deferred);
-                                    });
-
-
-                                    /* after promise */
-                                    deferred.promise.then((data) => {
-                                        // Document created successfully.
-                                        // remove finished event
-                                        db.ref('_events/' + eventId).remove();
-
-                                        firestore.doc('session/' + e.user + '/' + e.project + '/' + e.object + '/' + e.objectid + '/_action/'+e.action + '/' + e.actionId).delete().then(() => {
-                                            // Document deleted successfully.
-                                        }).catch((err) => {
-                                            // remove in error event
-                                            console.log(err);
-                                        });
-
-
-                                    }).catch((err) => {
-                                        // error event
-                                        console.log(err);
-                                    });
-
-
-                                } else {
-
-                                    /* Signal slog "write" */
-                                    db.ref('session/' + e.user + '/' + e.project + '/' + e.object + '/' + e.objectid + '/data').once('value', function (data) {
-                                        watcher.callback({
-                                                user: e.user,
-                                                object: e.object,
-                                                objectId: e.objectid,
-                                                project: e.project,
-                                                action: e.action,
-                                                source: e.source,
-                                                eventId: null,
-                                                data: data.val()
-                                            },
-                                            deferred);
-                                    });
-
-                                    /* after promise */
-                                    deferred.promise.then((data) => {
-                                        // reset storage data
-                                        db.ref('session/' + e.user + '/' + e.project + '/' + e.object + '/' + e.objectid + '/_action/'+e.action).remove();
-                                        // remove finished event
-                                        db.ref('_events/' + eventId).remove();
-                                    }).catch((err) => {
-                                        // error event
-                                        console.log(err);
-                                    });
-
-
-                                }
-
-
-                                break;
-
-                            default:
-
-                                /* Signal slot "fetchObject */
+                            firestore.doc('session/' + e.user + '/' + e.project + '/' + e.object + '/' + e.objectid + '/data').get().then((doc) => {
                                 watcher.callback({
                                         user: e.user,
                                         object: e.object,
@@ -252,71 +199,139 @@ class firebaseFunctionsConnector {
                                         project: e.project,
                                         action: e.action,
                                         source: e.source,
-                                        eventId: eventId
+                                        eventId: null,
+                                        data: doc.data()
                                     },
-                                    deferred
-                                );
+                                    deferred);
+                            });
 
 
+                            /* after promise */
+                            deferred.promise.then((data) => {
+                                // Document created successfully.
+                                // remove finished event
+                                db.ref('_events/' + eventId).remove();
 
-                                /* after promise */
-                                deferred.promise.then((data) => {
-
-                                    if (e.source == 'firestore') {
-
-                                        firestore.doc('session/' + e.user + '/' + e.project + '/' + e.object + '/' + e.objectid + '/data').set(
-                                            {
-                                                'bind': typeof data == 'string' ? {value: data} : data,
-                                                'stable': typeof data == 'string' ? {value: data} : data
-                                            }
-                                        ).then(() => {
-                                            // Document created successfully.
-                                            // remove finished event
-                                            db.ref('_events/' + eventId).remove();
-
-                                            firestore.doc('session/' + e.user + '/' + e.project + '/' + e.object + '/' + e.objectid + '/_action/'+e.action + '/' + e.actionId).delete().then(() => {
-                                                // Document deleted successfully.
-                                            }).catch((err) => {
-                                                // remove in error event
-                                                console.log(err);
-                                            });
-
-
-
-                                        });
-
-                                    } else {
-
-                                        // set storage data
-                                        db.ref('session/' + e.user + '/' + e.project + '/' + e.object + '/' + e.objectid + '/data').set({
-                                            'bind': typeof data == 'string' ? {value: data} : data,
-                                            'stable': typeof data == 'string' ? {value: data} : data
-                                        });
-
-                                        // remove finished event
-                                        db.ref('_events/' + eventId).remove();
-                                        db.ref('session/' + e.user + '/' + e.project + '/' + e.object + '/' + e.objectid + '/_action/'+e.action).remove();
-
-                                    }
-
-
+                                firestore.doc('session/' + e.user + '/' + e.project + '/' + e.object + '/' + e.objectid + '/action/'+e.action + '/' + e.actionId).delete().then(() => {
+                                    // Document deleted successfully.
                                 }).catch((err) => {
                                     // remove in error event
                                     console.log(err);
                                 });
 
-                                break;
+
+                            }).catch((err) => {
+                                // error event
+                                console.log(err);
+                            });
+
+
+                        } else {
+
+                            /* Signal slog "write" */
+                            db.ref('session/' + e.user + '/' + e.project + '/' + e.object + '/' + e.objectid + '/data').once('value', function (data) {
+                                watcher.callback({
+                                        user: e.user,
+                                        object: e.object,
+                                        objectId: e.objectid,
+                                        project: e.project,
+                                        action: e.action,
+                                        source: e.source,
+                                        eventId: null,
+                                        data: data.val()
+                                    },
+                                    deferred);
+                            });
+
+                            /* after promise */
+                            deferred.promise.then((data) => {
+                                // reset storage data
+                                db.ref('session/' + e.user + '/' + e.project + '/' + e.object + '/' + e.objectid + '/action/'+e.action).remove();
+                                // remove finished event
+                                db.ref('_events/' + eventId).remove();
+                            }).catch((err) => {
+                                // error event
+                                console.log(err);
+                            });
 
 
                         }
-                    }
 
 
-                });
+                        break;
+
+                    default:
+
+                        /* Signal slot "fetchObject */
+                        watcher.callback({
+                                user: e.user,
+                                object: e.object,
+                                objectId: e.objectid,
+                                project: e.project,
+                                action: e.action,
+                                source: e.source,
+                                eventId: eventId
+                            },
+                            deferred
+                        );
 
 
+
+                        /* after promise */
+                        deferred.promise.then((data) => {
+
+                            if (e.source == 'firestore') {
+
+                                firestore.doc('session/' + e.user + '/' + e.project + '/' + e.object + '/' + e.objectid + '/data').set(
+                                    {
+                                        'bind': typeof data == 'string' ? {value: data} : data,
+                                        'stable': typeof data == 'string' ? {value: data} : data
+                                    }
+                                ).then(() => {
+                                    // Document created successfully.
+                                    // remove finished event
+                                    db.ref('_events/' + eventId).remove();
+
+                                    firestore.doc('session/' + e.user + '/' + e.project + '/' + e.object + '/' + e.objectid + '/action/'+e.action + '/' + e.actionId).delete().then(() => {
+                                        // Document deleted successfully.
+                                    }).catch((err) => {
+                                        // remove in error event
+                                        console.log(err);
+                                    });
+
+
+
+                                });
+
+                            } else {
+
+                                // set storage data
+                                db.ref('session/' + e.user + '/' + e.project + '/' + e.object + '/' + e.objectid + '/data').set({
+                                    'bind': typeof data == 'string' ? {value: data} : data,
+                                    'stable': typeof data == 'string' ? {value: data} : data
+                                });
+
+                                // remove finished event
+                                db.ref('_events/' + eventId).remove();
+                                db.ref('session/' + e.user + '/' + e.project + '/' + e.object + '/' + e.objectid + '/action/'+e.action).remove();
+
+                            }
+
+
+                        }).catch((err) => {
+                            // remove in error event
+                            console.log(err);
+                        });
+
+                        break;
+
+
+                }
             }
-        );
+
+
+        });
+
 
     }
 
