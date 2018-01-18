@@ -169,7 +169,7 @@ gulp.task('copy:buildCLI', function () {
  * 7B. Copy all backend function build
  */
 gulp.task('copy:backendFunctions', function () {
-  return gulp.src([`${rootFolder}/firebase.js`], { base: rootFolder})
+  return gulp.src([`${srcFolder}/firebase.js`], { base: srcFolder})
     .pipe(gulp.dest(distFolder));
 });
 
@@ -266,6 +266,7 @@ gulp.task('build', ['clean', 'compile']);
 gulp.task('build:watch', ['compile', 'watch']);
 gulp.task('default', ['build:watch']);
 gulp.task('test', ['version:manifest']);
+
 
 /**
  * Deletes the specified folder
