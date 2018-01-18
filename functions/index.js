@@ -255,7 +255,7 @@ exports.connectQueueUpdate = functions.database.ref('_queue/{actionid}').onUpdat
 
     const original = event.data.val();
     const identifier = event.params.actionid;
-    const actionname = event.params.actionname;
+    const actionname = original.action.name;
 
     const actiondata = {
         'date': original.date,
