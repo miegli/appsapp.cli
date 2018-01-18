@@ -166,6 +166,14 @@ gulp.task('copy:buildCLI', function () {
 });
 
 /**
+ * 7B. Copy all backend function build
+ */
+gulp.task('copy:backendFunctions', function () {
+  return gulp.src([`${rootFolder}/firebase.js`], { base: rootFolder})
+    .pipe(gulp.dest(distFolder));
+});
+
+/**
  * 8A. increment version for package.json
  */
 gulp.task('version:manifest', function () {
@@ -229,6 +237,7 @@ gulp.task('compile', function () {
     'rollup:umd',
     'copy:build',
     'copy:buildCLI',
+    'copy:backendFunctions',
     'version:manifest',
     'copy:manifest',
     'copy:readme',
