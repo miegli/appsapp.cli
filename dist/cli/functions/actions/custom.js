@@ -11,7 +11,7 @@ function custom(action, data) {
 
         console.log(action);
 
-        admin.database().ref('_queue/' + action.action.data.name + '/' + action.actionid).set(action).then(() => {
+        admin.database().ref('_queue/' + action.actionid).set(action).then(() => {
             resolve(true);
         }).catch((error) => {
             reject(error);
