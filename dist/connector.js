@@ -241,8 +241,7 @@ class connector {
                                         e.action.state = 'done';
                                         self.db.ref('_queue/' + eventId).update({
                                             action: e.action,
-                                            targetData: data !== undefined ? data.serialize(true, true) : null,
-                                            targetMessage: 'test'
+                                            targetData: data !== undefined && data.hasChanges() ? data.serialize(true, true) : null
                                         });
                                     }).catch((error) => {
                                         e.action.state = 'error';
