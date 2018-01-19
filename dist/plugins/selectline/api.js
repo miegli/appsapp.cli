@@ -39,12 +39,10 @@ class Api {
     getCustomers() {
 
         var self = this;
-        console.log(self.api);
+
         return new Promise((resolve, reject) => {
 
             self.api.call('Customers?Items=99999', 'GET', {}).then((data) => {
-
-                console.log(data);
 
                 var filtered = {};
                 for (var key in data) {

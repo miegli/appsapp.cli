@@ -129,9 +129,7 @@ class Service {
                 agent: false,
                 json: true // Automatically stringifies the body to JSON
             }).then(function (response) {
-
-                console.log(response);
-
+                resolve(response);
             }).catch(function (err) {
 
                 if (isfinalcall) {
@@ -140,7 +138,13 @@ class Service {
 
                     if (err.response !== undefined && err.response.body.ResponseCode == '10-002') {
                         self.authenticate().then((data) => {
-                            self.call(uri, method, data, true);
+                            self.call(uri, method, data, true).then((response) => {
+                                resolve(response);
+                            }).catch((err) => {
+                                reject(err);
+                            });
+                        }).catch((err) => {
+                            reject(err);
                         });
                     } else {
                         reject(err);
@@ -151,7 +155,6 @@ class Service {
 
 
         });
-
 
 
     }
