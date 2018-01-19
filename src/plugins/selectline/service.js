@@ -200,7 +200,7 @@ class Service {
 
 }
 
-module.exports = Service;
+module.exports = new Service;
 
 
 /**
