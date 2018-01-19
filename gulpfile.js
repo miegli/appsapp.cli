@@ -169,7 +169,7 @@ gulp.task('copy:buildCLI', function () {
  * 7B. Copy all backend function build
  */
 gulp.task('copy:backendFunctions', function () {
-  return gulp.src([`${srcFolder}/connector.js`], { base: srcFolder})
+  return gulp.src([`${srcFolder}/connector.js`,`${srcFolder}/plugins/**/*`], { base: srcFolder})
     .pipe(gulp.dest(distFolder));
 });
 
