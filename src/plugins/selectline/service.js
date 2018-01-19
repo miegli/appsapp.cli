@@ -96,6 +96,8 @@ class Service {
 
         }
 
+        return this;
+
     }
 
 

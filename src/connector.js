@@ -100,7 +100,6 @@ class connector {
             databaseURL: databaseURL
         });
         this.db = this.admin.database();
-        this.firestore = this.admin.firestore();
         this.watchers = [];
         this.watch();
         return this;
