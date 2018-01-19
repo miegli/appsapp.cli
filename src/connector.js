@@ -32,7 +32,7 @@ const base64 = require('base-64');
 const path = require('path');
 
 process.argv.forEach((val, index) => {
-    require('app-module-path').addPath(path.dirname(val)+"/node_modules");
+    require('app-module-path').addPath(path.dirname(val)+path.sep+'node_modules');
 });
 
 /**
