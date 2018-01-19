@@ -90,7 +90,8 @@
     "sha1": "^1.1.1",
     "simple-git": "^1.81.1",
     "touch": "^3.1.0",
-    "unirest": "^0.5.1"
+    "unirest": "^0.5.1",
+    "request-promise": "^4.2.2"
   },
   "preferGlobal": true,
   "bin": {
