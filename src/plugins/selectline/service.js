@@ -49,52 +49,50 @@ class Service {
         this.authenticate = function () {
 
             var self = this;
-            var deferred = new Deferred();
+            return new Promise(function (resolve, reject) {
 
+                self.request({
+                    method: 'POST',
+                    uri: this.config.Api + 'login',
+                    body: {
+                        'UserName': this.config.UserName,
+                        'Password': this.config.Password
+                    },
+                    headers: {
+                        'content-type': 'application/json'
+                    },
+                    rejectUnauthorized: false,
+                    requestCert: true,
+                    agent: false,
+                    json: true // Automatically stringifies the body to JSON
+                }).then(function (login) {
 
-            self.request({
-                method: 'POST',
-                uri: this.config.Api + 'login',
-                body: {
-                    'UserName': this.config.UserName,
-                    'Password': this.config.Password
-                },
-                headers: {
-                    'content-type': 'application/json'
-                },
-                rejectUnauthorized: false,
-                requestCert: true,
-                agent: false,
-                json: true // Automatically stringifies the body to JSON
-            }).then(function (login) {
+                    if (login.TokenType !== undefined && login.AccessToken !== undefined) {
 
-                if (login.TokenType !== undefined && login.AccessToken !== undefined) {
+                        self.config.login = {
+                            'TokenType': login.TokenType,
+                            'AccessToken': login.AccessToken
+                        };
+                        resolve();
+                    }
+
+                }).catch(function (err) {
 
                     self.config.login = {
-                        'TokenType': login.TokenType,
-                        'AccessToken': login.AccessToken
+                        'TokenType': false,
+                        'AccessToken': false
                     };
+                    reject();
 
-                    deferred.resolve(self.config.login);
 
-                }
+                });
 
-            }).catch(function (err) {
-
-                self.config.login = {
-                    'TokenType': false,
-                    'AccessToken': false
-                };
-
-                deferred.reject(err.response !== undefined ? err.response.body : err);
 
             });
 
 
-            return deferred.promise;
-
-
         }
+
 
         return this;
 
@@ -107,31 +105,16 @@ class Service {
      * @param string uri
      * @param string method
      * @param mixed data (body request)
-     * @param mixed callingDeferrer (calling deferrer)
-     * @param mixed deferred (internal deferrer)
-     * @return mixed
+     * @param boolean isfinalcall
+     * @return Promise
      *
      */
-    call(uri, method, data, callingDeferred, deferred) {
+    call(uri, method, data, isfinalcall) {
 
 
         var self = this;
 
-        if (deferred === undefined) {
-            var deferred = new Deferred();
-            deferred.tries = -1;
-        }
-
-        if (callingDeferred == undefined) {
-            var callingDeferred = new Deferred();
-        }
-
-
-        deferred.tries++;
-
-        if (self.config.login.TokenType !== null) {
-
-
+        return new Promise(function (resolve, reject) {
 
             self.request({
                 method: method !== undefined ? method : 'GET',
@@ -147,54 +130,28 @@ class Service {
                 json: true // Automatically stringifies the body to JSON
             }).then(function (response) {
 
-                callingDeferred.resolve(response);
-                deferred.resolve(response);
+                console.log(response);
 
             }).catch(function (err) {
 
-                if (err.response !== undefined && err.response.body.ResponseCode == '10-002') {
-
-                    // login required, try to re-authenticate once
-                    if (deferred.tries < 1) {
-
-                        self.authenticate().then((data) => {
-                            self.call(uri, callingDeferred, deferred);
-                        });
-                    } else {
-                        // reject error in authentication
-                        deferred.reject(err.response !== undefined ? err.response.body : err);
-                        callingDeferred.reject(err.response !== undefined ? err.response.body : err);
-                    }
-
+                if (isfinalcall) {
+                    reject(err);
                 } else {
 
-
-                    // try to call once again
-                    if (deferred.tries < 2) {
-                        callingDeferred.promise.catch((e) => {});
-                        callingDeferred.reject(null);
-                        self.call(uri, method, data, callingDeferred, deferred);
+                    if (err.response !== undefined && err.response.body.ResponseCode == '10-002') {
+                        self.authenticate().then((data) => {
+                            self.call(uri, method, data, true);
+                        });
                     } else {
-                        // reject error in response
-                        deferred.reject(err.response !== undefined ? err.response.body : err);
-                        callingDeferred.reject(err.response !== undefined ? err.response.body : err);
+                        reject(err);
                     }
-
                 }
 
             });
 
-        } else {
-            self.authenticate().then((response) => {
-                // call again after successfull authentaction
-                self.call(uri, method, data, callingDeferred, deferred);
-            }).catch((err) => {
-                // reject error in authentication
-                deferred.reject(err.response !== undefined ? err.response.body : err);
-            });
-        }
 
-        return deferred.promise;
+        });
+
 
 
     }
@@ -204,47 +161,3 @@ class Service {
 
 module.exports = new Service;
 
-
-/**
- *
- * constructs promise
- * @return mixed
- *
- */
-function Deferred() {
-    // update 062115 for typeof
-    if (typeof(Promise) != 'undefined' && Promise.defer) {
-        //need import of Promise.jsm for example: Cu.import('resource:/gree/modules/Promise.jsm');
-        return new Deferred();
-    } else if (typeof(PromiseUtils) != 'undefined' && PromiseUtils.defer) {
-        //need import of PromiseUtils.jsm for example: Cu.import('resource:/gree/modules/PromiseUtils.jsm');
-        return PromiseUtils.defer();
-    } else {
-        /* A method to resolve the associated Promise with the value passed.
-         * If the promise is already settled it does nothing.
-         *
-         * @param {anything} value : This value is used to resolve the promise
-         * If the value is a Promise then the associated promise assumes the state
-         * of Promise passed as value.
-         */
-        this.resolve = null;
-
-        /* A method to reject the assocaited Promise with the value passed.
-         * If the promise is already settled it does nothing.
-         *
-         * @param {anything} reason: The reason for the rejection of the Promise.
-         * Generally its an Error object. If however a Promise is passed, then the Promise
-         * itself will be the reason for rejection no matter the state of the Promise.
-         */
-        this.reject = null;
-
-        /* A newly created Pomise object.
-         * Initially in pending state.
-         */
-        this.promise = new Promise(function (resolve, reject) {
-            this.resolve = resolve;
-            this.reject = reject;
-        }.bind(this));
-
-    }
-}
