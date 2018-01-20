@@ -292,24 +292,24 @@ export class PersistableModel {
 
 
     /**
-     * call custom action
+     * trigger custom action
      * @param string action
      * @param boolean silent
      * @returns {Observable<any>}
      */
-    public call(action: string, silent?: boolean) {
+    public trigger(action: string) {
 
-        if (silent === undefined) {
-            silent = true;
-        }
-        return this.save({
-            name: 'custom',
-            data: {
-                name: action
-            }
-        }, silent);
+        return new Observable<any>((observer: Observer<any>) => {
+            this.getPersistenceManager().trigger({
+                name: 'custom',
+                data: {
+                    name: action
+                }
+            }, observer);
+        });
 
     }
+
 
     /**
      * save with optional observable
