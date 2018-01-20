@@ -170,21 +170,20 @@ var PersistableModel = /** @class */ (function () {
         });
     };
     /**
-     * call custom action
+     * trigger custom action
      * @param {?} action
-     * @param {?=} silent
      * @return {?}
      */
-    PersistableModel.prototype.call = function (action, silent) {
-        if (silent === undefined) {
-            silent = true;
-        }
-        return this.save({
-            name: 'custom',
-            data: {
-                name: action
-            }
-        }, silent);
+    PersistableModel.prototype.trigger = function (action) {
+        var _this = this;
+        return new Observable.Observable(function (observer) {
+            _this.getPersistenceManager().trigger({
+                name: 'custom',
+                data: {
+                    name: action
+                }
+            }, observer);
+        });
     };
     /**
      * save with optional observable

@@ -122,12 +122,12 @@ export declare class PersistableModel {
         data?: {};
     }): Promise<{}>;
     /**
-     * call custom action
+     * trigger custom action
      * @param string action
      * @param boolean silent
      * @returns {Observable<any>}
      */
-    call(action: string, silent?: boolean): Observable<any>;
+    trigger(action: string): Observable<any>;
     /**
      * save with optional observable
      * @param action
