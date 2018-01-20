@@ -292,6 +292,26 @@ export class PersistableModel {
 
 
     /**
+     * call custom action
+     * @param string action
+     * @param boolean silent
+     * @returns {Observable<any>}
+     */
+    public call(action: string, silent?: boolean) {
+
+        if (silent === undefined) {
+            silent = true;
+        }
+        return this.save({
+            name: 'custom',
+            data: {
+                name: action
+            }
+        }, silent);
+
+    }
+
+    /**
      * save with optional observable
      * @param action
      * @param silent
@@ -352,32 +372,32 @@ export class PersistableModel {
         return new Observable<any>((observer: Observer<any>) => {
 
 
-                self.setHasPendingChanges(true, action);
+            self.setHasPendingChanges(true, action);
 
 
-                if (self.__persistenceManager) {
-                    self.__persistenceManager.save(self, observer, action).then((success) => {
-                        self.__edited = {};
-
-                        if (action) {
-                            if (self.isOnline()) {
-                                observer.next(self.getMessage('submitted'));
-                            } else {
-                                observer.next(self.getMessage('submittedInBackground'));
-                            }
-                        } else {
-                            observer.complete();
-                        }
-
-                    }).catch((error) => {
-                        self.__edited = {};
-                        observer.error(error);
-                    });
-
-                } else {
-                    observer.error('No persistence Manger provided');
+            if (self.__persistenceManager) {
+                self.__persistenceManager.save(self, observer, action).then((success) => {
                     self.__edited = {};
-                }
+
+                    if (action) {
+                        if (self.isOnline()) {
+                            observer.next(self.getMessage('submitted'));
+                        } else {
+                            observer.next(self.getMessage('submittedInBackground'));
+                        }
+                    } else {
+                        observer.complete();
+                    }
+
+                }).catch((error) => {
+                    self.__edited = {};
+                    observer.error(error);
+                });
+
+            } else {
+                observer.error('No persistence Manger provided');
+                self.__edited = {};
+            }
 
 
         });
@@ -1012,22 +1032,22 @@ export class PersistableModel {
             let valueAsObjects = [];
             if (value.length) {
                 value.forEach((itemOriginal) => {
-                   if (itemOriginal instanceof PersistableModel == false && self.getAppsAppModuleProvider()) {
-                       let item = self.getAppsAppModuleProvider().new(self.getMetadataValue(property, 'isList'));
-                       item.loadJson(itemOriginal);
-                       item.setParent(self);
-                       item.loaded().then((m) => {
-                           item.getChangesObserverable().subscribe((next) => {
-                               if (next.model.getParent()) {
-                                   next.model.getParent().setProperty(property,self.getPropertyValue(property, true));
-                               }
+                    if (itemOriginal instanceof PersistableModel == false && self.getAppsAppModuleProvider()) {
+                        let item = self.getAppsAppModuleProvider().new(self.getMetadataValue(property, 'isList'));
+                        item.loadJson(itemOriginal);
+                        item.setParent(self);
+                        item.loaded().then((m) => {
+                            item.getChangesObserverable().subscribe((next) => {
+                                if (next.model.getParent()) {
+                                    next.model.getParent().setProperty(property, self.getPropertyValue(property, true));
+                                }
 
-                           })
-                       });
-                       valueAsObjects.push(item);
-                   } else {
-                     valueAsObjects.push(itemOriginal);
-                   }
+                            })
+                        });
+                        valueAsObjects.push(item);
+                    } else {
+                        valueAsObjects.push(itemOriginal);
+                    }
                 });
             }
 
@@ -1206,9 +1226,9 @@ export class PersistableModel {
         } else {
             if (metadataInput.length) {
                 metadataInput.forEach((m) => {
-                   if (m.constraints && m.constraints[0].type == type) {
-                       metadata = m;
-                   }
+                    if (m.constraints && m.constraints[0].type == type) {
+                        metadata = m;
+                    }
                 });
             }
         }
@@ -1247,7 +1267,6 @@ export class PersistableModel {
         return null;
 
     }
-
 
 
     /**
@@ -1632,7 +1651,7 @@ export class PersistableModel {
      * Set hased values
      * @Returns mixed
      */
-    public addHashedValue(value,hash) {
+    public addHashedValue(value, hash) {
 
         this.__hashedValues[hash] = value;
         return this;
