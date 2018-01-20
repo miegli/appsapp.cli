@@ -178,13 +178,14 @@ var PersistableModel = /** @class */ (function () {
      */
     PersistableModel.prototype.trigger = function (action) {
         var _this = this;
+        var /** @type {?} */ self = this;
         return new Observable$1(function (observer) {
-            _this.getPersistenceManager().trigger({
+            _this.getPersistenceManager().trigger(self, observer, {
                 name: 'custom',
                 data: {
                     name: action
                 }
-            }, observer);
+            });
         });
     };
     /**
