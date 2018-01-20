@@ -299,13 +299,15 @@ export class PersistableModel {
      */
     public trigger(action: string) {
 
+        var self = this;
+
         return new Observable<any>((observer: Observer<any>) => {
-            this.getPersistenceManager().trigger({
+            this.getPersistenceManager().trigger(self, observer, {
                 name: 'custom',
                 data: {
                     name: action
                 }
-            }, observer);
+            });
         });
 
     }
