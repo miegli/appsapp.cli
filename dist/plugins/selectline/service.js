@@ -53,10 +53,10 @@ class Service {
 
                 self.request({
                     method: 'POST',
-                    uri: this.config.Api + 'login',
+                    uri: self.config.Api + 'login',
                     body: {
-                        'UserName': this.config.UserName,
-                        'Password': this.config.Password
+                        'UserName': self.config.UserName,
+                        'Password': self.config.Password
                     },
                     headers: {
                         'content-type': 'application/json'
@@ -82,7 +82,7 @@ class Service {
                         'TokenType': false,
                         'AccessToken': false
                     };
-                    reject();
+                    reject(err);
 
 
                 });

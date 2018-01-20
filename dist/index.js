@@ -172,6 +172,23 @@ var PersistableModel = /** @class */ (function () {
         });
     };
     /**
+     * call custom action
+     * @param {?} action
+     * @param {?=} silent
+     * @return {?}
+     */
+    PersistableModel.prototype.call = function (action, silent) {
+        if (silent === undefined) {
+            silent = true;
+        }
+        return this.save({
+            name: 'custom',
+            data: {
+                name: action
+            }
+        }, silent);
+    };
+    /**
      * save with optional observable
      * @param {?=} action
      * @param {?=} silent
