@@ -988,6 +988,9 @@ export class PersistableModel {
                     if (property.substr(0, 2) !== '__' && propertiesWithValidationError[property] === undefined) {
                         if (Object.keys(self).indexOf(property) >= 0) {
                             self[property] = self.transformTypeFromMetadata(property, model[property]);
+                            if (model.isInBackendMode()) {
+                                self.__edited[property] = self[property];
+                            }
                         }
                     }
                 });
@@ -1750,6 +1753,22 @@ export class PersistableModel {
     public getChangesWithCallback(callback) {
         this.__editedObservableCallbacks.push(callback);
         return this;
+    }
+
+    /**
+     * get property value
+     * @param property
+     */
+    public get(property: string) {
+        return this.getPropertyValue(property);
+    }
+
+    /**
+     * set property value
+     * @param property
+     */
+    public set(property: string, value: any) {
+        return this.setProperty(property, value);
     }
 
     /**
