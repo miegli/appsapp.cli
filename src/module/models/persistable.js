@@ -699,6 +699,9 @@ var PersistableModel = /** @class */ (function () {
                     if (property.substr(0, 2) !== '__' && propertiesWithValidationError_1[property] === undefined) {
                         if (Object.keys(self).indexOf(property) >= 0) {
                             self[property] = self.transformTypeFromMetadata(property, model[property]);
+                            if (model.isInBackendMode()) {
+                                self.__edited[property] = self[property];
+                            }
                         }
                     }
                 });
@@ -1257,6 +1260,20 @@ var PersistableModel = /** @class */ (function () {
     PersistableModel.prototype.getChangesWithCallback = function (callback) {
         this.__editedObservableCallbacks.push(callback);
         return this;
+    };
+    /**
+     * get property value
+     * @param property
+     */
+    PersistableModel.prototype.get = function (property) {
+        return this.getPropertyValue(property);
+    };
+    /**
+     * set property value
+     * @param property
+     */
+    PersistableModel.prototype.set = function (property, value) {
+        return this.setProperty(property, value);
     };
     /**
      * Check if model is initialized in backend mode
