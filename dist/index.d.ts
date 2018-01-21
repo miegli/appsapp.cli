@@ -15,3 +15,17 @@ export * from './module/validation/validators/IsSelect';
 export * from './module/validation/validators/IsList';
 export * from './module/interfaces/messages';
 export * from 'class-validator/decorator/decorators';
+export interface appRequest {
+    user: string;
+    object: string;
+    objectId: string;
+    project: string;
+    action: {
+        data: {
+            name: string;
+        };
+        name: 'custom';
+        state: string;
+    };
+    eventId: string;
+}
