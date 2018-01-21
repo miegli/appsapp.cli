@@ -584,30 +584,33 @@ export class PersistableModel {
     }
 
     /**
-     * get obervable property for using as an binding variable
-     * @returns {Observable<any>}
+     * get property
+     * @returns any
      */
     public getProperty(property) {
 
         let self = this;
 
+        if (this.isInBackendMode()) {
+            return self.getPropertyValue(property);
+        } else {
+            if (!self.__bindings[property]) {
 
-        if (!self.__bindings[property]) {
+                self.__bindings[property] = new Observable<any>((observer: Observer<any>) => {
+                    self.__bindingsObserver[property] = observer;
+                });
 
-            self.__bindings[property] = new Observable<any>((observer: Observer<any>) => {
-                self.__bindingsObserver[property] = observer;
-            });
+                window.setTimeout(() => {
+                    if (self.__bindingsObserver[property] !== undefined) {
+                        self.__bindingsObserver[property].next(self[property]);
+                    }
+                });
 
-            window.setTimeout(() => {
-                if (self.__bindingsObserver[property] !== undefined) {
-                    self.__bindingsObserver[property].next(self[property]);
-                }
-            });
+            }
 
+            return self.__bindings[property];
         }
 
-
-        return self.__bindings[property];
 
     }
 
