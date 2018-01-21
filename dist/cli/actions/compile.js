@@ -92,7 +92,7 @@ findModels = function () {
                             }
 
                             if (classname) {
-                                build[classname] = injectRequire(match[0].replace("var " + classname + " =", "global." + classname + " ="), string);
+                                build[classname] = injectRequire(match[0].replace("var " + classname + " =", "global." + classname + " ="), string).replace("appsapp-cli", "appsapp-cli/appsapp-cli.umd").replace("appsapp-module", "appsapp-cli/appsapp-cli.umd");
                             }
 
                         }

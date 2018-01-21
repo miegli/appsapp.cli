@@ -28,6 +28,7 @@ const functions = require('firebase-functions');
 const admin = require('firebase-admin');
 admin.initializeApp(functions.config().firebase);
 
+//
 // //Initialize the app with a service account, granting admin privileges
 // var serviceAccount = require("/Users/pamegli/Documents/projects/appsapp.myApp/myApp/serviceAccountKey.json");
 // admin.initializeApp({
@@ -402,6 +403,7 @@ function call(action, data) {
 
                     if (config && config['constructor'] !== undefined) {
 
+                        console.log(base64.decode(config.constructor));
                         eval(base64.decode(config.constructor));
                         model = new global[action.object];
 

@@ -71,6 +71,8 @@ findModels = function () {
 
                         var regex = /var ([\w])+? = [^]+?PersistableModel\)\);/g;
                         var match = regex.exec(line);
+                        var classname = null;
+
                         if (match) {
 
                             var regex2 = /^var (\w+?) =/gm;
@@ -78,8 +80,21 @@ findModels = function () {
 
                             if (match2 && match2.length == 2) {
                                 var classname = match2[1];
+                                if (classname == '__extends') {
+
+                                    var regex2 = /^var (\w+?) = \//gm;
+                                    var match2 = regex2.exec(match[0]);
+                                    if (match2 && match2.length == 2) {
+                                        var classname = match2[1];
+                                    }
+
+                                }
+                            }
+
+                            if (classname) {
                                 build[classname] = injectRequire(match[0].replace("var " + classname + " =", "global." + classname + " ="), string);
                             }
+
                         }
 
 
@@ -90,18 +105,17 @@ findModels = function () {
             }
 
 
-
             // post process inject dependencies for list decorator
             Object.keys(build).forEach((classname) => {
                 var injectedRequire = {};
                 var regex = new RegExp(/IsList\((\w+?)\)/gm);
                 var match = build[classname].match(regex);
-                  if (match) {
+                if (match) {
                     match.forEach((m) => {
 
-                        var listRequire = m.split('(')[1].replace(/\)/gm,'').trim();
+                        var listRequire = m.split('(')[1].replace(/\)/gm, '').trim();
                         if (injectedRequire[listRequire] == undefined && build[listRequire] !== undefined) {
-                            build[classname] = build[classname].replace(m, m.replace(listRequire, 'global.'+listRequire));
+                            build[classname] = build[classname].replace(m, m.replace(listRequire, 'global.' + listRequire));
                             build[classname] = build[classname] + '\n' + build[listRequire].split('/**END_OF_APPSAPPS_INJECT_REQUIRE**/')[1];
                             injectedRequire[listRequire] = true;
                         }
@@ -109,8 +123,6 @@ findModels = function () {
 
                 }
             });
-
-
 
 
             // post process base64 encode
