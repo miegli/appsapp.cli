@@ -189,8 +189,6 @@ injectRequire = function (codeModel, codeFullFile) {
         var r = false;
 
         if (line.indexOf("'appsapp-cli'") > 0 || line.indexOf('"appsapp-cli"') > 0 || line.indexOf("'appsapp-module'") > 0 || line.indexOf('"appsapp-module"') > 0) {
-            line = line.replace("appsapp-cli", "appsapp-cli/appsapp-cli.umd");
-            line = line.replace("appsapp-module", "appsapp-cli/appsapp-cli.umd");
             r = true;
             injectRequire += ',' + line;
         }
