@@ -1759,22 +1759,6 @@ export class PersistableModel {
     }
 
     /**
-     * get property value
-     * @param property
-     */
-    public get(property: string) {
-        return this.getPropertyValue(property);
-    }
-
-    /**
-     * set property value
-     * @param property
-     */
-    public set(property: string, value: any) {
-        return this.setProperty(property, value);
-    }
-
-    /**
      * Check if model is initialized in backend mode
      * @returns {boolean}
      */

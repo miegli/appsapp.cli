@@ -405,22 +405,27 @@ var PersistableModel = /** @class */ (function () {
         return this;
     };
     /**
-     * get obervable property for using as an binding variable
-     * @returns {Observable<any>}
+     * get property
+     * @returns any
      */
     PersistableModel.prototype.getProperty = function (property) {
         var self = this;
-        if (!self.__bindings[property]) {
-            self.__bindings[property] = new rxjs_1.Observable(function (observer) {
-                self.__bindingsObserver[property] = observer;
-            });
-            window.setTimeout(function () {
-                if (self.__bindingsObserver[property] !== undefined) {
-                    self.__bindingsObserver[property].next(self[property]);
-                }
-            });
+        if (this.isInBackendMode()) {
+            return self.getPropertyValue(property);
         }
-        return self.__bindings[property];
+        else {
+            if (!self.__bindings[property]) {
+                self.__bindings[property] = new rxjs_1.Observable(function (observer) {
+                    self.__bindingsObserver[property] = observer;
+                });
+                window.setTimeout(function () {
+                    if (self.__bindingsObserver[property] !== undefined) {
+                        self.__bindingsObserver[property].next(self[property]);
+                    }
+                });
+            }
+            return self.__bindings[property];
+        }
     };
     /**
      * get observer property for using as an binding variable
