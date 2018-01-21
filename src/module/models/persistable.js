@@ -1,12 +1,12 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-var Observable_1 = require("rxjs/Observable");
 var class_validator_1 = require("class-validator");
 var class_transformer_1 = require("class-transformer");
 var class_validator_2 = require("class-validator");
 var class_validator_3 = require("class-validator");
 var angular2_uuid_1 = require("angular2-uuid");
 var objectHash = require("object-hash");
+var rxjs_1 = require("rxjs");
 var PersistableModel = /** @class */ (function () {
     /**
      * PersistanceManager as an optional argument when changes were persisted to stable database
@@ -55,13 +55,13 @@ var PersistableModel = /** @class */ (function () {
         /**
          * create observerable and observer for handling the models data changes
          */
-        this.__editedObservable = new Observable_1.Observable(function (observer) {
+        this.__editedObservable = new rxjs_1.Observable(function (observer) {
             self.__editedObserver = observer;
         });
         /**
          * create observerable and observer for handling the models data changes
          */
-        this.__observable = new Observable_1.Observable(function (observer) {
+        this.__observable = new rxjs_1.Observable(function (observer) {
             self.__observer = observer;
             self.__observer.next(_this);
         });
@@ -150,7 +150,7 @@ var PersistableModel = /** @class */ (function () {
      */
     PersistableModel.prototype.action = function (action) {
         var self = this;
-        var observable = new Observable_1.Observable(function (observer) {
+        var observable = new rxjs_1.Observable(function (observer) {
             if (self.__persistenceManager) {
                 self.__persistenceManager.action(self, observer, action).then(function (success) {
                     observer.complete();
@@ -180,7 +180,7 @@ var PersistableModel = /** @class */ (function () {
     PersistableModel.prototype.trigger = function (action) {
         var _this = this;
         var self = this;
-        return new Observable_1.Observable(function (observer) {
+        return new rxjs_1.Observable(function (observer) {
             _this.getPersistenceManager().trigger(self, observer, {
                 name: 'custom',
                 data: {
@@ -225,7 +225,7 @@ var PersistableModel = /** @class */ (function () {
                 }
             }
         });
-        return new Observable_1.Observable(function (o) {
+        return new rxjs_1.Observable(function (o) {
             observer = o;
         });
     };
@@ -239,7 +239,7 @@ var PersistableModel = /** @class */ (function () {
         Object.keys(self.__edited).forEach(function (property) {
             self[property] = self.__edited[property];
         });
-        return new Observable_1.Observable(function (observer) {
+        return new rxjs_1.Observable(function (observer) {
             self.setHasPendingChanges(true, action);
             if (self.__persistenceManager) {
                 self.__persistenceManager.save(self, observer, action).then(function (success) {
@@ -411,7 +411,7 @@ var PersistableModel = /** @class */ (function () {
     PersistableModel.prototype.getProperty = function (property) {
         var self = this;
         if (!self.__bindings[property]) {
-            self.__bindings[property] = new Observable_1.Observable(function (observer) {
+            self.__bindings[property] = new rxjs_1.Observable(function (observer) {
                 self.__bindingsObserver[property] = observer;
             });
             window.setTimeout(function () {
@@ -603,7 +603,7 @@ var PersistableModel = /** @class */ (function () {
     PersistableModel.prototype.getValidation = function (property) {
         var self = this;
         if (self.__validator[property] === undefined) {
-            self.__validator[property] = new Observable_1.Observable(function (observer) {
+            self.__validator[property] = new rxjs_1.Observable(function (observer) {
                 self.__validatorObserver[property] = observer;
             });
         }
@@ -621,7 +621,7 @@ var PersistableModel = /** @class */ (function () {
                 this.registerConditionValidators(true);
             }
             if (this.__conditionActionIfMatches[property] === undefined) {
-                this.__conditionActionIfMatches[property] = new Observable_1.Observable(function (observer) {
+                this.__conditionActionIfMatches[property] = new rxjs_1.Observable(function (observer) {
                     _this.__conditionActionIfMatchesObserver[property] = observer;
                 });
             }
@@ -977,7 +977,7 @@ var PersistableModel = /** @class */ (function () {
             var hasRealtimeTypes = false;
             self.__conditionActionIfMatchesRemovedProperties[validator.propertyName] = true;
             if (self.__conditionActionIfMatches[validator.propertyName] == undefined) {
-                self.__conditionActionIfMatches[validator.propertyName] = new Observable_1.Observable(function (observer) {
+                self.__conditionActionIfMatches[validator.propertyName] = new rxjs_1.Observable(function (observer) {
                     self.__conditionActionIfMatchesObserver[validator.propertyName] = observer;
                     self.__conditionActionIfMatchesObserver[validator.propertyName].next({
                         'action': self.__conditionActionIfMatchesAction[validator.propertyName],
