@@ -217,9 +217,10 @@ export declare class PersistableModel {
     setFirebaseDatabaseRoot(path: any): this;
     /**
      * get property
-     * @returns any
+     * @param string property
+     * @returns {any}
      */
-    getProperty(property: any): any;
+    getProperty(property: string): any;
     /**
      * get observer property for using as an binding variable
      * @returns {Observer<any>}
