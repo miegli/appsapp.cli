@@ -18,7 +18,7 @@ export * from './module/validation/validators/IsList';
 export * from './module/interfaces/messages';
 export * from 'class-validator/decorator/decorators'
 
-export interface request {
+export interface appRequest {
     user: string,
     object: string,
     objectId: string,
