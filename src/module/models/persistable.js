@@ -1267,20 +1267,6 @@ var PersistableModel = /** @class */ (function () {
         return this;
     };
     /**
-     * get property value
-     * @param property
-     */
-    PersistableModel.prototype.get = function (property) {
-        return this.getPropertyValue(property);
-    };
-    /**
-     * set property value
-     * @param property
-     */
-    PersistableModel.prototype.set = function (property, value) {
-        return this.setProperty(property, value);
-    };
-    /**
      * Check if model is initialized in backend mode
      * @returns {boolean}
      */

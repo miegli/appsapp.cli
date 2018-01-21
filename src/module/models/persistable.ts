@@ -585,9 +585,10 @@ export class PersistableModel {
 
     /**
      * get property
-     * @returns any
+     * @param string property
+     * @returns {any}
      */
-    public getProperty(property) {
+    public getProperty(property: string) {
 
         let self = this;
 
