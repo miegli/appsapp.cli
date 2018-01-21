@@ -92,7 +92,7 @@ findModels = function () {
                             }
 
                             if (classname) {
-                                build[classname] = injectRequire(match[0].replace("var " + classname + " =", "global." + classname + " ="), string).replace("appsapp-cli", "appsapp-cli/appsapp-cli.umd").replace("appsapp-module", "appsapp-cli/appsapp-cli.umd");
+                                build[classname] = injectRequire(match[0].replace("var " + classname + " =", "global." + classname + " ="), string).replace(/require\("appsapp-cli/g, 'require("appsapp-cli/appsapp-cli.umd').replace(/require\("appsapp-module/g, 'require("appsapp-module/appsapp-module.umd');
                             }
 
                         }
