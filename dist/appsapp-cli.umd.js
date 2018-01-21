@@ -194,6 +194,14 @@ var PersistableModel = /** @class */ (function () {
      */
     PersistableModel.prototype.save = function (action, silent) {
         var /** @type {?} */ self = this, /** @type {?} */ observer = null;
+        if (typeof action === 'string') {
+            action = {
+                name: 'custom',
+                data: {
+                    name: action
+                }
+            };
+        }
         self.executeSave(action).subscribe(function (next) {
             if (observer) {
                 observer.next(next);

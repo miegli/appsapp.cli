@@ -31,7 +31,7 @@ export interface actionWebhook {
 }
 export interface actionCustom {
     name: 'custom';
-    data: {
+    data?: {
         name: string;
     };
     additionalActions?: [actionEmail | actionWebhook | actionGoogleSheets | actionCustom];
@@ -110,7 +110,7 @@ export declare class PersistableModel {
      * @param action
      * @returns {Promise<any>}
      */
-    saveWithPromise(action?: actionEmail | actionWebhook | actionGoogleSheets | actionCustom): Promise<{}>;
+    saveWithPromise(action?: actionEmail | actionWebhook | actionGoogleSheets | actionCustom | string): Promise<{}>;
     /**
      * execute cation
      * @param action
@@ -133,7 +133,7 @@ export declare class PersistableModel {
      * @param silent
      * @returns {Observable<any>}
      */
-    save(action?: actionEmail | actionWebhook | actionGoogleSheets | actionCustom, silent?: boolean): Observable<any>;
+    save(action?: actionEmail | actionWebhook | actionGoogleSheets | actionCustom | string, silent?: boolean): Observable<any>;
     /**
      * save model and persist if is persistable
      * @param {any} action as an optinal argument for transmitting additional action metadata
@@ -340,7 +340,7 @@ export declare class PersistableModel {
      * @param {any} action as an optional argument
      * @returns {PersistableModel}
      */
-    setHasPendingChanges(state: any, action?: actionEmail | actionWebhook | actionGoogleSheets | actionCustom): this;
+    setHasPendingChanges(state: any, action?: actionEmail | actionWebhook | actionGoogleSheets | actionCustom | string): this;
     /**
      * serialize this object
      * @param {boolean} noUnderScoreData
