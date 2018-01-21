@@ -501,6 +501,16 @@ export declare class PersistableModel {
      */
     getChangesWithCallback(callback: any): this;
     /**
+     * get property value
+     * @param property
+     */
+    get(property: string): any;
+    /**
+     * set property value
+     * @param property
+     */
+    set(property: string, value: any): this;
+    /**
      * Check if model is initialized in backend mode
      * @returns {boolean}
      */
