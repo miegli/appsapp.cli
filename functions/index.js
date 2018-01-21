@@ -26,14 +26,14 @@
  */
 const functions = require('firebase-functions');
 const admin = require('firebase-admin');
-admin.initializeApp(functions.config().firebase);
+//admin.initializeApp(functions.config().firebase);
 
-// Initialize the app with a service account, granting admin privileges
-// var serviceAccount = require("/Users/pamegli/Documents/projects/appsapp.myApp/myApp/serviceAccountKey.json");
-// admin.initializeApp({
-//     credential: admin.credential.cert(serviceAccount),
-//     databaseURL: "https://test-32b81.firebaseio.com"
-// });
+//Initialize the app with a service account, granting admin privileges
+var serviceAccount = require("/Users/pamegli/Documents/projects/appsapp.myApp/myApp/serviceAccountKey.json");
+admin.initializeApp({
+    credential: admin.credential.cert(serviceAccount),
+    databaseURL: "https://test-32b81.firebaseio.com"
+});
 
 const uuidV1 = require('uuid/v1');
 const request = require('request-promise');
@@ -371,6 +371,8 @@ function dispatchEvent(original, identifier, actiondata) {
                     reject(error);
                 });
             });
+
+
         }).catch((error) => {
             reject(error);
         });
@@ -400,9 +402,11 @@ function call(action, data) {
 
                     if (config && config['constructor'] !== undefined) {
 
+                        console.log(base64.decode(config.constructor));
+                        return null;
+
                         eval(base64.decode(config.constructor));
                         model = new global[action.object];
-
 
                         model.loadJson(data).then(() => {
 

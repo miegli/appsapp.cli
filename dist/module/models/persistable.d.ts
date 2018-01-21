@@ -1,7 +1,6 @@
-import { Observer } from "rxjs/Observer";
-import { Observable } from "rxjs/Observable";
 import { AngularFireDatabase, AngularFireObject } from "angularfire2/database";
 import { HttpClient } from "@angular/common/http";
+import { Observable, Observer } from 'rxjs';
 export interface actionEmail {
     name: 'email';
     data: {

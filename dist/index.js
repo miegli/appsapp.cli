@@ -1,8 +1,8 @@
-import { Observable as Observable$1 } from 'rxjs/Observable';
 import { MetadataStorage, Validator, getFromContainer, registerDecorator, validate, validateSync } from 'class-validator';
 import { plainToClass, serialize } from 'class-transformer';
 import { UUID } from 'angular2-uuid';
 import { sha1 } from 'object-hash';
+import { Observable } from 'rxjs';
 import { get } from 'unirest';
 
 
@@ -54,13 +54,13 @@ var PersistableModel = /** @class */ (function () {
         /**
          * create observerable and observer for handling the models data changes
          */
-        this.__editedObservable = new Observable$1(function (observer) {
+        this.__editedObservable = new Observable(function (observer) {
             self.__editedObserver = observer;
         });
         /**
          * create observerable and observer for handling the models data changes
          */
-        this.__observable = new Observable$1(function (observer) {
+        this.__observable = new Observable(function (observer) {
             self.__observer = observer;
             self.__observer.next(_this);
         });
@@ -150,7 +150,7 @@ var PersistableModel = /** @class */ (function () {
      */
     PersistableModel.prototype.action = function (action) {
         var /** @type {?} */ self = this;
-        var /** @type {?} */ observable = new Observable$1(function (observer) {
+        var /** @type {?} */ observable = new Observable(function (observer) {
             if (self.__persistenceManager) {
                 self.__persistenceManager.action(self, observer, action).then(function (success) {
                     observer.complete();
@@ -179,7 +179,7 @@ var PersistableModel = /** @class */ (function () {
     PersistableModel.prototype.trigger = function (action) {
         var _this = this;
         var /** @type {?} */ self = this;
-        return new Observable$1(function (observer) {
+        return new Observable(function (observer) {
             _this.getPersistenceManager().trigger(self, observer, {
                 name: 'custom',
                 data: {
@@ -224,7 +224,7 @@ var PersistableModel = /** @class */ (function () {
                 }
             }
         });
-        return new Observable$1(function (o) {
+        return new Observable(function (o) {
             observer = o;
         });
     };
@@ -238,7 +238,7 @@ var PersistableModel = /** @class */ (function () {
         Object.keys(self.__edited).forEach(function (property) {
             self[property] = self.__edited[property];
         });
-        return new Observable$1(function (observer) {
+        return new Observable(function (observer) {
             self.setHasPendingChanges(true, action);
             if (self.__persistenceManager) {
                 self.__persistenceManager.save(self, observer, action).then(function (success) {
@@ -412,7 +412,7 @@ var PersistableModel = /** @class */ (function () {
     PersistableModel.prototype.getProperty = function (property) {
         var /** @type {?} */ self = this;
         if (!self.__bindings[property]) {
-            self.__bindings[property] = new Observable$1(function (observer) {
+            self.__bindings[property] = new Observable(function (observer) {
                 self.__bindingsObserver[property] = observer;
             });
             window.setTimeout(function () {
@@ -605,7 +605,7 @@ var PersistableModel = /** @class */ (function () {
     PersistableModel.prototype.getValidation = function (property) {
         var /** @type {?} */ self = this;
         if (self.__validator[property] === undefined) {
-            self.__validator[property] = new Observable$1(function (observer) {
+            self.__validator[property] = new Observable(function (observer) {
                 self.__validatorObserver[property] = observer;
             });
         }
@@ -623,7 +623,7 @@ var PersistableModel = /** @class */ (function () {
                 this.registerConditionValidators(true);
             }
             if (this.__conditionActionIfMatches[property] === undefined) {
-                this.__conditionActionIfMatches[property] = new Observable$1(function (observer) {
+                this.__conditionActionIfMatches[property] = new Observable(function (observer) {
                     _this.__conditionActionIfMatchesObserver[property] = observer;
                 });
             }
@@ -980,7 +980,7 @@ var PersistableModel = /** @class */ (function () {
             var /** @type {?} */ hasRealtimeTypes = false;
             self.__conditionActionIfMatchesRemovedProperties[validator.propertyName] = true;
             if (self.__conditionActionIfMatches[validator.propertyName] == undefined) {
-                self.__conditionActionIfMatches[validator.propertyName] = new Observable$1(function (observer) {
+                self.__conditionActionIfMatches[validator.propertyName] = new Observable(function (observer) {
                     self.__conditionActionIfMatchesObserver[validator.propertyName] = observer;
                     self.__conditionActionIfMatchesObserver[validator.propertyName].next({
                         'action': self.__conditionActionIfMatchesAction[validator.propertyName],

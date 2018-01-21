@@ -1,5 +1,3 @@
-import {Observer} from "rxjs/Observer";
-import {Observable} from "rxjs/Observable";
 import {AngularFireDatabase, AngularFireObject} from "angularfire2/database";
 import {validate, validateSync} from "class-validator";
 import {plainToClass, serialize} from "class-transformer";
@@ -10,6 +8,7 @@ import {UUID} from "angular2-uuid";
 import {AppsappModuleProviderMessages} from "../interfaces/messages";
 import {HttpClient} from "@angular/common/http";
 import * as objectHash from 'object-hash';
+import {Observable, Observer} from 'rxjs';
 
 declare var global: any;
 
