@@ -216,8 +216,8 @@ export declare class PersistableModel {
      */
     setFirebaseDatabaseRoot(path: any): this;
     /**
-     * get obervable property for using as an binding variable
-     * @returns {Observable<any>}
+     * get property
+     * @returns any
      */
     getProperty(property: any): any;
     /**
@@ -500,16 +500,6 @@ export declare class PersistableModel {
      * @returns {this}
      */
     getChangesWithCallback(callback: any): this;
-    /**
-     * get property value
-     * @param property
-     */
-    get(property: string): any;
-    /**
-     * set property value
-     * @param property
-     */
-    set(property: string, value: any): this;
     /**
      * Check if model is initialized in backend mode
      * @returns {boolean}

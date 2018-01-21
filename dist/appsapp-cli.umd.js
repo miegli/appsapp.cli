@@ -403,23 +403,28 @@ var PersistableModel = /** @class */ (function () {
         return this;
     };
     /**
-     * get obervable property for using as an binding variable
+     * get property
      * @param {?} property
-     * @return {?}
+     * @return {?} any
      */
     PersistableModel.prototype.getProperty = function (property) {
         var /** @type {?} */ self = this;
-        if (!self.__bindings[property]) {
-            self.__bindings[property] = new rxjs.Observable(function (observer) {
-                self.__bindingsObserver[property] = observer;
-            });
-            window.setTimeout(function () {
-                if (self.__bindingsObserver[property] !== undefined) {
-                    self.__bindingsObserver[property].next(self[property]);
-                }
-            });
+        if (this.isInBackendMode()) {
+            return self.getPropertyValue(property);
         }
-        return self.__bindings[property];
+        else {
+            if (!self.__bindings[property]) {
+                self.__bindings[property] = new rxjs.Observable(function (observer) {
+                    self.__bindingsObserver[property] = observer;
+                });
+                window.setTimeout(function () {
+                    if (self.__bindingsObserver[property] !== undefined) {
+                        self.__bindingsObserver[property].next(self[property]);
+                    }
+                });
+            }
+            return self.__bindings[property];
+        }
     };
     /**
      * get observer property for using as an binding variable
@@ -1273,23 +1278,6 @@ var PersistableModel = /** @class */ (function () {
     PersistableModel.prototype.getChangesWithCallback = function (callback) {
         this.__editedObservableCallbacks.push(callback);
         return this;
-    };
-    /**
-     * get property value
-     * @param {?} property
-     * @return {?}
-     */
-    PersistableModel.prototype.get = function (property) {
-        return this.getPropertyValue(property);
-    };
-    /**
-     * set property value
-     * @param {?} property
-     * @param {?} value
-     * @return {?}
-     */
-    PersistableModel.prototype.set = function (property, value) {
-        return this.setProperty(property, value);
     };
     /**
      * Check if model is initialized in backend mode
