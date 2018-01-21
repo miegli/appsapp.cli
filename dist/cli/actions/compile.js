@@ -92,7 +92,11 @@ findModels = function () {
                             }
 
                             if (classname) {
-                                build[classname] = injectRequire(match[0].replace("var " + classname + " =", "global." + classname + " ="), string).replace(/require\("appsapp-cli/g, 'require("appsapp-cli/appsapp-cli.umd').replace(/require\("appsapp-module/g, 'require("appsapp-module/appsapp-module.umd');
+                                build[classname] =
+                                    injectRequire(match[0].replace("var " + classname + " =", "global." + classname + " ="), string)
+                                        .replace(/require\("appsapp-cli/g, 'require("appsapp-cli/appsapp-cli.umd')
+                                        .replace(/require\("appsapp-module/g, 'require("appsapp-module/appsapp-module.umd')
+                                        .replace(/require\("\.\//g, 'global, dummy = ("');
                             }
 
                         }
@@ -112,8 +116,8 @@ findModels = function () {
                 var match = build[classname].match(regex);
                 if (match) {
                     match.forEach((m) => {
-
                         var listRequire = m.split('(')[1].replace(/\)/gm, '').trim();
+
                         if (injectedRequire[listRequire] == undefined && build[listRequire] !== undefined) {
                             build[classname] = build[classname].replace(m, m.replace(listRequire, 'global.' + listRequire));
                             build[classname] = build[classname] + '\n' + build[listRequire].split('/**END_OF_APPSAPPS_INJECT_REQUIRE**/')[1];

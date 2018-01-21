@@ -22,36 +22,35 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-
 var appsapp_cli_1 = require("appsapp-cli/appsapp-cli.umd");
-console.log(appsapp_cli_1);
-// var Projekt_1 = require("./Projekt");
-// global.MitarbeiterProjekte = /** @class */ (function (_super) {
-//     __extends(MitarbeiterProjekte, _super);
-//     function MitarbeiterProjekte() {
-//         var _this = _super !== null && _super.apply(this, arguments) || this;
-//         _this.Projekte = [];
-//         return _this;
-//     }
-//     __decorate([
-//         appsapp_cli_1.IsString(), appsapp_cli_1.HasLabel('Name'),
-//         __metadata("design:type", String)
-//     ], MitarbeiterProjekte.prototype, "MitarbeiterName", void 0);
-//     __decorate([
-//         appsapp_cli_1.IsString(), appsapp_cli_1.HasLabel('Vorname'),
-//         __metadata("design:type", String)
-//     ], MitarbeiterProjekte.prototype, "Mitarbeitervorname", void 0);
-//     __decorate([
-//         appsapp_cli_1.IsString(), appsapp_cli_1.HasLabel('Kürzel'), appsapp_cli_1.MinLength(1), appsapp_cli_1.MaxLength(2),
-//         __metadata("design:type", String)
-//     ], MitarbeiterProjekte.prototype, "MitarbeiterKuerzel", void 0);
-//     __decorate([
-//         appsapp_cli_1.IsString(), appsapp_cli_1.HasLabel('SL Benutzer'), appsapp_cli_1.MinLength(1), appsapp_cli_1.MaxLength(2),
-//         __metadata("design:type", String)
-//     ], MitarbeiterProjekte.prototype, "Mitarbeiter_SLBenutzer", void 0);
-//     __decorate([
-//         appsapp_cli_1.IsList(Projekt_1.Projekt),
-//         __metadata("design:type", Object)
-//     ], MitarbeiterProjekte.prototype, "Projekte", void 0);
-//     return MitarbeiterProjekte;
-// }(appsapp_cli_1.PersistableModel));
+var Projekt_1 = global, dummy = ("Projekt");
+var Projekt_1 = global, dummy = ("Projekt");
+global.MitarbeiterProjekte = /** @class */ (function (_super) {
+    __extends(MitarbeiterProjekte, _super);
+    function MitarbeiterProjekte() {
+        var _this = _super !== null && _super.apply(this, arguments) || this;
+        _this.Projekte = [];
+        return _this;
+    }
+    __decorate([
+        appsapp_cli_1.IsString(), appsapp_cli_1.HasLabel('Name'),
+        __metadata("design:type", String)
+    ], MitarbeiterProjekte.prototype, "MitarbeiterName", void 0);
+    __decorate([
+        appsapp_cli_1.IsString(), appsapp_cli_1.HasLabel('Vorname'),
+        __metadata("design:type", String)
+    ], MitarbeiterProjekte.prototype, "Mitarbeitervorname", void 0);
+    __decorate([
+        appsapp_cli_1.IsString(), appsapp_cli_1.HasLabel('Krzel'), appsapp_cli_1.MinLength(1), appsapp_cli_1.MaxLength(2),
+        __metadata("design:type", String)
+    ], MitarbeiterProjekte.prototype, "MitarbeiterKuerzel", void 0);
+    __decorate([
+        appsapp_cli_1.IsString(), appsapp_cli_1.HasLabel('SL-Benutzer'), appsapp_cli_1.MinLength(1), appsapp_cli_1.MaxLength(2),
+        __metadata("design:type", String)
+    ], MitarbeiterProjekte.prototype, "Mitarbeiter_SLBenutzer", void 0);
+    __decorate([
+        appsapp_cli_1.IsList(Projekt_1.Projekt),
+        __metadata("design:type", Object)
+    ], MitarbeiterProjekte.prototype, "Projekte", void 0);
+    return MitarbeiterProjekte;
+}(appsapp_cli_1.PersistableModel));
