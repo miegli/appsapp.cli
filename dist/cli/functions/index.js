@@ -402,9 +402,6 @@ function call(action, data) {
 
                     if (config && config['constructor'] !== undefined) {
 
-                        console.log(base64.decode(config.constructor));
-                        return null;
-
                         eval(base64.decode(config.constructor));
                         model = new global[action.object];
 
