@@ -406,7 +406,8 @@ var PersistableModel = /** @class */ (function () {
     };
     /**
      * get property
-     * @returns any
+     * @param string property
+     * @returns {any}
      */
     PersistableModel.prototype.getProperty = function (property) {
         var self = this;

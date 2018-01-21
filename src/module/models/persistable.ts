@@ -45,7 +45,7 @@ export interface actionWebhook {
 
 export interface actionCustom {
     name: 'custom',
-    data: {
+    data?: {
         name: string
     },
     additionalActions?: [actionEmail | actionWebhook | actionGoogleSheets | actionCustom]
@@ -227,7 +227,7 @@ export class PersistableModel {
      * @param action
      * @returns {Promise<any>}
      */
-    public saveWithPromise(action?: actionEmail | actionWebhook | actionGoogleSheets | actionCustom) {
+    public saveWithPromise(action?: actionEmail | actionWebhook | actionGoogleSheets | actionCustom | string) {
 
         let self = this;
 
@@ -318,9 +318,18 @@ export class PersistableModel {
      * @param silent
      * @returns {Observable<any>}
      */
-    public save(action?: actionEmail | actionWebhook | actionGoogleSheets | actionCustom, silent?: boolean) {
+    public save(action?: actionEmail | actionWebhook | actionGoogleSheets | actionCustom | string, silent?: boolean) {
 
         let self = this, observer = null;
+
+        if (typeof action === 'string') {
+            action = {
+                name: 'custom',
+                data: {
+                    name: action
+                }
+            }
+        }
 
         self.executeSave(action).subscribe((next) => {
             if (observer) {
@@ -361,7 +370,7 @@ export class PersistableModel {
      * @param {any} action as an optinal argument for transmitting additional action metadata
      * @returns {Observable<any>}
      */
-    private executeSave(action?: actionEmail | actionWebhook | actionGoogleSheets | actionCustom) {
+    private executeSave(action?: actionEmail | actionWebhook | actionGoogleSheets | actionCustom | string) {
 
         let self = this;
 
@@ -1112,7 +1121,7 @@ export class PersistableModel {
      * @param {any} action as an optional argument
      * @returns {PersistableModel}
      */
-    public setHasPendingChanges(state, action?: actionEmail | actionWebhook | actionGoogleSheets | actionCustom) {
+    public setHasPendingChanges(state, action?: actionEmail | actionWebhook | actionGoogleSheets | actionCustom | string) {
 
         if (state && this.__persistenceManager) {
             this.__persistenceManager.addPendingChanges(this, action);
