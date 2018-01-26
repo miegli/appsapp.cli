@@ -254,6 +254,24 @@ gulp.task('compile', function () {
     });
 });
 
+gulp.task('compilewatch', function () {
+  runSequence(
+    'copy:source',
+    'inline-resources',
+    'ngc',
+    'rollup:fesm',
+    'rollup:umd',
+    function (err) {
+      if (err) {
+        console.log('ERROR:', err.message);
+        deleteFolders([tmpFolder, buildFolder]);
+        //deleteFolders([distFolder, tmpFolder, buildFolder]);
+      } else {
+        console.log('Compilation finished succesfully');
+      }
+    });
+});
+
 /**
  * Watch for any change in the /src folder and compile files
  */
@@ -263,7 +281,7 @@ gulp.task('watch', function () {
 
 gulp.task('clean', ['clean:dist', 'clean:tmp', 'clean:build']);
 gulp.task('build', ['clean', 'compile']);
-gulp.task('build:watch', ['compile', 'watch']);
+gulp.task('build:watch', ['compilewatch', 'watch']);
 gulp.task('default', ['build:watch']);
 gulp.task('test', ['version:manifest']);
 

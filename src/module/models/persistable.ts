@@ -56,6 +56,7 @@ export class PersistableModel {
 
     private __httpClient: HttpClient;
     private __isLoadedPromise: Promise<any>;
+    private __isLoaded: boolean = false;
     private __observer: Observer<any>;
     private __observable: Observable<any>;
     private __uuid: string = '';
@@ -301,12 +302,27 @@ export class PersistableModel {
         var self = this;
 
         return new Observable<any>((observer: Observer<any>) => {
-            this.getPersistenceManager().trigger(self, observer, {
-                name: 'custom',
-                data: {
-                    name: action
-                }
-            });
+
+
+            if (self.__isLoaded) {
+                self.getPersistenceManager().trigger(self, observer, {
+                    name: 'custom',
+                    data: {
+                        name: action
+                    }
+                });
+            } else {
+                self.loaded().then((model) => {
+                    self.getPersistenceManager().trigger(model, observer, {
+                        name: 'custom',
+                        data: {
+                            name: action
+                        }
+                    });
+                });
+            }
+
+
         });
 
     }
@@ -491,8 +507,8 @@ export class PersistableModel {
         this.__firebaseDatabase = firebaseDatabase;
         let self = this;
 
-
         let connectedRef = this.__firebaseDatabase.app.database().ref(".info/connected");
+
 
         connectedRef.on("value", (snap) => {
             self.__isOnline = snap.val();
@@ -505,16 +521,21 @@ export class PersistableModel {
 
         });
 
+        if (this.getPersistenceManager() !== undefined) {
 
-        this.getPersistenceManager().getFirebase().getAuth().then((auth: AngularFireAuth) => {
-            auth.authState.subscribe((user) => {
-                if (user && self.__persistenceManager) {
-                    self.__persistenceManager.getObserver().next({'action': 'connected'});
-                }
-                self.emit();
-            });
-        });
+            if (!this.getPersistenceManager()._isConnected) {
+                this.getPersistenceManager().getFirebase().getAuth().then((auth: AngularFireAuth) => {
+                    auth.authState.subscribe((user) => {
+                        if (user && self.__persistenceManager) {
+                            self.__persistenceManager.getObserver().next({'action': 'connected'});
+                        }
+                        self.emit();
+                    });
+                });
+                this.getPersistenceManager().setIsConnected();
+            }
 
+        }
 
         return this;
 
@@ -768,7 +789,11 @@ export class PersistableModel {
      * @returns {PersistableModel}
      */
     public setPersistenceManager(persistenceManager) {
-        this.__persistenceManager = persistenceManager;
+
+        if (persistenceManager !== undefined) {
+            this.__persistenceManager = persistenceManager;
+        }
+
 
         if (this.__uuid.length == 0) {
             this.__uuid = UUID.UUID();
@@ -1618,7 +1643,14 @@ export class PersistableModel {
      */
     private setIsLoadedPromise(promise) {
 
+        let self = this;
+
         this.__isLoadedPromise = promise;
+
+        this.__isLoadedPromise.then(() => {
+            self.__isLoaded = true;
+        });
+
 
         return this;
 
