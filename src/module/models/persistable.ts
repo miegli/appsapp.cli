@@ -57,6 +57,7 @@ export class PersistableModel {
     private __httpClient: HttpClient;
     private __isLoadedPromise: Promise<any>;
     private __isLoaded: boolean = false;
+    private __isAutosave: boolean = false;
     private __observer: Observer<any>;
     private __observable: Observable<any>;
     private __uuid: string = '';
@@ -72,6 +73,7 @@ export class PersistableModel {
     private __editedObserver: Observer<any>;
     private __editedObservable: Observable<any>;
     private __editedObservableCallbacks: any = [];
+    private __editedObservableObservers: any = [];
     private __temp = {};
     private __forceUpdateProperty = {};
     private __persistenceManager: any;
@@ -147,6 +149,14 @@ export class PersistableModel {
             if (!self.hasPendingChanges() || self.getFirebaseDatabase() === undefined) {
 
                 if (self.__bindingsObserver) {
+
+                    self.__editedObservableObservers.forEach((callback: any) => {
+                        if (next[callback.property] !== undefined && callback.first === undefined) {
+                            callback.callback(next[callback.property]);
+                            callback.first = true;
+                        }
+                    });
+
                     Object.keys(self.__bindingsObserver).forEach((property) => {
                         if (!self.hasChanges(property) || self.__forceUpdateProperty[property] !== undefined) {
                             if (next[property] !== undefined) {
@@ -156,6 +166,7 @@ export class PersistableModel {
                         }
 
                     });
+
                 }
 
 
@@ -693,6 +704,19 @@ export class PersistableModel {
      */
     public setProperty(property, value) {
 
+        var self = this, autosave = false;
+
+        if (this.__isAutosave && this[property] !== value) {
+            autosave = true;
+        }
+
+        self.__editedObservableObservers.forEach((callback: any) => {
+            if (callback.property == property && this[property] !== value) {
+                callback.callback(value);
+                callback.first = true;
+            }
+        });
+
         this[property] = value;
         this.__edited[property] = value;
         var event = {property: property, value: value, model: this};
@@ -701,6 +725,11 @@ export class PersistableModel {
         }
         this.executeConditionValidatorCircular(property);
         this.executeChangesWithCallback(event);
+
+        if (autosave) {
+            this.save(null, true);
+        }
+
         return this;
     }
 
@@ -1788,8 +1817,30 @@ export class PersistableModel {
             callback(event);
         });
 
+        // this.__editedObservableObservers.forEach((callback) => {
+        //     if (event.property == callback.property) {
+        //         callback.callback(event.value);
+        //     }
+        // });
+
         return this;
     }
+
+
+    /**
+     * observe property
+     * @param property
+     * @param any callback
+     * @returns {this}
+     */
+    public watch(property, callback) {
+
+        this.__editedObservableObservers.push({callback: callback, property: property});
+
+        return this;
+
+    }
+
 
     /**
      * get changes with callback
@@ -1806,6 +1857,15 @@ export class PersistableModel {
      */
     public isInBackendMode() {
         return global[this.constructor.name] === undefined ? false : true;
+    }
+
+    /**
+     * Enable autosave mode
+     * @returns {this}
+     */
+    public autosave() {
+        this.__isAutosave = true;
+        return this;
     }
 
 }

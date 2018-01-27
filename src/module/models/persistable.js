@@ -13,6 +13,7 @@ var PersistableModel = /** @class */ (function () {
      */
     function PersistableModel() {
         var _this = this;
+        this.__isLoaded = false;
         this.__uuid = '';
         this.__firebaseDatabaseRoot = 'session';
         this.__bindings = {};
@@ -178,15 +179,26 @@ var PersistableModel = /** @class */ (function () {
      * @returns {Observable<any>}
      */
     PersistableModel.prototype.trigger = function (action) {
-        var _this = this;
         var self = this;
         return new rxjs_1.Observable(function (observer) {
-            _this.getPersistenceManager().trigger(self, observer, {
-                name: 'custom',
-                data: {
-                    name: action
-                }
-            });
+            if (self.__isLoaded) {
+                self.getPersistenceManager().trigger(self, observer, {
+                    name: 'custom',
+                    data: {
+                        name: action
+                    }
+                });
+            }
+            else {
+                self.loaded().then(function (model) {
+                    self.getPersistenceManager().trigger(model, observer, {
+                        name: 'custom',
+                        data: {
+                            name: action
+                        }
+                    });
+                });
+            }
         });
     };
     /**
@@ -346,14 +358,19 @@ var PersistableModel = /** @class */ (function () {
                 self.__persistenceManager.getObserver().next({ 'action': 'disconnected' });
             }
         });
-        this.getPersistenceManager().getFirebase().getAuth().then(function (auth) {
-            auth.authState.subscribe(function (user) {
-                if (user && self.__persistenceManager) {
-                    self.__persistenceManager.getObserver().next({ 'action': 'connected' });
-                }
-                self.emit();
-            });
-        });
+        if (this.getPersistenceManager() !== undefined) {
+            if (!this.getPersistenceManager()._isConnected) {
+                this.getPersistenceManager().getFirebase().getAuth().then(function (auth) {
+                    auth.authState.subscribe(function (user) {
+                        if (user && self.__persistenceManager) {
+                            self.__persistenceManager.getObserver().next({ 'action': 'connected' });
+                        }
+                        self.emit();
+                    });
+                });
+                this.getPersistenceManager().setIsConnected();
+            }
+        }
         return this;
     };
     /**
@@ -548,7 +565,9 @@ var PersistableModel = /** @class */ (function () {
      * @returns {PersistableModel}
      */
     PersistableModel.prototype.setPersistenceManager = function (persistenceManager) {
-        this.__persistenceManager = persistenceManager;
+        if (persistenceManager !== undefined) {
+            this.__persistenceManager = persistenceManager;
+        }
         if (this.__uuid.length == 0) {
             this.__uuid = angular2_uuid_1.UUID.UUID();
         }
@@ -1158,7 +1177,11 @@ var PersistableModel = /** @class */ (function () {
      * @returns {PersistableModel}
      */
     PersistableModel.prototype.setIsLoadedPromise = function (promise) {
+        var self = this;
         this.__isLoadedPromise = promise;
+        this.__isLoadedPromise.then(function () {
+            self.__isLoaded = true;
+        });
         return this;
     };
     /**

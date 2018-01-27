@@ -40,6 +40,7 @@ export declare class PersistableModel {
     private __httpClient;
     private __isLoadedPromise;
     private __isLoaded;
+    private __isAutosave;
     private __observer;
     private __observable;
     private __uuid;
@@ -55,6 +56,7 @@ export declare class PersistableModel {
     private __editedObserver;
     private __editedObservable;
     private __editedObservableCallbacks;
+    private __editedObservableObservers;
     private __temp;
     private __forceUpdateProperty;
     private __persistenceManager;
@@ -498,6 +500,13 @@ export declare class PersistableModel {
      */
     private executeChangesWithCallback(event);
     /**
+     * observe property
+     * @param property
+     * @param any callback
+     * @returns {this}
+     */
+    watch(property: any, callback: any): this;
+    /**
      * get changes with callback
      * @returns {this}
      */
@@ -507,4 +516,9 @@ export declare class PersistableModel {
      * @returns {boolean}
      */
     isInBackendMode(): boolean;
+    /**
+     * Enable autosave mode
+     * @returns {this}
+     */
+    autosave(): this;
 }
