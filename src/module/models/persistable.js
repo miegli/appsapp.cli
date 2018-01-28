@@ -295,20 +295,15 @@ var PersistableModel = /** @class */ (function () {
         });
     };
     /**
-     * resets to previous data
+     * resets model
      * @returns {PersistableModel}
      */
     PersistableModel.prototype.reset = function () {
         var self = this;
+        Object.keys(self.getProperties()).forEach(function (property) {
+            self.update(property, self.transformTypeFromMetadata(property, ''));
+        });
         self.__edited = {};
-        self.emit();
-        if (this.__persistenceManager) {
-            this.__persistenceManager.load(self).then(function (model) {
-                self.emit();
-            }).catch(function (error) {
-                console.log(error);
-            });
-        }
         return this;
     };
     /**
@@ -488,6 +483,9 @@ var PersistableModel = /** @class */ (function () {
      * @returns {any}
      */
     PersistableModel.prototype.getMessage = function (keyword) {
+        if (this.__messages === undefined) {
+            return keyword;
+        }
         return this.__messages[keyword] == undefined ? keyword : this.__messages[keyword];
     };
     /**
@@ -552,6 +550,26 @@ var PersistableModel = /** @class */ (function () {
             }
         });
         return properties;
+    };
+    /**
+     * add a new list entry
+     * @param property
+     * @param uuid string
+     * @param data
+     * @returns this
+     */
+    PersistableModel.prototype.add = function (property, uuid, data) {
+        if (this.getMetadataValue(property, 'isList') && this.__appsAppModuleProvider) {
+            var n = this.__appsAppModuleProvider.new(this.getMetadataValue(property, 'isList'), uuid, data);
+            if (this.__isAutosave) {
+                n.autosave();
+            }
+            this[property].push(n);
+            return n;
+        }
+        else {
+            return null;
+        }
     };
     /**
      * return string representative from given property value
@@ -753,7 +771,7 @@ var PersistableModel = /** @class */ (function () {
                 Object.keys(json).forEach(function (property) {
                     if (property.substr(0, 2) !== '__' && propertiesWithValidationError_1[property] === undefined) {
                         if (Object.keys(self).indexOf(property) >= 0) {
-                            self[property] = self.transformTypeFromMetadata(property, model[property]);
+                            self.setProperty(property, self.transformTypeFromMetadata(property, model[property]));
                             if (model.isInBackendMode()) {
                                 self.__edited[property] = self[property];
                             }
@@ -1310,11 +1328,6 @@ var PersistableModel = /** @class */ (function () {
         this.__editedObservableCallbacks.forEach(function (callback) {
             callback(event);
         });
-        // this.__editedObservableObservers.forEach((callback) => {
-        //     if (event.property == callback.property) {
-        //         callback.callback(event.value);
-        //     }
-        // });
         return this;
     };
     /**
@@ -1325,6 +1338,7 @@ var PersistableModel = /** @class */ (function () {
      */
     PersistableModel.prototype.watch = function (property, callback) {
         this.__editedObservableObservers.push({ callback: callback, property: property });
+        callback(this.getPropertyValue(property));
         return this;
     };
     /**
