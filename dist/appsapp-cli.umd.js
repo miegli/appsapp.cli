@@ -770,7 +770,7 @@ var PersistableModel = /** @class */ (function () {
                 Object.keys(json).forEach(function (property) {
                     if (property.substr(0, 2) !== '__' && propertiesWithValidationError_1[property] === undefined) {
                         if (Object.keys(self).indexOf(property) >= 0) {
-                            self[property] = self.transformTypeFromMetadata(property, model[property]);
+                            self.setProperty(property, self.transformTypeFromMetadata(property, model[property]));
                             if (model.isInBackendMode()) {
                                 self.__edited[property] = self[property];
                             }
@@ -803,9 +803,6 @@ var PersistableModel = /** @class */ (function () {
         }
         if (this.getMetadata(property, 'isDateRange').length) {
             return typeof value == 'object' ? value : [];
-        }
-        if (this.getMetadata(property, 'isNumber').length) {
-            return typeof value == 'number' ? value : 0;
         }
         if (this.getMetadata(property, 'isList').length) {
             var /** @type {?} */ valueAsObjects_1 = [];
@@ -1342,11 +1339,6 @@ var PersistableModel = /** @class */ (function () {
         this.__editedObservableCallbacks.forEach(function (callback) {
             callback(event);
         });
-        // this.__editedObservableObservers.forEach((callback) => {
-        //     if (event.property == callback.property) {
-        //         callback.callback(event.value);
-        //     }
-        // });
         return this;
     };
     /**
@@ -1357,6 +1349,7 @@ var PersistableModel = /** @class */ (function () {
      */
     PersistableModel.prototype.watch = function (property, callback) {
         this.__editedObservableObservers.push({ callback: callback, property: property });
+        callback(this.getPropertyValue(property));
         return this;
     };
     /**
