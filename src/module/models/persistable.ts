@@ -442,25 +442,22 @@ export class PersistableModel {
 
     }
 
+
+
     /**
-     * resets to previous data
+     * resets model
      * @returns {PersistableModel}
      */
     public reset() {
 
         let self = this;
 
+        Object.keys(self.getProperties()).forEach((property) => {
+            self.update(property,self.transformTypeFromMetadata(property, ''));
+        });
+
         self.__edited = {};
-        self.emit();
 
-        if (this.__persistenceManager) {
-            this.__persistenceManager.load(self).then((model: any) => {
-                self.emit();
-            }).catch((error) => {
-                console.log(error);
-            });
-
-        }
         return this;
 
 
@@ -692,6 +689,10 @@ export class PersistableModel {
      */
     public getMessage(keyword) {
 
+        if (this.__messages === undefined) {
+            return keyword;
+        }
+
         return this.__messages[keyword] == undefined ? keyword : this.__messages[keyword];
 
     }
@@ -769,6 +770,34 @@ export class PersistableModel {
         });
 
         return properties;
+
+    }
+
+
+    /**
+     * add a new list entry
+     * @param property
+     * @param uuid string
+     * @param data
+     * @returns this
+     */
+    public add(property, uuid?: any, data?: any) {
+
+        if (this.getMetadataValue(property,'isList') && this.__appsAppModuleProvider) {
+
+            var n = this.__appsAppModuleProvider.new(this.getMetadataValue(property,'isList'),uuid, data);
+
+            if (this.__isAutosave) {
+                n.autosave();
+            }
+
+            this[property].push(n);
+
+            return n;
+
+        } else {
+            return null;
+        }
 
     }
 
@@ -1098,6 +1127,7 @@ export class PersistableModel {
         if (this.getMetadata(property, 'isDateRange').length) {
             return typeof value == 'object' ? value : [];
         }
+
 
         if (this.getMetadata(property, 'isList').length) {
             let valueAsObjects = [];

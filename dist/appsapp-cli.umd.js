@@ -292,20 +292,15 @@ var PersistableModel = /** @class */ (function () {
         });
     };
     /**
-     * resets to previous data
+     * resets model
      * @return {?}
      */
     PersistableModel.prototype.reset = function () {
         var /** @type {?} */ self = this;
+        Object.keys(self.getProperties()).forEach(function (property) {
+            self.update(property, self.transformTypeFromMetadata(property, ''));
+        });
         self.__edited = {};
-        self.emit();
-        if (this.__persistenceManager) {
-            this.__persistenceManager.load(self).then(function (model) {
-                self.emit();
-            }).catch(function (error) {
-                console.log(error);
-            });
-        }
         return this;
     };
     /**
@@ -487,6 +482,9 @@ var PersistableModel = /** @class */ (function () {
      * @return {?}
      */
     PersistableModel.prototype.getMessage = function (keyword) {
+        if (this.__messages === undefined) {
+            return keyword;
+        }
         return this.__messages[keyword] == undefined ? keyword : this.__messages[keyword];
     };
     /**
@@ -552,6 +550,26 @@ var PersistableModel = /** @class */ (function () {
             }
         });
         return properties;
+    };
+    /**
+     * add a new list entry
+     * @param {?} property
+     * @param {?=} uuid string
+     * @param {?=} data
+     * @return {?} this
+     */
+    PersistableModel.prototype.add = function (property, uuid, data) {
+        if (this.getMetadataValue(property, 'isList') && this.__appsAppModuleProvider) {
+            var /** @type {?} */ n = this.__appsAppModuleProvider.new(this.getMetadataValue(property, 'isList'), uuid, data);
+            if (this.__isAutosave) {
+                n.autosave();
+            }
+            this[property].push(n);
+            return n;
+        }
+        else {
+            return null;
+        }
     };
     /**
      * return string representative from given property value
@@ -785,6 +803,9 @@ var PersistableModel = /** @class */ (function () {
         }
         if (this.getMetadata(property, 'isDateRange').length) {
             return typeof value == 'object' ? value : [];
+        }
+        if (this.getMetadata(property, 'isNumber').length) {
+            return typeof value == 'number' ? value : 0;
         }
         if (this.getMetadata(property, 'isList').length) {
             var /** @type {?} */ valueAsObjects_1 = [];

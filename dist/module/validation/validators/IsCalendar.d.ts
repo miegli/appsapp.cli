@@ -8,5 +8,6 @@ export declare function IsCalendar(options?: {
         second?: number;
         zeroBased?: boolean;
     };
+    weeks?: number;
     invalid?: [any];
 }): (object: Object, propertyName: string) => void;

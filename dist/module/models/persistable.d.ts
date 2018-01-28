@@ -144,7 +144,7 @@ export declare class PersistableModel {
      */
     private executeSave(action?);
     /**
-     * resets to previous data
+     * resets model
      * @returns {PersistableModel}
      */
     reset(): this;
@@ -260,6 +260,14 @@ export declare class PersistableModel {
      * @param stringify
      */
     getProperties(stringify?: any): {};
+    /**
+     * add a new list entry
+     * @param property
+     * @param uuid string
+     * @param data
+     * @returns this
+     */
+    add(property: any, uuid?: any, data?: any): any;
     /**
      * return string representative from given property value
      * @param property

@@ -14,6 +14,7 @@ var PersistableModel = /** @class */ (function () {
     function PersistableModel() {
         var _this = this;
         this.__isLoaded = false;
+        this.__isAutosave = false;
         this.__uuid = '';
         this.__firebaseDatabaseRoot = 'session';
         this.__bindings = {};
@@ -22,6 +23,7 @@ var PersistableModel = /** @class */ (function () {
         this.__validatorObserver = {};
         this.__edited = {};
         this.__editedObservableCallbacks = [];
+        this.__editedObservableObservers = [];
         this.__temp = {};
         this.__forceUpdateProperty = {};
         this.__isOnline = true;
@@ -72,6 +74,12 @@ var PersistableModel = /** @class */ (function () {
         this.__observable.subscribe(function (next) {
             if (!self.hasPendingChanges() || self.getFirebaseDatabase() === undefined) {
                 if (self.__bindingsObserver) {
+                    self.__editedObservableObservers.forEach(function (callback) {
+                        if (next[callback.property] !== undefined && callback.first === undefined) {
+                            callback.callback(next[callback.property]);
+                            callback.first = true;
+                        }
+                    });
                     Object.keys(self.__bindingsObserver).forEach(function (property) {
                         if (!self.hasChanges(property) || self.__forceUpdateProperty[property] !== undefined) {
                             if (next[property] !== undefined) {
@@ -489,6 +497,17 @@ var PersistableModel = /** @class */ (function () {
      * @returns {PersistableModel}
      */
     PersistableModel.prototype.setProperty = function (property, value) {
+        var _this = this;
+        var self = this, autosave = false;
+        if (this.__isAutosave && this[property] !== value) {
+            autosave = true;
+        }
+        self.__editedObservableObservers.forEach(function (callback) {
+            if (callback.property == property && _this[property] !== value) {
+                callback.callback(value);
+                callback.first = true;
+            }
+        });
         this[property] = value;
         this.__edited[property] = value;
         var event = { property: property, value: value, model: this };
@@ -497,6 +516,9 @@ var PersistableModel = /** @class */ (function () {
         }
         this.executeConditionValidatorCircular(property);
         this.executeChangesWithCallback(event);
+        if (autosave) {
+            this.save(null, true);
+        }
         return this;
     };
     /**
@@ -1288,6 +1310,21 @@ var PersistableModel = /** @class */ (function () {
         this.__editedObservableCallbacks.forEach(function (callback) {
             callback(event);
         });
+        // this.__editedObservableObservers.forEach((callback) => {
+        //     if (event.property == callback.property) {
+        //         callback.callback(event.value);
+        //     }
+        // });
+        return this;
+    };
+    /**
+     * observe property
+     * @param property
+     * @param any callback
+     * @returns {this}
+     */
+    PersistableModel.prototype.watch = function (property, callback) {
+        this.__editedObservableObservers.push({ callback: callback, property: property });
         return this;
     };
     /**
@@ -1304,6 +1341,14 @@ var PersistableModel = /** @class */ (function () {
      */
     PersistableModel.prototype.isInBackendMode = function () {
         return global[this.constructor.name] === undefined ? false : true;
+    };
+    /**
+     * Enable autosave mode
+     * @returns {this}
+     */
+    PersistableModel.prototype.autosave = function () {
+        this.__isAutosave = true;
+        return this;
     };
     return PersistableModel;
 }());

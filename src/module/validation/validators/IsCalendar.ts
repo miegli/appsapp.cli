@@ -9,7 +9,8 @@ export function IsCalendar(options?: {
     minute?: number,
     second?: number,
     zeroBased?: boolean
-  }
+  },
+  weeks?: number,
   invalid?: [any] /*
     '1/1', // 1st of January disabled
     '12/24', // Christmas disabled
