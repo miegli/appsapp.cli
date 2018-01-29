@@ -267,7 +267,7 @@ export declare class PersistableModel {
      * @param data
      * @returns this
      */
-    add(property: any, uuid?: any, data?: any): any;
+    add(property: any, uuid?: any, data?: any): this;
     /**
      * return string representative from given property value
      * @param property

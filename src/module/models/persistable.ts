@@ -791,9 +791,9 @@ export class PersistableModel {
                 n.autosave();
             }
 
-            this[property].push(n);
-
-            return n;
+            var t = this.getPropertyValue(property);
+            t.push(n);
+            return this.setProperty(property,t);
 
         } else {
             return null;

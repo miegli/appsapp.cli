@@ -564,8 +564,9 @@ var PersistableModel = /** @class */ (function () {
             if (this.__isAutosave) {
                 n.autosave();
             }
-            this[property].push(n);
-            return n;
+            var /** @type {?} */ t = this.getPropertyValue(property);
+            t.push(n);
+            return this.setProperty(property, t);
         }
         else {
             return null;
