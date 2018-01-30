@@ -1425,7 +1425,6 @@ var PersistableModel = /** @class */ (function () {
         this.__editedObservableObservers.push({ callback: callback, property: property });
         callback(this.getPropertyValue(property));
         this.loaded().then(function (model) {
-            console.log(model);
             callback(model.getPropertyValue(property));
         });
         return this;
