@@ -149,6 +149,11 @@ export declare class PersistableModel {
      */
     reset(): this;
     /**
+     * removes edited states
+     * @returns {PersistableModel}
+     */
+    removeEditedState(): this;
+    /**
      * get models observer
      * @returns {Observer<any>}
      */
@@ -263,11 +268,18 @@ export declare class PersistableModel {
     /**
      * add a new list entry
      * @param property
+     * @param data (json object, persistable model or array of those
      * @param uuid string
-     * @param data
      * @returns this
      */
-    add(property: any, uuid?: any, data?: any): this;
+    add(property: any, data?: any, uuid?: string): this;
+    /**
+     * remove a new list entry
+     * @param property
+     * @param uuid string or array set of string
+     * @returns this
+     */
+    remove(property: any, uuid?: string | [string]): this;
     /**
      * return string representative from given property value
      * @param property

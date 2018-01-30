@@ -306,6 +306,14 @@ var PersistableModel = /** @class */ (function () {
         return this;
     };
     /**
+     * removes edited states
+     * @return {?}
+     */
+    PersistableModel.prototype.removeEditedState = function () {
+        this.__edited = {};
+        return this;
+    };
+    /**
      * get models observer
      * @return {?}
      */
@@ -556,23 +564,89 @@ var PersistableModel = /** @class */ (function () {
     /**
      * add a new list entry
      * @param {?} property
+     * @param {?=} data (json object, persistable model or array of those
      * @param {?=} uuid string
-     * @param {?=} data
      * @return {?} this
      */
-    PersistableModel.prototype.add = function (property, uuid, data) {
+    PersistableModel.prototype.add = function (property, data, uuid) {
+        var _this = this;
+        var /** @type {?} */ self = this;
         if (this.getMetadataValue(property, 'isList') && this.__appsAppModuleProvider) {
-            var /** @type {?} */ n = this.__appsAppModuleProvider.new(this.getMetadataValue(property, 'isList'), uuid, data);
-            if (this.__isAutosave) {
-                n.autosave();
+            var /** @type {?} */ toAddModels = [];
+            var /** @type {?} */ toCreateModels = [];
+            if (data instanceof this.getMetadataValue(property, 'isList')) {
+                toAddModels.push(data);
             }
+            else if (typeof data == 'object' && data.length !== undefined) {
+                data.forEach(function (d) {
+                    if (d instanceof _this.getMetadataValue(property, 'isList')) {
+                        toAddModels.push(d);
+                    }
+                    else {
+                        toCreateModels.push(d);
+                    }
+                });
+            }
+            else {
+                toCreateModels.push(data);
+            }
+            toCreateModels.forEach(function (d) {
+                var /** @type {?} */ n = self.__appsAppModuleProvider.new(self.getMetadataValue(property, 'isList'), uuid, d);
+                if (self.__isAutosave) {
+                    n.autosave();
+                }
+                toAddModels.push(n);
+                // force conditions to be calculated initially
+                window.setTimeout(function () {
+                    console.log(n);
+                    Object.keys(n.__conditionActionIfMatchesAction).forEach(function (property) {
+                        n.getProperty(property).subscribe(function (value) {
+                            // skip
+                        });
+                    });
+                    Object.keys(n.__conditionActionIfMatchesRemovedProperties).forEach(function (property) {
+                        n.getProperty(property).subscribe(function (value) {
+                            // skip
+                        });
+                    });
+                }, 1);
+            });
             var /** @type {?} */ t = this.getPropertyValue(property);
-            t.push(n);
+            toAddModels.forEach(function (n) {
+                t.push(n);
+            });
             return this.setProperty(property, t);
         }
         else {
-            return null;
+            return this;
         }
+    };
+    /**
+     * remove a new list entry
+     * @param {?} property
+     * @param {?=} uuid string or array set of string
+     * @return {?} this
+     */
+    PersistableModel.prototype.remove = function (property, uuid) {
+        if (this.getMetadataValue(property, 'isList') && this.__appsAppModuleProvider) {
+            var /** @type {?} */ toRemoveUuids = {};
+            var /** @type {?} */ afterRemovedValue = [];
+            if (typeof uuid === 'string') {
+                toRemoveUuids[uuid] = true;
+            }
+            else {
+                uuid.forEach(function (id) {
+                    toRemoveUuids[id] = true;
+                });
+            }
+            this.getPropertyValue(property).forEach(function (m) {
+                if (toRemoveUuids[m.getUuid()] === undefined) {
+                    afterRemovedValue.push(m);
+                }
+            });
+            this.setProperty(property, afterRemovedValue);
+        }
+        return this;
     };
     /**
      * return string representative from given property value
