@@ -596,7 +596,6 @@ var PersistableModel = /** @class */ (function () {
                 toAddModels.push(n);
                 // force conditions to be calculated initially
                 window.setTimeout(function () {
-                    console.log(n);
                     Object.keys(n.__conditionActionIfMatchesAction).forEach(function (property) {
                         n.getProperty(property).subscribe(function (value) {
                             // skip
