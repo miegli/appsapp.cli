@@ -1954,10 +1954,15 @@ export class PersistableModel {
      */
     public watch(property, callback) {
 
-
+        let self = this;
 
         this.__editedObservableObservers.push({callback: callback, property: property});
         callback(this.getPropertyValue(property));
+
+        this.loaded().then((model) => {
+            callback(model.getPropertyValue(property));
+        });
+
 
         return this;
 
