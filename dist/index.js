@@ -591,6 +591,9 @@ var PersistableModel = /** @class */ (function () {
                 toCreateModels.push(data);
             }
             toCreateModels.forEach(function (d) {
+                if (uuid === undefined || uuid === null) {
+                    uuid = d[self.getMetadataValue(property, 'isList', null, 'usePropertyAsUuid')];
+                }
                 var /** @type {?} */ n = self.__appsAppModuleProvider.new(self.getMetadataValue(property, 'isList'), uuid, d);
                 if (self.__isAutosave) {
                     n.autosave();
@@ -885,7 +888,8 @@ var PersistableModel = /** @class */ (function () {
             if (value.length) {
                 value.forEach(function (itemOriginal) {
                     if (itemOriginal instanceof PersistableModel == false && self.getAppsAppModuleProvider()) {
-                        var /** @type {?} */ item_1 = self.getAppsAppModuleProvider().new(self.getMetadataValue(property, 'isList'));
+                        var /** @type {?} */ uuid = itemOriginal[self.getMetadataValue(property, 'isList', null, 'usePropertyAsUuid')];
+                        var /** @type {?} */ item_1 = self.getAppsAppModuleProvider().new(self.getMetadataValue(property, 'isList'), uuid);
                         item_1.loadJson(itemOriginal);
                         item_1.setParent(self);
                         item_1.loaded().then(function (m) {
@@ -1910,16 +1914,17 @@ function IsSelect(options) {
 
 /**
  * @param {?} typeOfItems
+ * @param {?=} usePropertyAsUuid
  * @param {?=} uniqueItems
  * @return {?}
  */
-function IsList(typeOfItems, uniqueItems) {
+function IsList(typeOfItems, usePropertyAsUuid, uniqueItems) {
     return function (object, propertyName) {
         registerDecorator({
             name: "isList",
             target: object.constructor,
             propertyName: propertyName,
-            constraints: [{ 'type': 'isList', 'value': typeOfItems, 'uniqueItems': uniqueItems == undefined ? false : uniqueItems }],
+            constraints: [{ 'type': 'isList', 'value': typeOfItems, 'usePropertyAsUuid': usePropertyAsUuid, 'uniqueItems': uniqueItems == undefined ? false : uniqueItems }],
             validator: {
                 /**
                  * @param {?} value

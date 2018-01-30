@@ -1411,8 +1411,12 @@ var PersistableModel = /** @class */ (function () {
      * @returns {this}
      */
     PersistableModel.prototype.watch = function (property, callback) {
+        var self = this;
         this.__editedObservableObservers.push({ callback: callback, property: property });
         callback(this.getPropertyValue(property));
+        this.loaded().then(function (model) {
+            callback(model.getPropertyValue(property));
+        });
         return this;
     };
     /**

@@ -819,6 +819,9 @@ export class PersistableModel {
 
             toCreateModels.forEach((d) => {
 
+                if (uuid === undefined || uuid === null) {
+                    uuid = d[self.getMetadataValue(property, 'isList',null, 'usePropertyAsUuid')];
+                }
                 var n = self.__appsAppModuleProvider.new(self.getMetadataValue(property,'isList'),uuid, d);
                 if (self.__isAutosave) {
                     n.autosave();
@@ -1229,7 +1232,8 @@ export class PersistableModel {
             if (value.length) {
                 value.forEach((itemOriginal) => {
                     if (itemOriginal instanceof PersistableModel == false && self.getAppsAppModuleProvider()) {
-                        let item = self.getAppsAppModuleProvider().new(self.getMetadataValue(property, 'isList'));
+                        let uuid = itemOriginal[self.getMetadataValue(property, 'isList',null, 'usePropertyAsUuid')];
+                        let item = self.getAppsAppModuleProvider().new(self.getMetadataValue(property, 'isList'),uuid);
                         item.loadJson(itemOriginal);
                         item.setParent(self);
                         item.loaded().then((m) => {

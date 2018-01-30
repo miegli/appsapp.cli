@@ -3,13 +3,13 @@ import {PersistableModel} from "../../models/persistable";
 
 declare var global: any;
 
-export function IsList(typeOfItems: any, uniqueItems?:boolean) {
+export function IsList(typeOfItems: any, usePropertyAsUuid?: string, uniqueItems?:boolean) {
     return function (object: Object, propertyName: string) {
         registerDecorator({
             name: "isList",
             target: object.constructor,
             propertyName: propertyName,
-            constraints: [{'type': 'isList', 'value': typeOfItems, 'uniqueItems': uniqueItems == undefined ? false : uniqueItems}],
+            constraints: [{'type': 'isList', 'value': typeOfItems, 'usePropertyAsUuid': usePropertyAsUuid, 'uniqueItems': uniqueItems == undefined ? false : uniqueItems}],
             validator: {
                 validate(value: any, args: ValidationArguments) {
 
