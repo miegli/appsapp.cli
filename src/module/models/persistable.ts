@@ -798,7 +798,7 @@ export class PersistableModel {
         let self = this;
 
 
-        if (this.getMetadataValue(property, 'isList') && this.__appsAppModuleProvider) {
+        if (this.getMetadataValue(property, 'isList')) {
 
             var toAddModels = [];
             var toCreateModels = [];
@@ -848,20 +848,22 @@ export class PersistableModel {
                     toAddModels.push(n);
 
                     // force conditions to be calculated initially
-                    window.setTimeout(() => {
+                    if (!n.isInBackendMode()) {
+                        window.setTimeout(() => {
 
-                        Object.keys(n.__conditionActionIfMatchesAction).forEach((property) => {
-                            n.getProperty(property).subscribe((value) => {
-                                // skip
+                            Object.keys(n.__conditionActionIfMatchesAction).forEach((property) => {
+                                n.getProperty(property).subscribe((value) => {
+                                    // skip
+                                });
                             });
-                        });
-                        Object.keys(n.__conditionActionIfMatchesRemovedProperties).forEach((property) => {
-                            n.getProperty(property).subscribe((value) => {
-                                // skip
-                            });
+                            Object.keys(n.__conditionActionIfMatchesRemovedProperties).forEach((property) => {
+                                n.getProperty(property).subscribe((value) => {
+                                    // skip
+                                });
 
-                        });
-                    }, 1);
+                            });
+                        }, 1);
+                    }
 
 
                 }

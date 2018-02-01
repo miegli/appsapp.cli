@@ -592,9 +592,23 @@ var PersistableModel = /** @class */ (function () {
                 if (uuid === undefined || uuid === null) {
                     uuid = d[self.getMetadataValue(property, 'isList', null, 'usePropertyAsUuid')];
                 }
-                var n = self.__appsAppModuleProvider.new(self.getMetadataValue(property, 'isList'), uuid, d);
-                if (self.__isAutosave) {
-                    n.autosave();
+                var n = null;
+                if (self.__appsAppModuleProvider === undefined) {
+                    // backend mode
+                    var constructor = self.getMetadataValue(property, 'isList');
+                    n = new constructor();
+                    if (uuid !== undefined) {
+                        n.setUuid(uuid);
+                        if (d !== undefined) {
+                            n.loadJson(d);
+                        }
+                    }
+                }
+                else {
+                    n = self.__appsAppModuleProvider.new(self.getMetadataValue(property, 'isList'), uuid, d);
+                    if (self.__isAutosave) {
+                        n.autosave();
+                    }
                 }
                 toAddModels.push(n);
                 // force conditions to be calculated initially
@@ -886,19 +900,34 @@ var PersistableModel = /** @class */ (function () {
             var valueAsObjects_1 = [];
             if (value.length) {
                 value.forEach(function (itemOriginal) {
-                    if (itemOriginal instanceof PersistableModel == false && self.getAppsAppModuleProvider()) {
+                    if (itemOriginal instanceof PersistableModel == false) {
                         var uuid = itemOriginal[self.getMetadataValue(property, 'isList', null, 'usePropertyAsUuid')];
-                        var item_1 = self.getAppsAppModuleProvider().new(self.getMetadataValue(property, 'isList'), uuid);
-                        item_1.loadJson(itemOriginal);
-                        item_1.setParent(self);
-                        item_1.loaded().then(function (m) {
-                            item_1.getChangesObserverable().subscribe(function (next) {
-                                if (next.model.getParent()) {
-                                    next.model.getParent().setProperty(property, self.getPropertyValue(property, true));
-                                }
-                            });
-                        });
-                        valueAsObjects_1.push(item_1);
+                        var item_1 = null;
+                        if (self.getAppsAppModuleProvider() !== undefined) {
+                            item_1 = self.getAppsAppModuleProvider().new(self.getMetadataValue(property, 'isList'), uuid);
+                        }
+                        else {
+                            // backend mode
+                            var constructor = self.getMetadataValue(property, 'isList');
+                            item_1 = new constructor();
+                            if (uuid !== undefined) {
+                                item_1.setUuid(uuid);
+                            }
+                        }
+                        if (item_1 !== undefined) {
+                            item_1.loadJson(itemOriginal);
+                            item_1.setParent(self);
+                            if (!item_1.isInBackendMode()) {
+                                item_1.loaded().then(function (m) {
+                                    item_1.getChangesObserverable().subscribe(function (next) {
+                                        if (next.model.getParent()) {
+                                            next.model.getParent().setProperty(property, self.getPropertyValue(property, true));
+                                        }
+                                    });
+                                });
+                            }
+                            valueAsObjects_1.push(item_1);
+                        }
                     }
                     else {
                         valueAsObjects_1.push(itemOriginal);
@@ -1307,7 +1336,15 @@ var PersistableModel = /** @class */ (function () {
      * @returns {Promise}
      */
     PersistableModel.prototype.loaded = function () {
-        return this.__isLoadedPromise;
+        var self = this;
+        if (this.__isLoadedPromise == undefined) {
+            return new Promise(function (resolve, reject) {
+                resolve(self);
+            });
+        }
+        else {
+            return this.__isLoadedPromise;
+        }
     };
     /**
      * send notification message to user
