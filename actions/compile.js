@@ -15,7 +15,6 @@ const base64 = require('base-64');
 
 build = function (program) {
 
-
     return new Promise(function (resolve, reject) {
 
         gulp.task("compile", function () {
@@ -31,7 +30,6 @@ build = function (program) {
         });
 
         gulp.start('compile', function () {
-
 
             findModels().then((next) => {
                 resolve(next);
@@ -95,7 +93,8 @@ findModels = function () {
                                 build[classname] =
                                     injectRequire(match[0].replace("var " + classname + " =", "global." + classname + " ="), string)
                                         .replace(/require\("appsapp-cli/g, 'require("appsapp-cli/appsapp-cli.umd')
-                                        .replace(/require\("appsapp-module/g, 'require("appsapp-module/appsapp-module.umd')
+                                        //.replace(/require\("appsapp-module/g, 'require("appsapp-module/appsapp-module.umd')
+                                        .replace(/require\("appsapp-module/g, ' ("null')
                                         .replace(/require\("\.\//g, 'global, dummy = ("');
                             }
 

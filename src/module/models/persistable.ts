@@ -443,7 +443,6 @@ export class PersistableModel {
     }
 
 
-
     /**
      * resets model
      * @returns {PersistableModel}
@@ -453,7 +452,7 @@ export class PersistableModel {
         let self = this;
 
         Object.keys(self.getProperties()).forEach((property) => {
-            self.update(property,self.transformTypeFromMetadata(property, ''));
+            self.update(property, self.transformTypeFromMetadata(property, ''));
         });
 
         self.__edited = {};
@@ -798,16 +797,17 @@ export class PersistableModel {
 
         let self = this;
 
-        if (this.getMetadataValue(property,'isList') && this.__appsAppModuleProvider) {
+
+        if (this.getMetadataValue(property, 'isList') && this.__appsAppModuleProvider) {
 
             var toAddModels = [];
             var toCreateModels = [];
 
-            if (data instanceof this.getMetadataValue(property,'isList')) {
+            if (data instanceof this.getMetadataValue(property, 'isList')) {
                 toAddModels.push(data);
             } else if (typeof data == 'object' && data.length !== undefined) {
                 data.forEach((d) => {
-                    if (d instanceof this.getMetadataValue(property,'isList')) {
+                    if (d instanceof this.getMetadataValue(property, 'isList')) {
                         toAddModels.push(d);
                     } else {
                         toCreateModels.push(d);
@@ -819,33 +819,53 @@ export class PersistableModel {
 
             toCreateModels.forEach((d) => {
 
-                if (uuid === undefined || uuid === null) {
-                    uuid = d[self.getMetadataValue(property, 'isList',null, 'usePropertyAsUuid')];
-                }
-                var n = self.__appsAppModuleProvider.new(self.getMetadataValue(property,'isList'),uuid, d);
-                if (self.__isAutosave) {
-                    n.autosave();
-                }
-                toAddModels.push(n);
+                    if (uuid === undefined || uuid === null) {
+                        uuid = d[self.getMetadataValue(property, 'isList', null, 'usePropertyAsUuid')];
+                    }
 
-                // force conditions to be calculated initially
-                window.setTimeout(() => {
+                    var n = null;
+                    if (self.__appsAppModuleProvider === undefined) {
 
-                    Object.keys(n.__conditionActionIfMatchesAction).forEach((property) => {
-                        n.getProperty(property).subscribe((value) => {
-                            // skip
+                        // backend mode
+                        var constructor = self.getMetadataValue(property, 'isList');
+                        n = new constructor();
+                        if (uuid !== undefined) {
+                            n.setUuid(uuid);
+                            if (d !== undefined) {
+                                n.loadJson(d);
+                            }
+                        }
+
+                    } else {
+                        n = self.__appsAppModuleProvider.new(self.getMetadataValue(property, 'isList'), uuid, d);
+                        if (self.__isAutosave) {
+                            n.autosave();
+                        }
+
+                    }
+
+
+                    toAddModels.push(n);
+
+                    // force conditions to be calculated initially
+                    window.setTimeout(() => {
+
+                        Object.keys(n.__conditionActionIfMatchesAction).forEach((property) => {
+                            n.getProperty(property).subscribe((value) => {
+                                // skip
+                            });
                         });
-                    });
-                    Object.keys(n.__conditionActionIfMatchesRemovedProperties).forEach((property) => {
-                        n.getProperty(property).subscribe((value) => {
-                            // skip
+                        Object.keys(n.__conditionActionIfMatchesRemovedProperties).forEach((property) => {
+                            n.getProperty(property).subscribe((value) => {
+                                // skip
+                            });
+
                         });
-
-                    });
-                },1);
+                    }, 1);
 
 
-            });
+                }
+            );
 
             var t = this.getPropertyValue(property);
             toAddModels.forEach((n) => {
@@ -853,7 +873,7 @@ export class PersistableModel {
             });
 
 
-            return this.setProperty(property,t);
+            return this.setProperty(property, t);
 
         } else {
             return this;
@@ -870,7 +890,7 @@ export class PersistableModel {
     public remove(property, uuid?: string | [string]) {
 
 
-        if (this.getMetadataValue(property,'isList') && this.__appsAppModuleProvider) {
+        if (this.getMetadataValue(property, 'isList') && this.__appsAppModuleProvider) {
 
             var toRemoveUuids = {};
             var afterRemovedValue = [];
@@ -883,7 +903,7 @@ export class PersistableModel {
                 })
             }
 
-            this.getPropertyValue(property).forEach((m:any) => {
+            this.getPropertyValue(property).forEach((m: any) => {
 
                 if (toRemoveUuids[m.getUuid()] === undefined) {
                     afterRemovedValue.push(m);
@@ -1182,7 +1202,7 @@ export class PersistableModel {
                 Object.keys(json).forEach((property) => {
                     if (property.substr(0, 2) !== '__' && propertiesWithValidationError[property] === undefined) {
                         if (Object.keys(self).indexOf(property) >= 0) {
-                            self.setProperty(property,self.transformTypeFromMetadata(property, model[property]));
+                            self.setProperty(property, self.transformTypeFromMetadata(property, model[property]));
                             if (model.isInBackendMode()) {
                                 self.__edited[property] = self[property];
                             }
@@ -1228,23 +1248,42 @@ export class PersistableModel {
 
 
         if (this.getMetadata(property, 'isList').length) {
+
+
             let valueAsObjects = [];
             if (value.length) {
                 value.forEach((itemOriginal) => {
-                    if (itemOriginal instanceof PersistableModel == false && self.getAppsAppModuleProvider()) {
-                        let uuid = itemOriginal[self.getMetadataValue(property, 'isList',null, 'usePropertyAsUuid')];
-                        let item = self.getAppsAppModuleProvider().new(self.getMetadataValue(property, 'isList'),uuid);
-                        item.loadJson(itemOriginal);
-                        item.setParent(self);
-                        item.loaded().then((m) => {
-                            item.getChangesObserverable().subscribe((next) => {
-                                if (next.model.getParent()) {
-                                    next.model.getParent().setProperty(property, self.getPropertyValue(property, true));
-                                }
+                    if (itemOriginal instanceof PersistableModel == false) {
+                        let uuid = itemOriginal[self.getMetadataValue(property, 'isList', null, 'usePropertyAsUuid')];
+                        let item = null;
+                        if (self.getAppsAppModuleProvider() !== undefined) {
+                            item = self.getAppsAppModuleProvider().new(self.getMetadataValue(property, 'isList'), uuid);
+                        } else {
+                            // backend mode
+                            var constructor = self.getMetadataValue(property, 'isList');
+                            item = new constructor();
+                            if (uuid !== undefined) {
+                                item.setUuid(uuid);
+                            }
+                        }
 
-                            })
-                        });
-                        valueAsObjects.push(item);
+                        if (item !== undefined) {
+                            item.loadJson(itemOriginal);
+                            item.setParent(self);
+
+                            if (!item.isInBackendMode()) {
+                                item.loaded().then((m) => {
+                                    item.getChangesObserverable().subscribe((next) => {
+                                        if (next.model.getParent()) {
+                                            next.model.getParent().setProperty(property, self.getPropertyValue(property, true));
+                                        }
+
+                                    })
+                                });
+                            }
+                            valueAsObjects.push(item);
+                        }
+
                     } else {
                         valueAsObjects.push(itemOriginal);
                     }
@@ -1819,7 +1858,17 @@ export class PersistableModel {
      * @returns {Promise}
      */
     public loaded() {
-        return this.__isLoadedPromise;
+
+        let self = this;
+        if (this.__isLoadedPromise == undefined) {
+            return new Promise(function (resolve, reject) {
+                resolve(self);
+            });
+        } else {
+            return this.__isLoadedPromise;
+        }
+
+
     }
 
     /**
@@ -1971,8 +2020,6 @@ export class PersistableModel {
         return this;
 
     }
-
-
 
 
     /**

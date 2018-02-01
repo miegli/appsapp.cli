@@ -31,6 +31,7 @@ const uuidv1 = require('uuid/v1');
 const base64 = require('base-64');
 const path = require('path');
 
+
 process.argv.forEach((val, index) => {
     require('app-module-path').addPath(path.dirname(val)+path.sep+'node_modules');
 });
@@ -70,6 +71,8 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 
 class connector {
 
+
+
     /**
      *
      * constructs the connector
@@ -79,6 +82,7 @@ class connector {
      */
     constructor() {
         this.admin = require('firebase-admin');
+        this.isWatching = false;
     }
 
 
@@ -101,8 +105,55 @@ class connector {
         });
         this.db = this.admin.database();
         this.watchers = [];
-        this.watch();
+        this.loadModels();
+
         return this;
+
+    }
+
+    /**
+     * load all models from config constructors
+     */
+    loadModels() {
+
+        var self = this;
+
+        this.db.ref('_config').once('value', (snapshot) => {
+
+            var config = snapshot.val();
+            if (!self.isWatching){
+                self.watch();
+            }
+
+            /**
+             * first eval
+             */
+            Object.keys(config).forEach((model) => {
+                if (config[model].constructor !== undefined) {
+                    eval(base64.decode(config[model].constructor));
+                }
+            });
+
+
+            /**
+             * second eval, must be done two times because of self-referencing injections
+             */
+            Object.keys(config).forEach((model) => {
+                if (config[model].constructor !== undefined) {
+                    eval(base64.decode(config[model].constructor));
+                }
+            });
+
+
+        });
+
+        this.db.ref('_config').on('child_changed', (snapshot) => {
+
+            var config = snapshot.val();
+            if (config.constructor !== undefined) {
+                eval(base64.decode(config.constructor));
+            }
+        });
 
     }
 
@@ -182,6 +233,7 @@ class connector {
          * watch for events and connect signal slots
          */
         var self = this;
+        self.isWatching = true;
 
         this.db.ref("_queue").on(
             "child_added",
@@ -215,17 +267,9 @@ class connector {
                 ((e.action.data !== undefined && e.action.data.name === watcher.action) || watcher.action === null)
             ) {
 
-
-                // convert json to real model object
-                self.db.ref('_config/' + e.object).once('value', (snapshot) => {
-
-                    let config = snapshot.val();
-                    eval(base64.decode(config.constructor));
-
                     let model = new global[e.object];
                     model.loadJson(e.snapshot).then((data) => {
 
-                        if (config && config['constructor'] !== undefined) {
                             watcher.callback({
                                 user: e.user,
                                 object: e.object,
@@ -265,16 +309,14 @@ class connector {
 
                                 }
                             });
-                        } else {
-                            console.log('error ' + e.object + ' object model invalide');
-                        }
+
 
                     }).catch((error) => {
                         console.log(error);
                     });
 
 
-                });
+
 
 
             }
