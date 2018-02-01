@@ -1,13 +1,13 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var class_validator_1 = require("class-validator");
-function IsList(typeOfItems, uniqueItems) {
+function IsList(typeOfItems, usePropertyAsUuid, uniqueItems) {
     return function (object, propertyName) {
         class_validator_1.registerDecorator({
             name: "isList",
             target: object.constructor,
             propertyName: propertyName,
-            constraints: [{ 'type': 'isList', 'value': typeOfItems, 'uniqueItems': uniqueItems == undefined ? false : uniqueItems }],
+            constraints: [{ 'type': 'isList', 'value': typeOfItems, 'usePropertyAsUuid': usePropertyAsUuid, 'uniqueItems': uniqueItems == undefined ? false : uniqueItems }],
             validator: {
                 validate: function (value, args) {
                     return new Promise(function (resolve, reject) {
