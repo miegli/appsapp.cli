@@ -569,7 +569,7 @@ var PersistableModel = /** @class */ (function () {
     PersistableModel.prototype.add = function (property, data, uuid) {
         var _this = this;
         var self = this;
-        if (this.getMetadataValue(property, 'isList') && this.__appsAppModuleProvider) {
+        if (this.getMetadataValue(property, 'isList')) {
             var toAddModels = [];
             var toCreateModels = [];
             if (data instanceof this.getMetadataValue(property, 'isList')) {
@@ -612,18 +612,20 @@ var PersistableModel = /** @class */ (function () {
                 }
                 toAddModels.push(n);
                 // force conditions to be calculated initially
-                window.setTimeout(function () {
-                    Object.keys(n.__conditionActionIfMatchesAction).forEach(function (property) {
-                        n.getProperty(property).subscribe(function (value) {
-                            // skip
+                if (!n.isInBackendMode()) {
+                    window.setTimeout(function () {
+                        Object.keys(n.__conditionActionIfMatchesAction).forEach(function (property) {
+                            n.getProperty(property).subscribe(function (value) {
+                                // skip
+                            });
                         });
-                    });
-                    Object.keys(n.__conditionActionIfMatchesRemovedProperties).forEach(function (property) {
-                        n.getProperty(property).subscribe(function (value) {
-                            // skip
+                        Object.keys(n.__conditionActionIfMatchesRemovedProperties).forEach(function (property) {
+                            n.getProperty(property).subscribe(function (value) {
+                                // skip
+                            });
                         });
-                    });
-                }, 1);
+                    }, 1);
+                }
             });
             var t = this.getPropertyValue(property);
             toAddModels.forEach(function (n) {

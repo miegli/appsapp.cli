@@ -9,7 +9,7 @@ export function IsSelect(options?: {
         url: string,
         mapping: {
             text: string | Function,
-            value: string | Function,
+            value?: string | Function,
             disabled?: boolean | Function,
             group?: string
         },
@@ -40,22 +40,31 @@ export function IsSelect(options?: {
                             getOptions: () => {
                                 return new Promise(function (resolveOptions, rejectOptions) {
                                     if (optionValidator.source) {
-                                        Unirest.get(optionValidator.source.url).type('json').end(function (response) {
-                                            let options = [];
-                                            if (response.error) {
-                                                rejectOptions(response.error);
-                                            } else {
-                                                response.body.forEach((item) => {
-                                                    options.push({
-                                                        value: optionValidator._getPropertyFromObject(item, optionValidator.source.mapping.value),
-                                                        text: optionValidator._getPropertyFromObject(item, optionValidator.source.mapping.text),
-                                                        disabled: optionValidator.source.mapping.disabled !== undefined ? optionValidator._getPropertyFromObject(item, optionValidator.source.mapping.disabled) : false,
-                                                    })
-                                                });
 
-                                                resolveOptions(options);
-                                            }
-                                        });
+
+                                        if (optionValidator.source.url.substr(0,4) == 'http') {
+
+                                            Unirest.get(optionValidator.source.url).type('json').end(function (response) {
+                                                let options = [];
+                                                if (response.error) {
+                                                    rejectOptions(response.error);
+                                                } else {
+                                                    response.body.forEach((item) => {
+                                                        options.push({
+                                                            value: optionValidator.source.mapping.value !== null && optionValidator.source.mapping.value !== undefined ? optionValidator._getPropertyFromObject(item, optionValidator.source.mapping.value) : item,
+                                                            text: optionValidator._getPropertyFromObject(item, optionValidator.source.mapping.text),
+                                                            disabled: optionValidator.source.mapping.disabled !== undefined ? optionValidator._getPropertyFromObject(item, optionValidator.source.mapping.disabled) : false,
+                                                        })
+                                                    });
+                                                    resolveOptions(options);
+                                                }
+                                            });
+
+                                        } else {
+                                            resolveOptions([]);
+                                        }
+
+
                                     } else {
                                         resolveOptions(args.constraints[0].value.options);
                                     }
@@ -79,6 +88,10 @@ export function IsSelect(options?: {
 
                         optionValidator.getOptions().then((options: any) => {
 
+                            if (options.length == 0) {
+                                resolve(true);
+                            }
+
                             let allValide = true;
                             let values = {};
                             options.forEach((option) => {
@@ -100,6 +113,7 @@ export function IsSelect(options?: {
 
 
                         }).catch((error) => {
+                            console.log(error);
                             resolve(false);
                         });
 

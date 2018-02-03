@@ -1,10 +1,7 @@
 import {registerDecorator, ValidationOptions, ValidationArguments} from "class-validator";
 
-export function IsDateRange(options?: {
-    minDate?: Date
-    maxDate?: Date,
+export function IsTime(options?: {
     display?: 'bubble' | 'center' | 'inline' | 'top' | 'bottom',
-    controls?: ['date' | 'time'],
     timeFormat?: string,
     steps?: {
         minute?: number,
@@ -26,10 +23,10 @@ export function IsDateRange(options?: {
 }) {
     return function (object: Object, propertyName: string) {
         registerDecorator({
-            name: "isDateRange",
+            name: "isTime",
             target: object.constructor,
             propertyName: propertyName,
-            constraints: [{'type': 'isDateRange', value: options}],
+            constraints: [{'type': 'isTime', value: options}],
             validator: {
                 validate(value: any, args: ValidationArguments) {
                     return true;

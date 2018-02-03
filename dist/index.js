@@ -409,6 +409,32 @@ var PersistableModel = /** @class */ (function () {
         return this.__firebaseDatabasePath;
     };
     /**
+     * get firebase data from base path /object/uuid/..
+     * @param {?} path
+     * @return {?} Observable
+     */
+    PersistableModel.prototype.getFirebaseData = function (path) {
+        if (this.getFirebaseDatabase()) {
+            var /** @type {?} */ a = path.split("/");
+            var /** @type {?} */ path = '';
+            var /** @type {?} */ i = 0;
+            a.forEach(function (segment) {
+                if (i == 3) {
+                    path = path + '/data';
+                }
+                path = path + '/' + segment;
+                i++;
+            });
+            var /** @type {?} */ p = this.__firebaseDatabaseRoot + '/' + this.getFirebaseDatabasePath().substr(this.__firebaseDatabaseRoot.length + 1).split("/")[0] + '/' + this.getFirebaseDatabasePath().substr(this.__firebaseDatabaseRoot.length + 1).split("/")[1] + path.substr(1);
+            return this.getFirebaseDatabase().object(p).snapshotChanges();
+        }
+        else {
+            return new Observable(function (observer) {
+                observer.next(null);
+            });
+        }
+    };
+    /**
      * set firebaseDatabaseObject
      * @param {?} firebaseDatabaseObject
      * @return {?}
@@ -588,11 +614,21 @@ var PersistableModel = /** @class */ (function () {
                 });
             }
             else {
-                toCreateModels.push(data);
+                if (typeof data == 'string') {
+                    var /** @type {?} */ d = [];
+                    d.push(data);
+                    toCreateModels.push(d);
+                }
+                else {
+                    toCreateModels.push(data);
+                }
             }
             toCreateModels.forEach(function (d) {
                 if (uuid === undefined || uuid === null) {
-                    uuid = d[self.getMetadataValue(property, 'isList', null, 'usePropertyAsUuid')];
+                    uuid = d !== undefined ? d[self.getMetadataValue(property, 'isList', null, 'usePropertyAsUuid')] : null;
+                }
+                if (typeof d == 'object' && d.length == 1 && d[0] !== undefined) {
+                    d = d[0];
                 }
                 var /** @type {?} */ n = null;
                 if (self.__appsAppModuleProvider === undefined) {
@@ -851,7 +887,8 @@ var PersistableModel = /** @class */ (function () {
      */
     PersistableModel.prototype.loadJson = function (json) {
         var /** @type {?} */ self = this;
-        var /** @type {?} */ model = (plainToClass(/** @type {?} */ (this.constructor), typeof json == 'string' ? JSON.parse(json) : json, { excludePrefixes: ["__"] }));
+        json = typeof json == 'string' ? JSON.parse(json) : json;
+        var /** @type {?} */ model = (plainToClass(/** @type {?} */ (this.constructor), json, { excludePrefixes: ["__"] }));
         return new Promise(function (resolve, reject) {
             if (model) {
                 var /** @type {?} */ propertiesWithValidationError_1 = {};
@@ -887,14 +924,17 @@ var PersistableModel = /** @class */ (function () {
      */
     PersistableModel.prototype.transformTypeFromMetadata = function (property, value) {
         var /** @type {?} */ self = this;
+        if (this.getMetadata(property, 'isTime').length) {
+            return typeof value == 'string' ? new Date(value) : (value ? value : new Date());
+        }
         if (this.getMetadata(property, 'isDate').length) {
-            return value ? new Date(value) : null;
+            return value ? new Date(value) : (value ? value : new Date());
         }
         if (this.getMetadata(property, 'isCalendar').length) {
-            return value ? new Date(value) : null;
+            return value ? new Date(value) : (value ? value : new Date());
         }
         if (this.getMetadata(property, 'isBirthDate').length) {
-            return value ? new Date(value) : null;
+            return value ? new Date(value) : (value ? value : new Date());
         }
         if (this.getMetadata(property, 'isDateRange').length) {
             return typeof value == 'object' ? value : [];
@@ -995,7 +1035,7 @@ var PersistableModel = /** @class */ (function () {
      */
     PersistableModel.prototype.serialize = function (noUnderScoreData, asObject) {
         var /** @type {?} */ json = '';
-        if (noUnderScoreData) {
+        if (noUnderScoreData || noUnderScoreData === undefined) {
             json = serialize(this, { excludePrefixes: ["__", "_"] });
         }
         else {
@@ -1054,7 +1094,7 @@ var PersistableModel = /** @class */ (function () {
      * @return {?}
      */
     PersistableModel.prototype.isArray = function (property) {
-        return typeof this[property] == 'object' ? (typeof this[property].length == 'number' ? true : false) : false;
+        return typeof this[property] == 'object' ? (this[property] !== null && typeof this[property].length == 'number' ? true : false) : false;
     };
     /**
      * get metadata contraints value
@@ -1129,6 +1169,7 @@ var PersistableModel = /** @class */ (function () {
             'isSelect': 'select',
             'isDateRange': 'dates',
             'isCalendar': 'date',
+            'isTime': 'time',
             'isNumpad': 'number',
             'customValidation': function (metadata) {
                 if (metadata.constraints[0].type && metadata.constraints[0].type && metadata.constraints[0].type.substr(0, 3) !== 'has') {
@@ -1289,13 +1330,15 @@ var PersistableModel = /** @class */ (function () {
         if (this.__conditionContraintsAffectedProperties[property] !== undefined) {
             Object.keys(this.__conditionContraintsAffectedProperties[property]).forEach(function (affectedProperty) {
                 var /** @type {?} */ result = validateSync(self, { groups: ["condition_" + affectedProperty] });
-                self.__conditionActionIfMatchesObserver[affectedProperty].next({
-                    action: self.__conditionActionIfMatchesAction[affectedProperty],
-                    state: result.length ? true : false
-                });
+                if (self.__conditionActionIfMatchesObserver[affectedProperty] !== undefined) {
+                    self.__conditionActionIfMatchesObserver[affectedProperty].next({
+                        action: self.__conditionActionIfMatchesAction[affectedProperty],
+                        state: result.length ? true : false
+                    });
+                }
                 self.recoverMissingProperty(affectedProperty);
                 self.__conditionActionIfMatchesRemovedProperties[affectedProperty] = result.length ? true : false;
-                if (self.__validatorObserver[affectedProperty]) {
+                if (self.__validatorObserver[affectedProperty] !== undefined) {
                     self.__validatorObserver[affectedProperty].next(result.length ? true : false);
                 }
             });
@@ -1548,8 +1591,13 @@ function HasConditions(options, actionIfMatches, validationOptions) {
                         options.forEach(function (condition) {
                             if (state) {
                                 if (condition.type == 'condition') {
-                                    if (!validator[condition.validator](args.object.__conditionContraintsPropertiesValue[condition.property] === undefined ? args.object[condition.property] : args.object.__conditionContraintsPropertiesValue[condition.property], condition.value, condition.validatorAdditionalArgument)) {
-                                        state = false;
+                                    if (condition.validator == 'equals' && value !== undefined && value !== null && value.length !== undefined && value.length == 0) {
+                                        state = true;
+                                    }
+                                    else {
+                                        if (!validator[condition.validator](args.object.__conditionContraintsPropertiesValue[condition.property] === undefined ? args.object[condition.property] : args.object.__conditionContraintsPropertiesValue[condition.property], condition.value, condition.validatorAdditionalArgument)) {
+                                            state = false;
+                                        }
                                     }
                                 }
                             }
@@ -1888,22 +1936,27 @@ function IsSelect(options) {
                             getOptions: function () {
                                 return new Promise(function (resolveOptions, rejectOptions) {
                                     if (optionValidator.source) {
-                                        get(optionValidator.source.url).type('json').end(function (response) {
-                                            var /** @type {?} */ options = [];
-                                            if (response.error) {
-                                                rejectOptions(response.error);
-                                            }
-                                            else {
-                                                response.body.forEach(function (item) {
-                                                    options.push({
-                                                        value: optionValidator._getPropertyFromObject(item, optionValidator.source.mapping.value),
-                                                        text: optionValidator._getPropertyFromObject(item, optionValidator.source.mapping.text),
-                                                        disabled: optionValidator.source.mapping.disabled !== undefined ? optionValidator._getPropertyFromObject(item, optionValidator.source.mapping.disabled) : false,
+                                        if (optionValidator.source.url.substr(0, 4) == 'http') {
+                                            get(optionValidator.source.url).type('json').end(function (response) {
+                                                var /** @type {?} */ options = [];
+                                                if (response.error) {
+                                                    rejectOptions(response.error);
+                                                }
+                                                else {
+                                                    response.body.forEach(function (item) {
+                                                        options.push({
+                                                            value: optionValidator.source.mapping.value !== null && optionValidator.source.mapping.value !== undefined ? optionValidator._getPropertyFromObject(item, optionValidator.source.mapping.value) : item,
+                                                            text: optionValidator._getPropertyFromObject(item, optionValidator.source.mapping.text),
+                                                            disabled: optionValidator.source.mapping.disabled !== undefined ? optionValidator._getPropertyFromObject(item, optionValidator.source.mapping.disabled) : false,
+                                                        });
                                                     });
-                                                });
-                                                resolveOptions(options);
-                                            }
-                                        });
+                                                    resolveOptions(options);
+                                                }
+                                            });
+                                        }
+                                        else {
+                                            resolveOptions([]);
+                                        }
                                     }
                                     else {
                                         resolveOptions(args.constraints[0].value.options);
@@ -1923,6 +1976,9 @@ function IsSelect(options) {
                             }
                         };
                         optionValidator.getOptions().then(function (options) {
+                            if (options.length == 0) {
+                                resolve(true);
+                            }
                             var /** @type {?} */ allValide = true;
                             var /** @type {?} */ values = {};
                             options.forEach(function (option) {
@@ -1942,6 +1998,7 @@ function IsSelect(options) {
                                 resolve(false);
                             }
                         }).catch(function (error) {
+                            console.log(error);
                             resolve(false);
                         });
                     });
@@ -1996,6 +2053,7 @@ function IsList(typeOfItems, usePropertyAsUuid, uniqueItems) {
                                         resolve(allValide);
                                     }
                                 }).catch(function (error) {
+                                    console.log(error);
                                     // validation error, so reject
                                     allValide = false;
                                     proceededValidations++;
@@ -2019,5 +2077,30 @@ function IsList(typeOfItems, usePropertyAsUuid, uniqueItems) {
     };
 }
 
-export { PersistableModel, HasConditions, HasDescription, HasLabel, HasPrecision, IsBirthDate, IsCalendar, IsDateRange, IsPassword, IsPhoneNumber, IsRating, IsText, IsNumpad, IsSelect, IsList };
+/**
+ * @param {?=} options
+ * @return {?}
+ */
+function IsTime(options) {
+    return function (object, propertyName) {
+        registerDecorator({
+            name: "isTime",
+            target: object.constructor,
+            propertyName: propertyName,
+            constraints: [{ 'type': 'isTime', value: options }],
+            validator: {
+                /**
+                 * @param {?} value
+                 * @param {?} args
+                 * @return {?}
+                 */
+                validate: function (value, args) {
+                    return true;
+                }
+            }
+        });
+    };
+}
+
+export { PersistableModel, HasConditions, HasDescription, HasLabel, HasPrecision, IsBirthDate, IsCalendar, IsDateRange, IsPassword, IsPhoneNumber, IsRating, IsText, IsNumpad, IsSelect, IsList, IsTime };
 export { ValidatorConstraint, Validate, ValidateNested, ValidateIf, IsDefined, Equals, NotEquals, IsEmpty, IsNotEmpty, IsIn, IsNotIn, IsOptional, IsBoolean, IsDate, IsNumber, IsInt, IsString, IsDateString, IsArray, IsEnum, IsDivisibleBy, IsPositive, IsNegative, Min, Max, MinDate, MaxDate, IsBooleanString, IsNumberString, Contains, NotContains, IsAlpha, IsAlphanumeric, IsAscii, IsBase64, IsByteLength, IsCreditCard, IsCurrency, IsEmail, IsFQDN, IsFullWidth, IsHalfWidth, IsVariableWidth, IsHexColor, IsHexadecimal, IsIP, IsISBN, IsISIN, IsISO8601, IsJSON, IsLowercase, IsMobilePhone, IsMongoId, IsMultibyte, IsSurrogatePair, IsUrl, IsUUID, IsUppercase, Length, MinLength, MaxLength, Matches, IsMilitaryTime, ArrayContains, ArrayNotContains, ArrayNotEmpty, ArrayMinSize, ArrayMaxSize, ArrayUnique } from 'class-validator/decorator/decorators';

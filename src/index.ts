@@ -15,6 +15,7 @@ export * from './module/validation/validators/IsText';
 export * from './module/validation/validators/IsNumpad';
 export * from './module/validation/validators/IsSelect';
 export * from './module/validation/validators/IsList';
+export * from './module/validation/validators/IsTime';
 export * from './module/interfaces/messages';
 export * from 'class-validator/decorator/decorators'
 

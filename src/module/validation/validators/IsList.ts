@@ -45,6 +45,7 @@ export function IsList(typeOfItems: any, usePropertyAsUuid?: string, uniqueItems
                                         resolve(allValide);
                                     }
                                 }).catch((error) => {
+                                    console.log(error);
                                     // validation error, so reject
                                     allValide = false;
                                     proceededValidations++;

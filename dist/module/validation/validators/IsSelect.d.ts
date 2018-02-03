@@ -3,7 +3,7 @@ export declare function IsSelect(options?: {
         url: string;
         mapping: {
             text: string | Function;
-            value: string | Function;
+            value?: string | Function;
             disabled?: boolean | Function;
             group?: string;
         };

@@ -1,8 +1,5 @@
-export declare function IsDateRange(options?: {
-    minDate?: Date;
-    maxDate?: Date;
+export declare function IsTime(options?: {
     display?: 'bubble' | 'center' | 'inline' | 'top' | 'bottom';
-    controls?: ['date' | 'time'];
     timeFormat?: string;
     steps?: {
         minute?: number;
