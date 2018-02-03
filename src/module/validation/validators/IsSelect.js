@@ -19,22 +19,27 @@ function IsSelect(options) {
                             getOptions: function () {
                                 return new Promise(function (resolveOptions, rejectOptions) {
                                     if (optionValidator.source) {
-                                        Unirest.get(optionValidator.source.url).type('json').end(function (response) {
-                                            var options = [];
-                                            if (response.error) {
-                                                rejectOptions(response.error);
-                                            }
-                                            else {
-                                                response.body.forEach(function (item) {
-                                                    options.push({
-                                                        value: optionValidator._getPropertyFromObject(item, optionValidator.source.mapping.value),
-                                                        text: optionValidator._getPropertyFromObject(item, optionValidator.source.mapping.text),
-                                                        disabled: optionValidator.source.mapping.disabled !== undefined ? optionValidator._getPropertyFromObject(item, optionValidator.source.mapping.disabled) : false,
+                                        if (optionValidator.source.url.substr(0, 4) == 'http') {
+                                            Unirest.get(optionValidator.source.url).type('json').end(function (response) {
+                                                var options = [];
+                                                if (response.error) {
+                                                    rejectOptions(response.error);
+                                                }
+                                                else {
+                                                    response.body.forEach(function (item) {
+                                                        options.push({
+                                                            value: optionValidator.source.mapping.value !== null && optionValidator.source.mapping.value !== undefined ? optionValidator._getPropertyFromObject(item, optionValidator.source.mapping.value) : item,
+                                                            text: optionValidator._getPropertyFromObject(item, optionValidator.source.mapping.text),
+                                                            disabled: optionValidator.source.mapping.disabled !== undefined ? optionValidator._getPropertyFromObject(item, optionValidator.source.mapping.disabled) : false,
+                                                        });
                                                     });
-                                                });
-                                                resolveOptions(options);
-                                            }
-                                        });
+                                                    resolveOptions(options);
+                                                }
+                                            });
+                                        }
+                                        else {
+                                            resolveOptions([]);
+                                        }
                                     }
                                     else {
                                         resolveOptions(args.constraints[0].value.options);
@@ -54,6 +59,9 @@ function IsSelect(options) {
                             }
                         };
                         optionValidator.getOptions().then(function (options) {
+                            if (options.length == 0) {
+                                resolve(true);
+                            }
                             var allValide = true;
                             var values = {};
                             options.forEach(function (option) {
@@ -73,6 +81,7 @@ function IsSelect(options) {
                                 resolve(false);
                             }
                         }).catch(function (error) {
+                            console.log(error);
                             resolve(false);
                         });
                     });

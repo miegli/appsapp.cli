@@ -2098,4 +2098,13 @@ export class PersistableModel {
         return this;
     }
 
+    /**
+     * check if model has errors or not
+     * @returns {boolean}
+     */
+    public isValid() {
+        return Object.keys(this.__validationErrors).length ? false : true;
+
+    }
+
 }

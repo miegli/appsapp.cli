@@ -1539,6 +1539,13 @@ var PersistableModel = /** @class */ (function () {
         this.__isAutosave = true;
         return this;
     };
+    /**
+     * check if model has errors or not
+     * @return {?}
+     */
+    PersistableModel.prototype.isValid = function () {
+        return Object.keys(this.__validationErrors).length ? false : true;
+    };
     return PersistableModel;
 }());
 

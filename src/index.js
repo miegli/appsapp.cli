@@ -18,4 +18,5 @@ __export(require("./module/validation/validators/IsText"));
 __export(require("./module/validation/validators/IsNumpad"));
 __export(require("./module/validation/validators/IsSelect"));
 __export(require("./module/validation/validators/IsList"));
+__export(require("./module/validation/validators/IsTime"));
 __export(require("class-validator/decorator/decorators"));

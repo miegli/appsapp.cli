@@ -547,4 +547,9 @@ export declare class PersistableModel {
      * @returns {this}
      */
     autosave(): this;
+    /**
+     * check if model has errors or not
+     * @returns {boolean}
+     */
+    isValid(): boolean;
 }

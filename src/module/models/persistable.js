@@ -409,6 +409,32 @@ var PersistableModel = /** @class */ (function () {
         return this.__firebaseDatabasePath;
     };
     /**
+     * get firebase data from base path /object/uuid/..
+     * @param string path
+     * @returns Observable
+     */
+    PersistableModel.prototype.getFirebaseData = function (path) {
+        if (this.getFirebaseDatabase()) {
+            var a = path.split("/");
+            var path = '';
+            var i = 0;
+            a.forEach(function (segment) {
+                if (i == 3) {
+                    path = path + '/data';
+                }
+                path = path + '/' + segment;
+                i++;
+            });
+            var p = this.__firebaseDatabaseRoot + '/' + this.getFirebaseDatabasePath().substr(this.__firebaseDatabaseRoot.length + 1).split("/")[0] + '/' + this.getFirebaseDatabasePath().substr(this.__firebaseDatabaseRoot.length + 1).split("/")[1] + path.substr(1);
+            return this.getFirebaseDatabase().object(p).snapshotChanges();
+        }
+        else {
+            return new rxjs_1.Observable(function (observer) {
+                observer.next(null);
+            });
+        }
+    };
+    /**
      * set firebaseDatabaseObject
      * @param firebaseDatabaseObject
      * @returns {PersistableModel}
@@ -586,11 +612,21 @@ var PersistableModel = /** @class */ (function () {
                 });
             }
             else {
-                toCreateModels.push(data);
+                if (typeof data == 'string') {
+                    var d = [];
+                    d.push(data);
+                    toCreateModels.push(d);
+                }
+                else {
+                    toCreateModels.push(data);
+                }
             }
             toCreateModels.forEach(function (d) {
                 if (uuid === undefined || uuid === null) {
-                    uuid = d[self.getMetadataValue(property, 'isList', null, 'usePropertyAsUuid')];
+                    uuid = d !== undefined ? d[self.getMetadataValue(property, 'isList', null, 'usePropertyAsUuid')] : null;
+                }
+                if (typeof d == 'object' && d.length == 1 && d[0] !== undefined) {
+                    d = d[0];
                 }
                 var n = null;
                 if (self.__appsAppModuleProvider === undefined) {
@@ -850,7 +886,8 @@ var PersistableModel = /** @class */ (function () {
      */
     PersistableModel.prototype.loadJson = function (json) {
         var self = this;
-        var model = class_transformer_1.plainToClass(this.constructor, typeof json == 'string' ? JSON.parse(json) : json, { excludePrefixes: ["__"] });
+        json = typeof json == 'string' ? JSON.parse(json) : json;
+        var model = class_transformer_1.plainToClass(this.constructor, json, { excludePrefixes: ["__"] });
         return new Promise(function (resolve, reject) {
             if (model) {
                 var propertiesWithValidationError_1 = {};
@@ -886,14 +923,17 @@ var PersistableModel = /** @class */ (function () {
      */
     PersistableModel.prototype.transformTypeFromMetadata = function (property, value) {
         var self = this;
+        if (this.getMetadata(property, 'isTime').length) {
+            return typeof value == 'string' ? new Date(value) : (value ? value : new Date());
+        }
         if (this.getMetadata(property, 'isDate').length) {
-            return value ? new Date(value) : null;
+            return value ? new Date(value) : (value ? value : new Date());
         }
         if (this.getMetadata(property, 'isCalendar').length) {
-            return value ? new Date(value) : null;
+            return value ? new Date(value) : (value ? value : new Date());
         }
         if (this.getMetadata(property, 'isBirthDate').length) {
-            return value ? new Date(value) : null;
+            return value ? new Date(value) : (value ? value : new Date());
         }
         if (this.getMetadata(property, 'isDateRange').length) {
             return typeof value == 'object' ? value : [];
@@ -994,7 +1034,7 @@ var PersistableModel = /** @class */ (function () {
      */
     PersistableModel.prototype.serialize = function (noUnderScoreData, asObject) {
         var json = '';
-        if (noUnderScoreData) {
+        if (noUnderScoreData || noUnderScoreData === undefined) {
             json = class_transformer_1.serialize(this, { excludePrefixes: ["__", "_"] });
         }
         else {
@@ -1052,7 +1092,7 @@ var PersistableModel = /** @class */ (function () {
      * @returns {boolean}
      */
     PersistableModel.prototype.isArray = function (property) {
-        return typeof this[property] == 'object' ? (typeof this[property].length == 'number' ? true : false) : false;
+        return typeof this[property] == 'object' ? (this[property] !== null && typeof this[property].length == 'number' ? true : false) : false;
     };
     /**
      * get metadata contraints value
@@ -1127,6 +1167,7 @@ var PersistableModel = /** @class */ (function () {
             'isSelect': 'select',
             'isDateRange': 'dates',
             'isCalendar': 'date',
+            'isTime': 'time',
             'isNumpad': 'number',
             'customValidation': function (metadata) {
                 if (metadata.constraints[0].type && metadata.constraints[0].type && metadata.constraints[0].type.substr(0, 3) !== 'has') {
@@ -1281,13 +1322,15 @@ var PersistableModel = /** @class */ (function () {
         if (this.__conditionContraintsAffectedProperties[property] !== undefined) {
             Object.keys(this.__conditionContraintsAffectedProperties[property]).forEach(function (affectedProperty) {
                 var result = class_validator_1.validateSync(self, { groups: ["condition_" + affectedProperty] });
-                self.__conditionActionIfMatchesObserver[affectedProperty].next({
-                    action: self.__conditionActionIfMatchesAction[affectedProperty],
-                    state: result.length ? true : false
-                });
+                if (self.__conditionActionIfMatchesObserver[affectedProperty] !== undefined) {
+                    self.__conditionActionIfMatchesObserver[affectedProperty].next({
+                        action: self.__conditionActionIfMatchesAction[affectedProperty],
+                        state: result.length ? true : false
+                    });
+                }
                 self.recoverMissingProperty(affectedProperty);
                 self.__conditionActionIfMatchesRemovedProperties[affectedProperty] = result.length ? true : false;
-                if (self.__validatorObserver[affectedProperty]) {
+                if (self.__validatorObserver[affectedProperty] !== undefined) {
                     self.__validatorObserver[affectedProperty].next(result.length ? true : false);
                 }
             });
