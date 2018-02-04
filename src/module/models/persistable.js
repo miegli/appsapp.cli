@@ -411,7 +411,7 @@ var PersistableModel = /** @class */ (function () {
     /**
      * get firebase data from base path /object/uuid/..
      * @param string path
-     * @returns Observable
+     * @returns Promise
      */
     PersistableModel.prototype.getFirebaseData = function (path) {
         if (this.getFirebaseDatabase()) {
@@ -426,11 +426,11 @@ var PersistableModel = /** @class */ (function () {
                 i++;
             });
             var p = this.__firebaseDatabaseRoot + '/' + this.getFirebaseDatabasePath().substr(this.__firebaseDatabaseRoot.length + 1).split("/")[0] + '/' + this.getFirebaseDatabasePath().substr(this.__firebaseDatabaseRoot.length + 1).split("/")[1] + path.substr(1);
-            return this.getFirebaseDatabase().object(p).snapshotChanges();
+            return this.getFirebaseDatabase().object(p).query.once('value');
         }
         else {
-            return new rxjs_1.Observable(function (observer) {
-                observer.next(null);
+            return new Promise(function (resolve, reject) {
+                resolve(null);
             });
         }
     };
@@ -685,6 +685,7 @@ var PersistableModel = /** @class */ (function () {
                 }
             });
             var t = this.getPropertyValue(property);
+            console.log(t, toAddModels);
             toAddModels.forEach(function (n) {
                 t.push(n);
             });
