@@ -55,6 +55,45 @@ admin.database().ref("_sha1").on('value', (snapshot) => {
     decryptHashes = snapshot.val();
 });
 
+/**
+ * load all models from config constructors
+ */
+
+var self = this;
+
+admin.database().ref('_config').once('value', (snapshot) => {
+
+    var config = snapshot.val();
+
+    /**
+     * first eval
+     */
+    Object.keys(config).forEach((model) => {
+        if (config[model].constructor !== undefined) {
+            eval(base64.decode(config[model].constructor));
+        }
+    });
+
+    /**
+     * second eval, must be done two times because of self-referencing injections
+     */
+    Object.keys(config).forEach((model) => {
+        if (config[model].constructor !== undefined) {
+            eval(base64.decode(config[model].constructor));
+        }
+    });
+
+
+});
+
+admin.database().ref('_config').on('child_changed', (snapshot) => {
+
+    var config = snapshot.val();
+    if (config.constructor !== undefined) {
+        eval(base64.decode(config.constructor));
+    }
+});
+
 
 /**
  * constructor loader
@@ -403,7 +442,7 @@ function call(action, data) {
 
                     if (config && config['constructor'] !== undefined) {
 
-                        eval(base64.decode(config.constructor));
+                       // eval(base64.decode(config.constructor));
                         model = new global[action.object];
 
                         model.loadJson(data).then(() => {
