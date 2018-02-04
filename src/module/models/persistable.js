@@ -1528,6 +1528,13 @@ var PersistableModel = /** @class */ (function () {
         this.__isAutosave = true;
         return this;
     };
+    /**
+     * check if model has errors or not
+     * @returns {boolean}
+     */
+    PersistableModel.prototype.isValid = function () {
+        return Object.keys(this.__validationErrors).length ? false : true;
+    };
     return PersistableModel;
 }());
 exports.PersistableModel = PersistableModel;

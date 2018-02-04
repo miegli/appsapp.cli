@@ -24,7 +24,7 @@
     "angular2-uuid": "^1.1.1",
     "base-64": "^0.1.0",
     "node-cmd": "^3.0.0",
-    "appsapp-cli": "^1.6.120",
+    "appsapp-cli": "^1.6.121",
     "unirest": "^0.5.1"
   },
   "private": true
