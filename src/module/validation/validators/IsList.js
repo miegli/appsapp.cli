@@ -17,6 +17,13 @@ function IsList(typeOfItems, usePropertyAsUuid, uniqueItems) {
                         if (value.length == 0) {
                             resolve(true);
                         }
+                        if (typeof value.forEach !== 'function') {
+                            var tmp = [];
+                            Object.keys(value).forEach(function (v) {
+                                tmp.push(value[v]);
+                            });
+                            value = tmp;
+                        }
                         value.forEach(function (itemOriginal) {
                             var item = null;
                             try {

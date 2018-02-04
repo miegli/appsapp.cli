@@ -204,9 +204,9 @@ export declare class PersistableModel {
     /**
      * get firebase data from base path /object/uuid/..
      * @param string path
-     * @returns Observable
+     * @returns Promise
      */
-    getFirebaseData(path: string): Observable<any>;
+    getFirebaseData(path: string): Promise<any>;
     /**
      * set firebaseDatabaseObject
      * @param firebaseDatabaseObject

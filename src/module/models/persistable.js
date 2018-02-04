@@ -586,6 +586,27 @@ var PersistableModel = /** @class */ (function () {
         return properties;
     };
     /**
+     * get properties
+     * @param stringify
+     */
+    PersistableModel.prototype.convertListPropertiesFromArrayToObject = function () {
+        var self = this;
+        Object.keys(self).forEach(function (property) {
+            if (property.substr(0, 1) !== '_' && self.getMetadataValue(property, 'isList', null, 'usePropertyAsUuid')) {
+                var tmp_1 = {}, usePropertyAsUuid_1 = self.getMetadataValue(property, 'isList', null, 'usePropertyAsUuid');
+                if (usePropertyAsUuid_1 && usePropertyAsUuid_1 !== undefined && usePropertyAsUuid_1 !== true) {
+                    self.getPropertyValue(property).forEach(function (val) {
+                        if (val[usePropertyAsUuid_1] !== undefined) {
+                            tmp_1[val[usePropertyAsUuid_1]] = val;
+                        }
+                    });
+                    self[property] = tmp_1;
+                }
+            }
+        });
+        return this;
+    };
+    /**
      * add a new list entry
      * @param property
      * @param data (json object, persistable model or array of those
