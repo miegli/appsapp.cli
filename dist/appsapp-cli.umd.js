@@ -677,7 +677,6 @@ var PersistableModel = /** @class */ (function () {
                 }
             });
             var /** @type {?} */ t = this.getPropertyValue(property);
-            console.log(t, toAddModels);
             toAddModels.forEach(function (n) {
                 t.push(n);
             });
