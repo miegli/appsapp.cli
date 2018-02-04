@@ -409,30 +409,22 @@ var PersistableModel = /** @class */ (function () {
         return this.__firebaseDatabasePath;
     };
     /**
-     * get firebase data from base path /object/uuid/..
+     * get firebase session data path
      * @param {?} path
-     * @return {?} Promise
+     * @return {?} string
      */
-    PersistableModel.prototype.getFirebaseData = function (path) {
-        if (this.getFirebaseDatabase()) {
-            var /** @type {?} */ a = path.split("/");
-            var /** @type {?} */ path = '';
-            var /** @type {?} */ i = 0;
-            a.forEach(function (segment) {
-                if (i == 3) {
-                    path = path + '/data';
-                }
-                path = path + '/' + segment;
-                i++;
-            });
-            var /** @type {?} */ p = this.__firebaseDatabaseRoot + '/' + this.getFirebaseDatabasePath().substr(this.__firebaseDatabaseRoot.length + 1).split("/")[0] + '/' + this.getFirebaseDatabasePath().substr(this.__firebaseDatabaseRoot.length + 1).split("/")[1] + path.substr(1);
-            return this.getFirebaseDatabase().object(p).query.once('value');
-        }
-        else {
-            return new Promise(function (resolve, reject) {
-                resolve(null);
-            });
-        }
+    PersistableModel.prototype.getFirebaseDatabaseSessionPath = function (path) {
+        var /** @type {?} */ a = path.split("/");
+        var /** @type {?} */ path = '';
+        var /** @type {?} */ i = 0;
+        a.forEach(function (segment) {
+            if (i == 3) {
+                path = path + '/data';
+            }
+            path = path + '/' + segment;
+            i++;
+        });
+        return this.__firebaseDatabaseRoot + '/' + this.getFirebaseDatabasePath().substr(this.__firebaseDatabaseRoot.length + 1).split("/")[0] + '/' + this.getFirebaseDatabasePath().substr(this.__firebaseDatabaseRoot.length + 1).split("/")[1] + path.substr(1);
     };
     /**
      * set firebaseDatabaseObject
@@ -963,6 +955,13 @@ var PersistableModel = /** @class */ (function () {
         }
         if (this.getMetadata(property, 'isList').length) {
             var /** @type {?} */ valueAsObjects_1 = [];
+            if (typeof value.forEach !== 'function') {
+                var /** @type {?} */ tmp = [];
+                Object.keys(value).forEach(function (v) {
+                    tmp.push(value[v]);
+                });
+                value = tmp;
+            }
             if (value.length) {
                 value.forEach(function (itemOriginal) {
                     if (itemOriginal instanceof PersistableModel == false) {

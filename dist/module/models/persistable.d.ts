@@ -202,11 +202,11 @@ export declare class PersistableModel {
      */
     getFirebaseDatabasePath(): string;
     /**
-     * get firebase data from base path /object/uuid/..
+     * get firebase session data path
      * @param string path
-     * @returns Promise
+     * @returns string
      */
-    getFirebaseData(path: string): Promise<any>;
+    getFirebaseDatabaseSessionPath(path: string): string;
     /**
      * set firebaseDatabaseObject
      * @param firebaseDatabaseObject

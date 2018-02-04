@@ -1,4 +1,4 @@
-import {AngularFireDatabase, AngularFireObject} from "angularfire2/database";
+import {AngularFireDatabase, AngularFireObject, DatabaseQuery} from "angularfire2/database";
 import {validate, validateSync} from "class-validator";
 import {plainToClass, serialize} from "class-transformer";
 import {AngularFireAuth} from "angularfire2/auth";
@@ -9,6 +9,7 @@ import {AppsappModuleProviderMessages} from "../interfaces/messages";
 import {HttpClient} from "@angular/common/http";
 import * as objectHash from 'object-hash';
 import {Observable, Observer} from 'rxjs';
+
 
 declare var global: any;
 
@@ -591,31 +592,24 @@ export class PersistableModel {
     }
 
     /**
-     * get firebase data from base path /object/uuid/..
+     * get firebase session data path
      * @param string path
-     * @returns Promise
+     * @returns string
      */
-    public getFirebaseData(path: string) {
+    public getFirebaseDatabaseSessionPath(path: string) {
 
-        if (this.getFirebaseDatabase()) {
-            var a = path.split("/");
-            var path = '';
-            var  i = 0;
-            a.forEach((segment) => {
-                if (i == 3) {
+        var a = path.split("/");
+        var path = '';
+        var i = 0;
+        a.forEach((segment) => {
+            if (i == 3) {
                 path = path + '/data';
-                }
-                path = path + '/' + segment;
-                i++;
-            });
+            }
+            path = path + '/' + segment;
+            i++;
+        });
 
-            var p = this.__firebaseDatabaseRoot + '/' + this.getFirebaseDatabasePath().substr(this.__firebaseDatabaseRoot.length+1).split("/")[0] + '/' + this.getFirebaseDatabasePath().substr(this.__firebaseDatabaseRoot.length+1).split("/")[1] + path.substr(1);
-            return this.getFirebaseDatabase().object(p).query.once('value');
-        } else {
-            return new Promise(function (resolve, reject) {
-                resolve(null);
-            });
-        }
+       return this.__firebaseDatabaseRoot + '/' + this.getFirebaseDatabasePath().substr(this.__firebaseDatabaseRoot.length + 1).split("/")[0] + '/' + this.getFirebaseDatabasePath().substr(this.__firebaseDatabaseRoot.length + 1).split("/")[1] + path.substr(1);
 
     }
 
@@ -937,7 +931,7 @@ export class PersistableModel {
             );
 
             var t = this.getPropertyValue(property);
-            console.log(t,toAddModels);
+
             toAddModels.forEach((n) => {
                 t.push(n);
             });
@@ -1301,7 +1295,7 @@ export class PersistableModel {
         let self = this;
 
         if (this.getMetadata(property, 'isTime').length) {
-          return typeof value == 'string' ? new Date(value) : (value ? value : new Date());
+            return typeof value == 'string' ? new Date(value) : (value ? value : new Date());
 
         }
 
@@ -1326,6 +1320,15 @@ export class PersistableModel {
 
 
             let valueAsObjects = [];
+
+            if (typeof value.forEach !== 'function') {
+                var tmp = [];
+                Object.keys(value).forEach((v) => {
+                    tmp.push(value[v]);
+                });
+                value = tmp;
+            }
+
             if (value.length) {
                 value.forEach((itemOriginal) => {
                     if (itemOriginal instanceof PersistableModel == false) {
