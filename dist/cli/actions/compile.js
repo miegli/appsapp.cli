@@ -111,7 +111,7 @@ findModels = function () {
             // post process inject dependencies for list decorator
             Object.keys(build).forEach((classname) => {
                 var injectedRequire = {};
-                var regex = new RegExp(/IsList\((\w+?)\)/gm);
+                var regex = new RegExp(/IsList\((\w+?)[\), ]/gm);
                 var match = build[classname].match(regex);
                 if (match) {
                     match.forEach((m) => {
