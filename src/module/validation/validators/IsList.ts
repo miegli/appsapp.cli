@@ -23,6 +23,14 @@ export function IsList(typeOfItems: any, usePropertyAsUuid?: string, uniqueItems
                             resolve(true);
                         }
 
+                        if (typeof value.forEach !== 'function') {
+                            var tmp = [];
+                            Object.keys(value).forEach((v) => {
+                                tmp.push(value[v]);
+                            });
+                            value = tmp;
+                        }
+
                         value.forEach((itemOriginal) => {
 
                             let item = null;

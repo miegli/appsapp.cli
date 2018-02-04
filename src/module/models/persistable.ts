@@ -815,6 +815,33 @@ export class PersistableModel {
 
     }
 
+    /**
+     * get properties
+     * @param stringify
+     */
+    public convertListPropertiesFromArrayToObject() {
+
+        let self = this;
+
+        Object.keys(self).forEach((property) => {
+            if (property.substr(0, 1) !== '_' && self.getMetadataValue(property, 'isList', null, 'usePropertyAsUuid')) {
+                let tmp = {}, usePropertyAsUuid = self.getMetadataValue(property, 'isList', null, 'usePropertyAsUuid');
+
+                if (usePropertyAsUuid && usePropertyAsUuid !== undefined && usePropertyAsUuid !== true) {
+                    self.getPropertyValue(property).forEach((val) => {
+                        if (val[usePropertyAsUuid] !== undefined) {
+                            tmp[val[usePropertyAsUuid]] = val;
+                        }
+                    });
+                    self[property] = tmp;
+                }
+            }
+        });
+
+        return this;
+
+
+    }
 
     /**
      * add a new list entry
