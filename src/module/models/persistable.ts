@@ -341,6 +341,48 @@ export class PersistableModel {
 
 
     /**
+     * trigger a webhook url
+     * @param {string} url
+     * @param {"get" | "post" | "head" | "put" | "patch" | "delete"} method
+     * @param {"json" | "html" | "xml"} type
+     * @returns {Observable<any>}
+     */
+    public webhook(url: string, method?: 'get' | 'post' | 'head' | 'put' | 'patch' | 'delete', type?: 'json' | 'html' | 'xml') {
+
+        var self = this;
+
+        return new Observable<any>((observer: Observer<any>) => {
+
+
+            if (self.__isLoaded) {
+                self.getPersistenceManager().trigger(self, observer, {
+                    name: 'webhook',
+                    data: {
+                        url: url,
+                        method: method,
+                        type: type
+                    }
+                });
+            } else {
+                self.loaded().then((model) => {
+                    self.getPersistenceManager().trigger(model, observer, {
+                        name: 'webhook',
+                        data: {
+                            url: url,
+                            method: method,
+                            type: type
+                        }
+                    });
+                });
+            }
+
+
+        });
+
+    }
+
+
+    /**
      * save with optional observable
      * @param action
      * @param silent
