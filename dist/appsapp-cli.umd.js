@@ -207,6 +207,40 @@ var PersistableModel = /** @class */ (function () {
         });
     };
     /**
+     * trigger a webhook url
+     * @param {?} url
+     * @param {?=} method
+     * @param {?=} type
+     * @return {?}
+     */
+    PersistableModel.prototype.webhook = function (url, method, type) {
+        var /** @type {?} */ self = this;
+        return new rxjs.Observable(function (observer) {
+            if (self.__isLoaded) {
+                self.getPersistenceManager().trigger(self, observer, {
+                    name: 'webhook',
+                    data: {
+                        url: url,
+                        method: method,
+                        type: type
+                    }
+                });
+            }
+            else {
+                self.loaded().then(function (model) {
+                    self.getPersistenceManager().trigger(model, observer, {
+                        name: 'webhook',
+                        data: {
+                            url: url,
+                            method: method,
+                            type: type
+                        }
+                    });
+                });
+            }
+        });
+    };
+    /**
      * save with optional observable
      * @param {?=} action
      * @param {?=} silent

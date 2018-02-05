@@ -131,6 +131,14 @@ export declare class PersistableModel {
      */
     trigger(action: string): Observable<any>;
     /**
+     * trigger a webhook url
+     * @param {string} url
+     * @param {"get" | "post" | "head" | "put" | "patch" | "delete"} method
+     * @param {"json" | "html" | "xml"} type
+     * @returns {Observable<any>}
+     */
+    webhook(url: string, method?: 'get' | 'post' | 'head' | 'put' | 'patch' | 'delete', type?: 'json' | 'html' | 'xml'): Observable<any>;
+    /**
      * save with optional observable
      * @param action
      * @param silent
