@@ -210,6 +210,40 @@ var PersistableModel = /** @class */ (function () {
         });
     };
     /**
+     * trigger a webhook url
+     * @param {string} url
+     * @param {"get" | "post" | "head" | "put" | "patch" | "delete"} method
+     * @param {"json" | "html" | "xml"} type
+     * @returns {Observable<any>}
+     */
+    PersistableModel.prototype.webhook = function (url, method, type) {
+        var self = this;
+        return new rxjs_1.Observable(function (observer) {
+            if (self.__isLoaded) {
+                self.getPersistenceManager().trigger(self, observer, {
+                    name: 'webhook',
+                    data: {
+                        url: url,
+                        method: method,
+                        type: type
+                    }
+                });
+            }
+            else {
+                self.loaded().then(function (model) {
+                    self.getPersistenceManager().trigger(model, observer, {
+                        name: 'webhook',
+                        data: {
+                            url: url,
+                            method: method,
+                            type: type
+                        }
+                    });
+                });
+            }
+        });
+    };
+    /**
      * save with optional observable
      * @param action
      * @param silent
