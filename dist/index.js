@@ -1738,6 +1738,33 @@ function HasLabel(label, validationOptions) {
 }
 
 /**
+ * @param {?} label
+ * @param {?=} validationOptions
+ * @return {?}
+ */
+function HasPlaceholder(label, validationOptions) {
+    return function (object, propertyName) {
+        registerDecorator({
+            name: "hasPlaceholder",
+            target: object.constructor,
+            propertyName: propertyName,
+            constraints: [{ 'type': 'hasPlaceholder', 'value': label }],
+            options: validationOptions,
+            validator: {
+                /**
+                 * @param {?} value
+                 * @param {?} args
+                 * @return {?}
+                 */
+                validate: function (value, args) {
+                    return true;
+                }
+            }
+        });
+    };
+}
+
+/**
  * @param {?} precision
  * @param {?=} validationOptions
  * @return {?}
@@ -2170,5 +2197,5 @@ function IsTime(options) {
     };
 }
 
-export { PersistableModel, HasConditions, HasDescription, HasLabel, HasPrecision, IsBirthDate, IsCalendar, IsDateRange, IsPassword, IsPhoneNumber, IsRating, IsText, IsNumpad, IsSelect, IsList, IsTime };
+export { PersistableModel, HasConditions, HasDescription, HasLabel, HasPlaceholder, HasPrecision, IsBirthDate, IsCalendar, IsDateRange, IsPassword, IsPhoneNumber, IsRating, IsText, IsNumpad, IsSelect, IsList, IsTime };
 export { ValidatorConstraint, Validate, ValidateNested, ValidateIf, IsDefined, Equals, NotEquals, IsEmpty, IsNotEmpty, IsIn, IsNotIn, IsOptional, IsBoolean, IsDate, IsNumber, IsInt, IsString, IsDateString, IsArray, IsEnum, IsDivisibleBy, IsPositive, IsNegative, Min, Max, MinDate, MaxDate, IsBooleanString, IsNumberString, Contains, NotContains, IsAlpha, IsAlphanumeric, IsAscii, IsBase64, IsByteLength, IsCreditCard, IsCurrency, IsEmail, IsFQDN, IsFullWidth, IsHalfWidth, IsVariableWidth, IsHexColor, IsHexadecimal, IsIP, IsISBN, IsISIN, IsISO8601, IsJSON, IsLowercase, IsMobilePhone, IsMongoId, IsMultibyte, IsSurrogatePair, IsUrl, IsUUID, IsUppercase, Length, MinLength, MaxLength, Matches, IsMilitaryTime, ArrayContains, ArrayNotContains, ArrayNotEmpty, ArrayMinSize, ArrayMaxSize, ArrayUnique } from 'class-validator/decorator/decorators';

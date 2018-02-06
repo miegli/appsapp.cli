@@ -4,6 +4,7 @@ export * from './module/models/persistable';
 export * from './module/validation/validators/HasConditions';
 export * from './module/validation/validators/HasDescription';
 export * from './module/validation/validators/HasLabel';
+export * from './module/validation/validators/HasPlaceholder';
 export * from './module/validation/validators/HasPrecision';
 export * from './module/validation/validators/IsBirthDate';
 export * from './module/validation/validators/IsCalendar';

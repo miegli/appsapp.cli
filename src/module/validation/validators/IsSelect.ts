@@ -15,6 +15,7 @@ export function IsSelect(options?: {
         },
         type?: 'json' | 'jsonp'
     },
+    display?: 'bubble' | 'center' | 'inline' | 'top' | 'bottom',
     options?: [
         {
             value: any,

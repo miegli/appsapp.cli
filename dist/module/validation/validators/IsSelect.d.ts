@@ -9,6 +9,7 @@ export declare function IsSelect(options?: {
         };
         type?: 'json' | 'jsonp';
     };
+    display?: 'bubble' | 'center' | 'inline' | 'top' | 'bottom';
     options?: [{
         value: any;
         disabled?: boolean;

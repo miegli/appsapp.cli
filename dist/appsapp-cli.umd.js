@@ -1736,6 +1736,33 @@ function HasLabel(label, validationOptions) {
 }
 
 /**
+ * @param {?} label
+ * @param {?=} validationOptions
+ * @return {?}
+ */
+function HasPlaceholder(label, validationOptions) {
+    return function (object, propertyName) {
+        classValidator.registerDecorator({
+            name: "hasPlaceholder",
+            target: object.constructor,
+            propertyName: propertyName,
+            constraints: [{ 'type': 'hasPlaceholder', 'value': label }],
+            options: validationOptions,
+            validator: {
+                /**
+                 * @param {?} value
+                 * @param {?} args
+                 * @return {?}
+                 */
+                validate: function (value, args) {
+                    return true;
+                }
+            }
+        });
+    };
+}
+
+/**
  * @param {?} precision
  * @param {?=} validationOptions
  * @return {?}
@@ -2172,6 +2199,7 @@ exports.PersistableModel = PersistableModel;
 exports.HasConditions = HasConditions;
 exports.HasDescription = HasDescription;
 exports.HasLabel = HasLabel;
+exports.HasPlaceholder = HasPlaceholder;
 exports.HasPrecision = HasPrecision;
 exports.IsBirthDate = IsBirthDate;
 exports.IsCalendar = IsCalendar;
