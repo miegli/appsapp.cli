@@ -18,15 +18,18 @@ build = function (program) {
     return new Promise(function (resolve, reject) {
 
         gulp.task("compile", function () {
+
             var tsProject = ts.createProject(files.getCurrentDirectory() + "/tsconfig.json", {
                 target: 'es5',
                 module: "commonjs",
                 noResolve: false
             });
 
-            return tsProject.src()
-                .pipe(tsProject().src())
-                .js.pipe(gulp.dest("./_tmpdist"));
+            var tsResult = gulp.src(files.getCurrentDirectory()+"/src/**/*.ts") // or tsProject.src()
+                .pipe(tsProject());
+
+            return tsResult.js.pipe(gulp.dest('./_tmpdist'));
+
         });
 
         gulp.start('compile', function () {
@@ -165,8 +168,7 @@ findModels = function () {
 
             queue.subscribe((next) => {
             }, (err) => {
-            }, (complete) => {
-
+            }, () => {
                 fsextra.remove("./_tmpdist", function (err) {
                     status.stop();
                     resolve(chalk.green('Backend functions successfully updated.'));
