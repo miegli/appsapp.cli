@@ -25,7 +25,7 @@ build = function (program) {
             });
 
             return tsProject.src()
-                .pipe(tsProject())
+                .pipe(tsProject().src())
                 .js.pipe(gulp.dest("./_tmpdist"));
         });
 
