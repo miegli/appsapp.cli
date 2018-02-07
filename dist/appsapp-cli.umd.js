@@ -4,6 +4,26 @@
 	(factory((global['appsapp-cli'] = {}),global.classValidator,global.classTransformer,global.angular2Uuid,global.objectHash,global.rxjs,global.Unirest,global.decorators));
 }(this, (function (exports,classValidator,classTransformer,angular2Uuid,objectHash,rxjs,Unirest,decorators) { 'use strict';
 
+/**
+ * @fileoverview added by tsickle
+ * @suppress {checkTypes} checked by tsc
+ */
+/**
+ * @record
+ */
+
+/**
+ * @record
+ */
+
+/**
+ * @record
+ */
+
+/**
+ * @record
+ */
+
 var PersistableModel = /** @class */ (function () {
     /**
      * PersistanceManager as an optional argument when changes were persisted to stable database
@@ -49,25 +69,29 @@ var PersistableModel = /** @class */ (function () {
      *
      * @return {?}
      */
-    PersistableModel.prototype.__init = function () {
+    PersistableModel.prototype.__init = /**
+     *
+     * @return {?}
+     */
+    function () {
         var _this = this;
         var /** @type {?} */ self = this;
         /**
-         * create observerable and observer for handling the models data changes
-         */
+                 * create observerable and observer for handling the models data changes
+                 */
         this.__editedObservable = new rxjs.Observable(function (observer) {
             self.__editedObserver = observer;
         });
         /**
-         * create observerable and observer for handling the models data changes
-         */
+                 * create observerable and observer for handling the models data changes
+                 */
         this.__observable = new rxjs.Observable(function (observer) {
             self.__observer = observer;
             self.__observer.next(_this);
         });
         /**
-         * creates and update bindings for getProperty()-Method
-         */
+                 * creates and update bindings for getProperty()-Method
+                 */
         this.__observable.subscribe(function (next) {
             if (!self.hasPendingChanges() || self.getFirebaseDatabase() === undefined) {
                 if (self.__bindingsObserver) {
@@ -93,7 +117,11 @@ var PersistableModel = /** @class */ (function () {
      * get http client
      * @return {?} HttpClient
      */
-    PersistableModel.prototype.getHttpClient = function () {
+    PersistableModel.prototype.getHttpClient = /**
+     * get http client
+     * @return {?} HttpClient
+     */
+    function () {
         return this.__httpClient;
     };
     /**
@@ -101,7 +129,12 @@ var PersistableModel = /** @class */ (function () {
      * @param {?} http
      * @return {?}
      */
-    PersistableModel.prototype.setHttpClient = function (http) {
+    PersistableModel.prototype.setHttpClient = /**
+     * set http client
+     * @param {?} http
+     * @return {?}
+     */
+    function (http) {
         this.__httpClient = http;
         return this;
     };
@@ -111,7 +144,13 @@ var PersistableModel = /** @class */ (function () {
      * @param {?} value
      * @return {?}
      */
-    PersistableModel.prototype.update = function (property, value) {
+    PersistableModel.prototype.update = /**
+     * update property
+     * @param {?} property
+     * @param {?} value
+     * @return {?}
+     */
+    function (property, value) {
         var /** @type {?} */ observer = this.setProperty(property, value).setHasNoChanges(property).getPropertyObserver(property);
         if (observer) {
             observer.next(value);
@@ -119,7 +158,7 @@ var PersistableModel = /** @class */ (function () {
         try {
             delete this.__bindings[property];
         }
-        catch (e) {
+        catch (/** @type {?} */ e) {
             // e
         }
         return this;
@@ -128,7 +167,11 @@ var PersistableModel = /** @class */ (function () {
      * call next method on observer
      * @return {?}
      */
-    PersistableModel.prototype.emit = function () {
+    PersistableModel.prototype.emit = /**
+     * call next method on observer
+     * @return {?}
+     */
+    function () {
         if (this.__observer) {
             this.__observer.next(this);
         }
@@ -139,7 +182,12 @@ var PersistableModel = /** @class */ (function () {
      * @param {?=} action
      * @return {?}
      */
-    PersistableModel.prototype.saveWithPromise = function (action) {
+    PersistableModel.prototype.saveWithPromise = /**
+     * save with optional observable
+     * @param {?=} action
+     * @return {?}
+     */
+    function (action) {
         var /** @type {?} */ self = this;
         return new Promise(function (resolve, reject) {
             self.save(action).subscribe(function (next) {
@@ -155,7 +203,12 @@ var PersistableModel = /** @class */ (function () {
      * @param {?} action
      * @return {?}
      */
-    PersistableModel.prototype.action = function (action) {
+    PersistableModel.prototype.action = /**
+     * execute cation
+     * @param {?} action
+     * @return {?}
+     */
+    function (action) {
         var /** @type {?} */ self = this;
         var /** @type {?} */ observable = new rxjs.Observable(function (observer) {
             if (self.__persistenceManager) {
@@ -183,7 +236,12 @@ var PersistableModel = /** @class */ (function () {
      * @param {?} action
      * @return {?}
      */
-    PersistableModel.prototype.trigger = function (action) {
+    PersistableModel.prototype.trigger = /**
+     * trigger custom action
+     * @param {?} action
+     * @return {?}
+     */
+    function (action) {
         var /** @type {?} */ self = this;
         return new rxjs.Observable(function (observer) {
             if (self.__isLoaded) {
@@ -213,7 +271,14 @@ var PersistableModel = /** @class */ (function () {
      * @param {?=} type
      * @return {?}
      */
-    PersistableModel.prototype.webhook = function (url, method, type) {
+    PersistableModel.prototype.webhook = /**
+     * trigger a webhook url
+     * @param {?} url
+     * @param {?=} method
+     * @param {?=} type
+     * @return {?}
+     */
+    function (url, method, type) {
         var /** @type {?} */ self = this;
         return new rxjs.Observable(function (observer) {
             if (self.__isLoaded) {
@@ -246,7 +311,13 @@ var PersistableModel = /** @class */ (function () {
      * @param {?=} silent
      * @return {?}
      */
-    PersistableModel.prototype.save = function (action, silent) {
+    PersistableModel.prototype.save = /**
+     * save with optional observable
+     * @param {?=} action
+     * @param {?=} silent
+     * @return {?}
+     */
+    function (action, silent) {
         var /** @type {?} */ self = this, /** @type {?} */ observer = null;
         if (typeof action === 'string') {
             action = {
@@ -293,7 +364,12 @@ var PersistableModel = /** @class */ (function () {
      * @param {?=} action
      * @return {?}
      */
-    PersistableModel.prototype.executeSave = function (action) {
+    PersistableModel.prototype.executeSave = /**
+     * save model and persist if is persistable
+     * @param {?=} action
+     * @return {?}
+     */
+    function (action) {
         var /** @type {?} */ self = this;
         Object.keys(self.__edited).forEach(function (property) {
             self[property] = self.__edited[property];
@@ -329,7 +405,11 @@ var PersistableModel = /** @class */ (function () {
      * resets model
      * @return {?}
      */
-    PersistableModel.prototype.reset = function () {
+    PersistableModel.prototype.reset = /**
+     * resets model
+     * @return {?}
+     */
+    function () {
         var /** @type {?} */ self = this;
         Object.keys(self.getProperties()).forEach(function (property) {
             self.update(property, self.transformTypeFromMetadata(property, ''));
@@ -341,7 +421,11 @@ var PersistableModel = /** @class */ (function () {
      * removes edited states
      * @return {?}
      */
-    PersistableModel.prototype.removeEditedState = function () {
+    PersistableModel.prototype.removeEditedState = /**
+     * removes edited states
+     * @return {?}
+     */
+    function () {
         this.__edited = {};
         return this;
     };
@@ -349,14 +433,22 @@ var PersistableModel = /** @class */ (function () {
      * get models observer
      * @return {?}
      */
-    PersistableModel.prototype.getObserver = function () {
+    PersistableModel.prototype.getObserver = /**
+     * get models observer
+     * @return {?}
+     */
+    function () {
         return this.__observer;
     };
     /**
      * get models obervable
      * @return {?}
      */
-    PersistableModel.prototype.getObservable = function () {
+    PersistableModel.prototype.getObservable = /**
+     * get models obervable
+     * @return {?}
+     */
+    function () {
         return this.__observable;
     };
     /**
@@ -364,7 +456,12 @@ var PersistableModel = /** @class */ (function () {
      * @param {?=} uuid
      * @return {?}
      */
-    PersistableModel.prototype.setUuid = function (uuid) {
+    PersistableModel.prototype.setUuid = /**
+     * set uuid
+     * @param {?=} uuid
+     * @return {?}
+     */
+    function (uuid) {
         this.__uuid = uuid !== undefined ? uuid : angular2Uuid.UUID.UUID();
         return this;
     };
@@ -372,7 +469,11 @@ var PersistableModel = /** @class */ (function () {
      * get uuid
      * @return {?}
      */
-    PersistableModel.prototype.getUuid = function () {
+    PersistableModel.prototype.getUuid = /**
+     * get uuid
+     * @return {?}
+     */
+    function () {
         return this.__uuid;
     };
     /**
@@ -380,7 +481,12 @@ var PersistableModel = /** @class */ (function () {
      * return {string}
      * @return {?}
      */
-    PersistableModel.prototype.getObjectIdentifier = function () {
+    PersistableModel.prototype.getObjectIdentifier = /**
+     * get models constructors name as an object identifier
+     * return {string}
+     * @return {?}
+     */
+    function () {
         return this.constructor.name;
     };
     /**
@@ -388,7 +494,12 @@ var PersistableModel = /** @class */ (function () {
      * @param {?} firebaseDatabase
      * @return {?}
      */
-    PersistableModel.prototype.setFirebaseDatabase = function (firebaseDatabase) {
+    PersistableModel.prototype.setFirebaseDatabase = /**
+     * set firebaseDatabase
+     * @param {?} firebaseDatabase
+     * @return {?}
+     */
+    function (firebaseDatabase) {
         this.__firebaseDatabase = firebaseDatabase;
         var /** @type {?} */ self = this;
         var /** @type {?} */ connectedRef = this.__firebaseDatabase.app.database().ref(".info/connected");
@@ -420,7 +531,11 @@ var PersistableModel = /** @class */ (function () {
      * get firebase database
      * @return {?}
      */
-    PersistableModel.prototype.getFirebaseDatabase = function () {
+    PersistableModel.prototype.getFirebaseDatabase = /**
+     * get firebase database
+     * @return {?}
+     */
+    function () {
         return this.__firebaseDatabase;
     };
     /**
@@ -428,7 +543,12 @@ var PersistableModel = /** @class */ (function () {
      * @param {?} path
      * @return {?}
      */
-    PersistableModel.prototype.setFirebaseDatabasePath = function (path) {
+    PersistableModel.prototype.setFirebaseDatabasePath = /**
+     * set firebase database path
+     * @param {?} path
+     * @return {?}
+     */
+    function (path) {
         this.__firebaseDatabasePath = path;
         this.registerConditionValidators(false);
         return this;
@@ -437,7 +557,11 @@ var PersistableModel = /** @class */ (function () {
      * get firebase database path
      * @return {?}
      */
-    PersistableModel.prototype.getFirebaseDatabasePath = function () {
+    PersistableModel.prototype.getFirebaseDatabasePath = /**
+     * get firebase database path
+     * @return {?}
+     */
+    function () {
         return this.__firebaseDatabasePath;
     };
     /**
@@ -445,7 +569,12 @@ var PersistableModel = /** @class */ (function () {
      * @param {?} path
      * @return {?} string
      */
-    PersistableModel.prototype.getFirebaseDatabaseSessionPath = function (path) {
+    PersistableModel.prototype.getFirebaseDatabaseSessionPath = /**
+     * get firebase session data path
+     * @param {?} path
+     * @return {?} string
+     */
+    function (path) {
         var /** @type {?} */ a = path.split("/");
         var /** @type {?} */ path = '';
         var /** @type {?} */ i = 0;
@@ -463,7 +592,12 @@ var PersistableModel = /** @class */ (function () {
      * @param {?} firebaseDatabaseObject
      * @return {?}
      */
-    PersistableModel.prototype.setFirebaseDatabaseObject = function (firebaseDatabaseObject) {
+    PersistableModel.prototype.setFirebaseDatabaseObject = /**
+     * set firebaseDatabaseObject
+     * @param {?} firebaseDatabaseObject
+     * @return {?}
+     */
+    function (firebaseDatabaseObject) {
         this.__angularFireObject = firebaseDatabaseObject;
         return this;
     };
@@ -471,14 +605,22 @@ var PersistableModel = /** @class */ (function () {
      * get firebaseDatabaseObject
      * @return {?}
      */
-    PersistableModel.prototype.getFirebaseDatabaseObject = function () {
+    PersistableModel.prototype.getFirebaseDatabaseObject = /**
+     * get firebaseDatabaseObject
+     * @return {?}
+     */
+    function () {
         return this.__angularFireObject;
     };
     /**
      * get firebaseDatabase prefix
      * @return {?} string
      */
-    PersistableModel.prototype.getFirebaseDatabaseRoot = function () {
+    PersistableModel.prototype.getFirebaseDatabaseRoot = /**
+     * get firebaseDatabase prefix
+     * @return {?} string
+     */
+    function () {
         return this.__firebaseDatabaseRoot;
     };
     /**
@@ -486,7 +628,12 @@ var PersistableModel = /** @class */ (function () {
      * @param {?} path
      * @return {?}
      */
-    PersistableModel.prototype.setFirebaseDatabaseRoot = function (path) {
+    PersistableModel.prototype.setFirebaseDatabaseRoot = /**
+     * set firebase databse path prefix
+     * @param {?} path
+     * @return {?}
+     */
+    function (path) {
         this.__firebaseDatabaseRoot = path;
         return this;
     };
@@ -495,7 +642,12 @@ var PersistableModel = /** @class */ (function () {
      * @param {?} property
      * @return {?}
      */
-    PersistableModel.prototype.getProperty = function (property) {
+    PersistableModel.prototype.getProperty = /**
+     * get property
+     * @param {?} property
+     * @return {?}
+     */
+    function (property) {
         var /** @type {?} */ self = this;
         if (this.isInBackendMode()) {
             return self.getPropertyValue(property);
@@ -519,7 +671,12 @@ var PersistableModel = /** @class */ (function () {
      * @param {?} property
      * @return {?}
      */
-    PersistableModel.prototype.getPropertyObserver = function (property) {
+    PersistableModel.prototype.getPropertyObserver = /**
+     * get observer property for using as an binding variable
+     * @param {?} property
+     * @return {?}
+     */
+    function (property) {
         if (this.__bindingsObserver[property]) {
             return this.__bindingsObserver[property];
         }
@@ -532,7 +689,12 @@ var PersistableModel = /** @class */ (function () {
      * @param {?} messages
      * @return {?}
      */
-    PersistableModel.prototype.setMessages = function (messages) {
+    PersistableModel.prototype.setMessages = /**
+     * set module provider messages
+     * @param {?} messages
+     * @return {?}
+     */
+    function (messages) {
         this.__messages = messages;
         return this;
     };
@@ -541,7 +703,12 @@ var PersistableModel = /** @class */ (function () {
      * @param {?} keyword
      * @return {?}
      */
-    PersistableModel.prototype.getMessage = function (keyword) {
+    PersistableModel.prototype.getMessage = /**
+     * get modules providers message
+     * @param {?} keyword
+     * @return {?}
+     */
+    function (keyword) {
         if (this.__messages === undefined) {
             return keyword;
         }
@@ -553,7 +720,13 @@ var PersistableModel = /** @class */ (function () {
      * @param {?} value
      * @return {?}
      */
-    PersistableModel.prototype.setProperty = function (property, value) {
+    PersistableModel.prototype.setProperty = /**
+     * set property value for using as an binding variable
+     * @param {?} property
+     * @param {?} value
+     * @return {?}
+     */
+    function (property, value) {
         var _this = this;
         var /** @type {?} */ self = this, /** @type {?} */ autosave = false;
         if (this.__isAutosave && this[property] !== value) {
@@ -584,7 +757,13 @@ var PersistableModel = /** @class */ (function () {
      * @param {?=} editing
      * @return {?}
      */
-    PersistableModel.prototype.getPropertyValue = function (property, editing) {
+    PersistableModel.prototype.getPropertyValue = /**
+     * return current property value
+     * @param {?} property
+     * @param {?=} editing
+     * @return {?}
+     */
+    function (property, editing) {
         if (editing) {
             return this.__edited[property] ? this.__edited[property] : this[property];
         }
@@ -597,7 +776,12 @@ var PersistableModel = /** @class */ (function () {
      * @param {?=} stringify
      * @return {?}
      */
-    PersistableModel.prototype.getProperties = function (stringify) {
+    PersistableModel.prototype.getProperties = /**
+     * get properties
+     * @param {?=} stringify
+     * @return {?}
+     */
+    function (stringify) {
         var /** @type {?} */ properties = {}, /** @type {?} */ self = this;
         Object.keys(self).forEach(function (property) {
             if (property.substr(0, 1) !== '_') {
@@ -615,7 +799,11 @@ var PersistableModel = /** @class */ (function () {
      * get properties
      * @return {?}
      */
-    PersistableModel.prototype.convertListPropertiesFromArrayToObject = function () {
+    PersistableModel.prototype.convertListPropertiesFromArrayToObject = /**
+     * get properties
+     * @return {?}
+     */
+    function () {
         var /** @type {?} */ self = this;
         Object.keys(self).forEach(function (property) {
             if (property.substr(0, 1) !== '_' && self.getMetadataValue(property, 'isList', null, 'usePropertyAsUuid')) {
@@ -639,7 +827,14 @@ var PersistableModel = /** @class */ (function () {
      * @param {?=} uuid string
      * @return {?} this
      */
-    PersistableModel.prototype.add = function (property, data, uuid) {
+    PersistableModel.prototype.add = /**
+     * add a new list entry
+     * @param {?} property
+     * @param {?=} data (json object, persistable model or array of those
+     * @param {?=} uuid string
+     * @return {?} this
+     */
+    function (property, data, uuid) {
         var _this = this;
         var /** @type {?} */ self = this;
         if (this.getMetadataValue(property, 'isList')) {
@@ -726,7 +921,13 @@ var PersistableModel = /** @class */ (function () {
      * @param {?=} uuid string or array set of string
      * @return {?} this
      */
-    PersistableModel.prototype.remove = function (property, uuid) {
+    PersistableModel.prototype.remove = /**
+     * remove a new list entry
+     * @param {?} property
+     * @param {?=} uuid string or array set of string
+     * @return {?} this
+     */
+    function (property, uuid) {
         if (this.getMetadataValue(property, 'isList') && this.__appsAppModuleProvider) {
             var /** @type {?} */ toRemoveUuids = {};
             var /** @type {?} */ afterRemovedValue = [];
@@ -752,7 +953,12 @@ var PersistableModel = /** @class */ (function () {
      * @param {?=} property
      * @return {?}
      */
-    PersistableModel.prototype.__toString = function (property) {
+    PersistableModel.prototype.__toString = /**
+     * return string representative from given property value
+     * @param {?=} property
+     * @return {?}
+     */
+    function (property) {
         if (property === undefined) {
             return this.serialize();
         }
@@ -779,7 +985,12 @@ var PersistableModel = /** @class */ (function () {
      * @param {?} persistenceManager
      * @return {?}
      */
-    PersistableModel.prototype.setPersistenceManager = function (persistenceManager) {
+    PersistableModel.prototype.setPersistenceManager = /**
+     * set persistenceManager
+     * @param {?} persistenceManager
+     * @return {?}
+     */
+    function (persistenceManager) {
         if (persistenceManager !== undefined) {
             this.__persistenceManager = persistenceManager;
         }
@@ -793,11 +1004,17 @@ var PersistableModel = /** @class */ (function () {
      * @param {?=} softcheck
      * @return {?}
      */
-    PersistableModel.prototype.validate = function (softcheck) {
+    PersistableModel.prototype.validate = /**
+     * valid this object
+     * @param {?=} softcheck
+     * @return {?}
+     */
+    function (softcheck) {
         var /** @type {?} */ self = this;
         return new Promise(function (resolve, reject) {
             self.removeConditionProperties();
             classValidator.validate(self, { skipMissingProperties: true }).then(function (errors) {
+                // errors is an array of validation errors
                 if (errors.length > 0) {
                     if (softcheck) {
                         resolve();
@@ -829,7 +1046,11 @@ var PersistableModel = /** @class */ (function () {
      * remove properties with invalid condition validators
      * @return {?}
      */
-    PersistableModel.prototype.removeConditionProperties = function () {
+    PersistableModel.prototype.removeConditionProperties = /**
+     * remove properties with invalid condition validators
+     * @return {?}
+     */
+    function () {
         var /** @type {?} */ self = this;
         if (self.__conditionActionIfMatchesRemovedProperties) {
             Object.keys(self.__conditionActionIfMatchesRemovedProperties).forEach(function (property) {
@@ -848,7 +1069,12 @@ var PersistableModel = /** @class */ (function () {
      * @param {?} property
      * @return {?}
      */
-    PersistableModel.prototype.getValidation = function (property) {
+    PersistableModel.prototype.getValidation = /**
+     * get validation observable for given property
+     * @param {?} property
+     * @return {?}
+     */
+    function (property) {
         var /** @type {?} */ self = this;
         if (self.__validator[property] === undefined) {
             self.__validator[property] = new rxjs.Observable(function (observer) {
@@ -862,7 +1088,12 @@ var PersistableModel = /** @class */ (function () {
      * @param {?} property
      * @return {?}
      */
-    PersistableModel.prototype.getCondition = function (property) {
+    PersistableModel.prototype.getCondition = /**
+     * get condition observable for given property
+     * @param {?} property
+     * @return {?}
+     */
+    function (property) {
         var _this = this;
         if (this.__conditionActionIfMatches[property] == undefined) {
             if (Object.keys(this.__conditionActionIfMatches).length) {
@@ -881,7 +1112,12 @@ var PersistableModel = /** @class */ (function () {
      * @param {?=} property
      * @return {?}
      */
-    PersistableModel.prototype.hasChanges = function (property) {
+    PersistableModel.prototype.hasChanges = /**
+     * is the object/property on editing state
+     * @param {?=} property
+     * @return {?}
+     */
+    function (property) {
         if (property) {
             return !(this.__edited[property] === undefined);
         }
@@ -894,14 +1130,19 @@ var PersistableModel = /** @class */ (function () {
      * @param {?=} property
      * @return {?}
      */
-    PersistableModel.prototype.setHasNoChanges = function (property) {
+    PersistableModel.prototype.setHasNoChanges = /**
+     * remove changes state
+     * @param {?=} property
+     * @return {?}
+     */
+    function (property) {
         if (property) {
             this.__forceUpdateProperty[property] = true;
             if (this.__edited[property]) {
                 try {
                     delete this.__edited[property];
                 }
-                catch (e) {
+                catch (/** @type {?} */ e) {
                     //
                 }
             }
@@ -916,7 +1157,12 @@ var PersistableModel = /** @class */ (function () {
      * @param {?} propertiesAsObject
      * @return {?}
      */
-    PersistableModel.prototype.importDynamicProperties = function (propertiesAsObject) {
+    PersistableModel.prototype.importDynamicProperties = /**
+     * import dynamic properties
+     * @param {?} propertiesAsObject
+     * @return {?}
+     */
+    function (propertiesAsObject) {
         var /** @type {?} */ self = this;
         return new Promise(function (resolve, reject) {
             Object.keys(propertiesAsObject).forEach(function (property) {
@@ -930,10 +1176,15 @@ var PersistableModel = /** @class */ (function () {
      * @param {?} json
      * @return {?}
      */
-    PersistableModel.prototype.loadJson = function (json) {
+    PersistableModel.prototype.loadJson = /**
+     * load json data
+     * @param {?} json
+     * @return {?}
+     */
+    function (json) {
         var /** @type {?} */ self = this;
         json = typeof json == 'string' ? JSON.parse(json) : json;
-        var /** @type {?} */ model = (classTransformer.plainToClass(/** @type {?} */ (this.constructor), json, { excludePrefixes: ["__"] }));
+        var /** @type {?} */ model = /** @type {?} */ (classTransformer.plainToClass(/** @type {?} */ (this.constructor), json, { excludePrefixes: ["__"] }));
         return new Promise(function (resolve, reject) {
             if (model) {
                 var /** @type {?} */ propertiesWithValidationError_1 = {};
@@ -967,7 +1218,13 @@ var PersistableModel = /** @class */ (function () {
      * @param {?} value
      * @return {?}
      */
-    PersistableModel.prototype.transformTypeFromMetadata = function (property, value) {
+    PersistableModel.prototype.transformTypeFromMetadata = /**
+     * transform type from metadata to avoid non matching data types
+     * @param {?} property
+     * @param {?} value
+     * @return {?}
+     */
+    function (property, value) {
         var /** @type {?} */ self = this;
         if (this.getMetadata(property, 'isTime').length) {
             return typeof value == 'string' ? new Date(value) : (value ? value : new Date());
@@ -1047,7 +1304,11 @@ var PersistableModel = /** @class */ (function () {
      * Transform all properties
      * @return {?}
      */
-    PersistableModel.prototype.transformAllProperties = function () {
+    PersistableModel.prototype.transformAllProperties = /**
+     * Transform all properties
+     * @return {?}
+     */
+    function () {
         var /** @type {?} */ self = this;
         Object.keys(self).forEach(function (property) {
             if (property.substr(0, 1) !== '_') {
@@ -1060,7 +1321,11 @@ var PersistableModel = /** @class */ (function () {
      * has model pending changes that are not synchronised yet or not
      * @return {?}
      */
-    PersistableModel.prototype.hasPendingChanges = function () {
+    PersistableModel.prototype.hasPendingChanges = /**
+     * has model pending changes that are not synchronised yet or not
+     * @return {?}
+     */
+    function () {
         return this._hasPendingChanges;
     };
     /**
@@ -1069,7 +1334,13 @@ var PersistableModel = /** @class */ (function () {
      * @param {?=} action
      * @return {?}
      */
-    PersistableModel.prototype.setHasPendingChanges = function (state, action) {
+    PersistableModel.prototype.setHasPendingChanges = /**
+     * set pending changes state
+     * @param {?} state
+     * @param {?=} action
+     * @return {?}
+     */
+    function (state, action) {
         if (state && this.__persistenceManager) {
             this.__persistenceManager.addPendingChanges(this, action);
         }
@@ -1085,7 +1356,13 @@ var PersistableModel = /** @class */ (function () {
      * @param {?=} asObject
      * @return {?}
      */
-    PersistableModel.prototype.serialize = function (noUnderScoreData, asObject) {
+    PersistableModel.prototype.serialize = /**
+     * serialize this object
+     * @param {?=} noUnderScoreData
+     * @param {?=} asObject
+     * @return {?}
+     */
+    function (noUnderScoreData, asObject) {
         var /** @type {?} */ json = '';
         if (noUnderScoreData || noUnderScoreData === undefined) {
             json = classTransformer.serialize(this, { excludePrefixes: ["__", "_"] });
@@ -1104,14 +1381,22 @@ var PersistableModel = /** @class */ (function () {
      * get the persistence manger
      * @return {?}
      */
-    PersistableModel.prototype.getPersistenceManager = function () {
+    PersistableModel.prototype.getPersistenceManager = /**
+     * get the persistence manger
+     * @return {?}
+     */
+    function () {
         return this.__persistenceManager;
     };
     /**
      * check if current network state is online
      * @return {?}
      */
-    PersistableModel.prototype.isOnline = function () {
+    PersistableModel.prototype.isOnline = /**
+     * check if current network state is online
+     * @return {?}
+     */
+    function () {
         return this.__isOnline;
     };
     /**
@@ -1119,7 +1404,12 @@ var PersistableModel = /** @class */ (function () {
      * @param {?} state
      * @return {?}
      */
-    PersistableModel.prototype.setIsOnline = function (state) {
+    PersistableModel.prototype.setIsOnline = /**
+     * set if model is connected to internet
+     * @param {?} state
+     * @return {?}
+     */
+    function (state) {
         this.__isOnline = state;
         return this;
     };
@@ -1129,7 +1419,13 @@ var PersistableModel = /** @class */ (function () {
      * @param {?=} type
      * @return {?}
      */
-    PersistableModel.prototype.getMetadata = function (property, type) {
+    PersistableModel.prototype.getMetadata = /**
+     * get properties metatadata
+     * @param {?=} property
+     * @param {?=} type
+     * @return {?}
+     */
+    function (property, type) {
         var /** @type {?} */ validationMetadata = [];
         this.__metadata.forEach(function (metadata) {
             if (!property || metadata.propertyName == property) {
@@ -1145,7 +1441,12 @@ var PersistableModel = /** @class */ (function () {
      * @param {?} property
      * @return {?}
      */
-    PersistableModel.prototype.isArray = function (property) {
+    PersistableModel.prototype.isArray = /**
+     * check if property is type of array
+     * @param {?} property
+     * @return {?}
+     */
+    function (property) {
         return typeof this[property] == 'object' ? (this[property] !== null && typeof this[property].length == 'number' ? true : false) : false;
     };
     /**
@@ -1156,7 +1457,15 @@ var PersistableModel = /** @class */ (function () {
      * @param {?=} constraints
      * @return {?}
      */
-    PersistableModel.prototype.getMetadataValue = function (property, type, metadataInput, constraints) {
+    PersistableModel.prototype.getMetadataValue = /**
+     * get metadata contraints value
+     * @param {?=} property
+     * @param {?=} type
+     * @param {?=} metadataInput
+     * @param {?=} constraints
+     * @return {?}
+     */
+    function (property, type, metadataInput, constraints) {
         var /** @type {?} */ metadata = null;
         if (metadataInput == undefined) {
             metadata = this.getMetadata(property, type)[0];
@@ -1199,7 +1508,12 @@ var PersistableModel = /** @class */ (function () {
      * @param {?} property
      * @return {?}
      */
-    PersistableModel.prototype.getType = function (property) {
+    PersistableModel.prototype.getType = /**
+     * resolves input type for given property
+     * @param {?} property
+     * @return {?}
+     */
+    function (property) {
         var /** @type {?} */ type = null;
         var /** @type {?} */ typeMappings = {
             'isString': 'text',
@@ -1250,7 +1564,12 @@ var PersistableModel = /** @class */ (function () {
      * @param {?} prepare
      * @return {?}
      */
-    PersistableModel.prototype.registerConditionValidators = function (prepare) {
+    PersistableModel.prototype.registerConditionValidators = /**
+     * registers condition validators
+     * @param {?} prepare
+     * @return {?}
+     */
+    function (prepare) {
         var /** @type {?} */ self = this;
         self.__conditionBindings = { 'request': {}, 'properties': {} };
         this.getMetadata(null, 'hasConditions').forEach(function (validator) {
@@ -1311,7 +1630,13 @@ var PersistableModel = /** @class */ (function () {
      * @param {?} counter
      * @return {?}
      */
-    PersistableModel.prototype.calculateCircularCondition = function (property, chain, counter) {
+    PersistableModel.prototype.calculateCircularCondition = /**
+     * @param {?} property
+     * @param {?} chain
+     * @param {?} counter
+     * @return {?}
+     */
+    function (property, chain, counter) {
         var /** @type {?} */ self = this;
         if (self.__conditionContraintsAffectedProperties[property] !== undefined) {
             Object.keys(self.__conditionContraintsAffectedProperties[property]).forEach(function (key) {
@@ -1335,7 +1660,12 @@ var PersistableModel = /** @class */ (function () {
      * @param {?} property
      * @return {?}
      */
-    PersistableModel.prototype.executeConditionValidatorCircular = function (property) {
+    PersistableModel.prototype.executeConditionValidatorCircular = /**
+     *
+     * @param {?} property
+     * @return {?}
+     */
+    function (property) {
         var /** @type {?} */ self = this;
         var /** @type {?} */ circularChain = {}, /** @type {?} */ counter = 0;
         var /** @type {?} */ obj = self.calculateCircularCondition(property, circularChain, counter);
@@ -1354,7 +1684,12 @@ var PersistableModel = /** @class */ (function () {
      * @param {?} property
      * @return {?}
      */
-    PersistableModel.prototype.executeConditionValidator = function (property) {
+    PersistableModel.prototype.executeConditionValidator = /**
+     *
+     * @param {?} property
+     * @return {?}
+     */
+    function (property) {
         var /** @type {?} */ self = this;
         if (self.__conditionContraintsProperties[property] !== undefined) {
             if (self.__conditionBindings['properties'][property] !== undefined) {
@@ -1402,10 +1737,15 @@ var PersistableModel = /** @class */ (function () {
      * @param {?} property
      * @return {?}
      */
-    PersistableModel.prototype.recoverMissingProperty = function (property) {
+    PersistableModel.prototype.recoverMissingProperty = /**
+     * recovers a missing property
+     * @param {?} property
+     * @return {?}
+     */
+    function (property) {
         if (Object.keys(this).indexOf(property) == -1) {
             if (this.__temp[property] == undefined) {
-                var /** @type {?} */ tmpmodel = (classTransformer.plainToClass(/** @type {?} */ (this.constructor), {}, { excludePrefixes: ["__"] }));
+                var /** @type {?} */ tmpmodel = /** @type {?} */ (classTransformer.plainToClass(/** @type {?} */ (this.constructor), {}, { excludePrefixes: ["__"] }));
                 this[property] = tmpmodel[property];
             }
             else {
@@ -1419,7 +1759,12 @@ var PersistableModel = /** @class */ (function () {
      * @param {?} notificationProvider
      * @return {?}
      */
-    PersistableModel.prototype.setNotificationProvider = function (notificationProvider) {
+    PersistableModel.prototype.setNotificationProvider = /**
+     * set notificationProvider
+     * @param {?} notificationProvider
+     * @return {?}
+     */
+    function (notificationProvider) {
         this.__notificationProvider = notificationProvider;
         return this;
     };
@@ -1428,7 +1773,12 @@ var PersistableModel = /** @class */ (function () {
      * @param {?} promise
      * @return {?}
      */
-    PersistableModel.prototype.setIsLoadedPromise = function (promise) {
+    PersistableModel.prototype.setIsLoadedPromise = /**
+     *
+     * @param {?} promise
+     * @return {?}
+     */
+    function (promise) {
         var /** @type {?} */ self = this;
         this.__isLoadedPromise = promise;
         this.__isLoadedPromise.then(function () {
@@ -1440,7 +1790,11 @@ var PersistableModel = /** @class */ (function () {
      * Is loaded promise
      * @return {?}
      */
-    PersistableModel.prototype.loaded = function () {
+    PersistableModel.prototype.loaded = /**
+     * Is loaded promise
+     * @return {?}
+     */
+    function () {
         var /** @type {?} */ self = this;
         if (this.__isLoadedPromise == undefined) {
             return new Promise(function (resolve, reject) {
@@ -1457,7 +1811,13 @@ var PersistableModel = /** @class */ (function () {
      * @param {?=} error
      * @return {?}
      */
-    PersistableModel.prototype.notify = function (message, error) {
+    PersistableModel.prototype.notify = /**
+     * send notification message to user
+     * @param {?} message
+     * @param {?=} error
+     * @return {?}
+     */
+    function (message, error) {
         this.__notificationProvider(message, error);
         return this;
     };
@@ -1466,7 +1826,12 @@ var PersistableModel = /** @class */ (function () {
      * \@Returns object
      * @return {?}
      */
-    PersistableModel.prototype.getHashedValues = function () {
+    PersistableModel.prototype.getHashedValues = /**
+     * Get hased values
+     * \@Returns object
+     * @return {?}
+     */
+    function () {
         var /** @type {?} */ values = [];
         var /** @type {?} */ self = this;
         Object.keys(this.__hashedValues).forEach(function (hash) {
@@ -1481,7 +1846,14 @@ var PersistableModel = /** @class */ (function () {
      * @param {?} hash
      * @return {?}
      */
-    PersistableModel.prototype.addHashedValue = function (value, hash) {
+    PersistableModel.prototype.addHashedValue = /**
+     * Set hased values
+     * \@Returns mixed
+     * @param {?} value
+     * @param {?} hash
+     * @return {?}
+     */
+    function (value, hash) {
         this.__hashedValues[hash] = value;
         return this;
     };
@@ -1491,7 +1863,13 @@ var PersistableModel = /** @class */ (function () {
      * @param {?} hash
      * @return {?}
      */
-    PersistableModel.prototype.getHashedValue = function (hash) {
+    PersistableModel.prototype.getHashedValue = /**
+     * Get value from hashed value
+     * \@Returns mixed
+     * @param {?} hash
+     * @return {?}
+     */
+    function (hash) {
         return this.__hashedValues[hash] !== undefined ? this.__hashedValues[hash] : hash;
     };
     /**
@@ -1500,7 +1878,13 @@ var PersistableModel = /** @class */ (function () {
      * @param {?} value
      * @return {?}
      */
-    PersistableModel.prototype.setHashedValue = function (value) {
+    PersistableModel.prototype.setHashedValue = /**
+     * Set hashed value
+     * \@Returns string hash
+     * @param {?} value
+     * @return {?}
+     */
+    function (value) {
         var /** @type {?} */ hash = typeof value == 'object' ? objectHash.sha1(value) : value;
         this.__hashedValues[hash] = value;
         return hash;
@@ -1510,7 +1894,12 @@ var PersistableModel = /** @class */ (function () {
      * @param {?} appsAppModuleProvider
      * @return {?}
      */
-    PersistableModel.prototype.setAppsAppModuleProvider = function (appsAppModuleProvider) {
+    PersistableModel.prototype.setAppsAppModuleProvider = /**
+     * set appsAppModuleProvider
+     * @param {?} appsAppModuleProvider
+     * @return {?}
+     */
+    function (appsAppModuleProvider) {
         this.__appsAppModuleProvider = appsAppModuleProvider;
         return this;
     };
@@ -1518,7 +1907,11 @@ var PersistableModel = /** @class */ (function () {
      * set appsAppModuleProvider
      * @return {?}
      */
-    PersistableModel.prototype.getAppsAppModuleProvider = function () {
+    PersistableModel.prototype.getAppsAppModuleProvider = /**
+     * set appsAppModuleProvider
+     * @return {?}
+     */
+    function () {
         return this.__appsAppModuleProvider;
     };
     /**
@@ -1526,7 +1919,12 @@ var PersistableModel = /** @class */ (function () {
      * @param {?} parentModel
      * @return {?}
      */
-    PersistableModel.prototype.setParent = function (parentModel) {
+    PersistableModel.prototype.setParent = /**
+     * set parent model
+     * @param {?} parentModel
+     * @return {?}
+     */
+    function (parentModel) {
         this.__parent = parentModel;
         return this;
     };
@@ -1534,14 +1932,22 @@ var PersistableModel = /** @class */ (function () {
      * get parent model
      * @return {?}
      */
-    PersistableModel.prototype.getParent = function () {
+    PersistableModel.prototype.getParent = /**
+     * get parent model
+     * @return {?}
+     */
+    function () {
         return this.__parent;
     };
     /**
      * get changes observerable
      * @return {?}
      */
-    PersistableModel.prototype.getChangesObserverable = function () {
+    PersistableModel.prototype.getChangesObserverable = /**
+     * get changes observerable
+     * @return {?}
+     */
+    function () {
         return this.__editedObservable;
     };
     /**
@@ -1549,7 +1955,12 @@ var PersistableModel = /** @class */ (function () {
      * @param {?} event
      * @return {?}
      */
-    PersistableModel.prototype.executeChangesWithCallback = function (event) {
+    PersistableModel.prototype.executeChangesWithCallback = /**
+     * execute changes with callback
+     * @param {?} event
+     * @return {?}
+     */
+    function (event) {
         this.__editedObservableCallbacks.forEach(function (callback) {
             callback(event);
         });
@@ -1561,7 +1972,13 @@ var PersistableModel = /** @class */ (function () {
      * @param {?} callback
      * @return {?}
      */
-    PersistableModel.prototype.watch = function (property, callback) {
+    PersistableModel.prototype.watch = /**
+     * observe property
+     * @param {?} property
+     * @param {?} callback
+     * @return {?}
+     */
+    function (property, callback) {
         this.__editedObservableObservers.push({ callback: callback, property: property });
         callback(this.getPropertyValue(property));
         this.loaded().then(function (model) {
@@ -1574,7 +1991,12 @@ var PersistableModel = /** @class */ (function () {
      * @param {?} callback
      * @return {?}
      */
-    PersistableModel.prototype.getChangesWithCallback = function (callback) {
+    PersistableModel.prototype.getChangesWithCallback = /**
+     * get changes with callback
+     * @param {?} callback
+     * @return {?}
+     */
+    function (callback) {
         this.__editedObservableCallbacks.push(callback);
         return this;
     };
@@ -1582,14 +2004,22 @@ var PersistableModel = /** @class */ (function () {
      * Check if model is initialized in backend mode
      * @return {?}
      */
-    PersistableModel.prototype.isInBackendMode = function () {
+    PersistableModel.prototype.isInBackendMode = /**
+     * Check if model is initialized in backend mode
+     * @return {?}
+     */
+    function () {
         return global[this.constructor.name] === undefined ? false : true;
     };
     /**
      * Enable autosave mode
      * @return {?}
      */
-    PersistableModel.prototype.autosave = function () {
+    PersistableModel.prototype.autosave = /**
+     * Enable autosave mode
+     * @return {?}
+     */
+    function () {
         this.__isAutosave = true;
         return this;
     };
@@ -1597,12 +2027,20 @@ var PersistableModel = /** @class */ (function () {
      * check if model has errors or not
      * @return {?}
      */
-    PersistableModel.prototype.isValid = function () {
+    PersistableModel.prototype.isValid = /**
+     * check if model has errors or not
+     * @return {?}
+     */
+    function () {
         return Object.keys(this.__validationErrors).length ? false : true;
     };
     return PersistableModel;
 }());
 
+/**
+ * @fileoverview added by tsickle
+ * @suppress {checkTypes} checked by tsc
+ */
 /**
  * @param {?} options
  * @param {?=} actionIfMatches
@@ -1635,17 +2073,17 @@ function HasConditions(options, actionIfMatches, validationOptions) {
             constraints: [{ 'type': 'hasConditions', 'value': options, 'actionIfMatches': actionIfMatches }],
             options: { groups: ['condition_' + propertyName] },
             validator: {
-                /**
+                validate: /**
                  * @param {?} value
                  * @param {?} args
                  * @return {?}
                  */
-                validate: function (value, args) {
+                function (value, args) {
                     var /** @type {?} */ validator = new classValidator.Validator();
                     var /** @type {?} */ state = true;
                     /**
-                     * iterates over all rules synchronous
-                     */
+                                         * iterates over all rules synchronous
+                                         */
                     if (options) {
                         options.forEach(function (condition) {
                             if (state) {
@@ -1663,13 +2101,13 @@ function HasConditions(options, actionIfMatches, validationOptions) {
                         });
                     }
                     /**
-                     *  if is in backend service mode, so override property value and condition validator state
-                     */
+                                         *  if is in backend service mode, so override property value and condition validator state
+                                         */
                     if (!state && args.object.isInBackendMode()) {
                         try {
                             delete args.object[args.property];
                         }
-                        catch (e) {
+                        catch (/** @type {?} */ e) {
                             return false;
                         }
                         return true;
@@ -1681,6 +2119,10 @@ function HasConditions(options, actionIfMatches, validationOptions) {
     };
 }
 
+/**
+ * @fileoverview added by tsickle
+ * @suppress {checkTypes} checked by tsc
+ */
 /**
  * @param {?} description
  * @param {?=} validationOptions
@@ -1695,12 +2137,12 @@ function HasDescription(description, validationOptions) {
             constraints: [{ 'type': 'hasDescription', 'value': description }],
             options: validationOptions,
             validator: {
-                /**
+                validate: /**
                  * @param {?} value
                  * @param {?} args
                  * @return {?}
                  */
-                validate: function (value, args) {
+                function (value, args) {
                     return true;
                 }
             }
@@ -1708,6 +2150,10 @@ function HasDescription(description, validationOptions) {
     };
 }
 
+/**
+ * @fileoverview added by tsickle
+ * @suppress {checkTypes} checked by tsc
+ */
 /**
  * @param {?} label
  * @param {?=} validationOptions
@@ -1722,12 +2168,12 @@ function HasLabel(label, validationOptions) {
             constraints: [{ 'type': 'hasLabel', 'value': label }],
             options: validationOptions,
             validator: {
-                /**
+                validate: /**
                  * @param {?} value
                  * @param {?} args
                  * @return {?}
                  */
-                validate: function (value, args) {
+                function (value, args) {
                     return true;
                 }
             }
@@ -1735,6 +2181,10 @@ function HasLabel(label, validationOptions) {
     };
 }
 
+/**
+ * @fileoverview added by tsickle
+ * @suppress {checkTypes} checked by tsc
+ */
 /**
  * @param {?} label
  * @param {?=} validationOptions
@@ -1749,12 +2199,12 @@ function HasPlaceholder(label, validationOptions) {
             constraints: [{ 'type': 'hasPlaceholder', 'value': label }],
             options: validationOptions,
             validator: {
-                /**
+                validate: /**
                  * @param {?} value
                  * @param {?} args
                  * @return {?}
                  */
-                validate: function (value, args) {
+                function (value, args) {
                     return true;
                 }
             }
@@ -1762,6 +2212,10 @@ function HasPlaceholder(label, validationOptions) {
     };
 }
 
+/**
+ * @fileoverview added by tsickle
+ * @suppress {checkTypes} checked by tsc
+ */
 /**
  * @param {?} precision
  * @param {?=} validationOptions
@@ -1776,12 +2230,12 @@ function HasPrecision(precision, validationOptions) {
             constraints: [{ 'type': 'hasPrecision', 'value': precision }],
             options: validationOptions,
             validator: {
-                /**
+                validate: /**
                  * @param {?} value
                  * @param {?} args
                  * @return {?}
                  */
-                validate: function (value, args) {
+                function (value, args) {
                     return true;
                 }
             }
@@ -1789,6 +2243,10 @@ function HasPrecision(precision, validationOptions) {
     };
 }
 
+/**
+ * @fileoverview added by tsickle
+ * @suppress {checkTypes} checked by tsc
+ */
 /**
  * @param {?=} validationOptions
  * @return {?}
@@ -1802,12 +2260,12 @@ function IsBirthDate(validationOptions) {
             constraints: [{ 'type': 'isBirthDate', 'value': true }],
             options: validationOptions,
             validator: {
-                /**
+                validate: /**
                  * @param {?} value
                  * @param {?} args
                  * @return {?}
                  */
-                validate: function (value, args) {
+                function (value, args) {
                     return true;
                 }
             }
@@ -1815,6 +2273,10 @@ function IsBirthDate(validationOptions) {
     };
 }
 
+/**
+ * @fileoverview added by tsickle
+ * @suppress {checkTypes} checked by tsc
+ */
 /**
  * @param {?=} options
  * @return {?}
@@ -1827,12 +2289,12 @@ function IsCalendar(options) {
             propertyName: propertyName,
             constraints: [{ 'type': 'isCalendar', value: options }],
             validator: {
-                /**
+                validate: /**
                  * @param {?} value
                  * @param {?} args
                  * @return {?}
                  */
-                validate: function (value, args) {
+                function (value, args) {
                     return true;
                 }
             }
@@ -1840,6 +2302,10 @@ function IsCalendar(options) {
     };
 }
 
+/**
+ * @fileoverview added by tsickle
+ * @suppress {checkTypes} checked by tsc
+ */
 /**
  * @param {?=} options
  * @return {?}
@@ -1852,12 +2318,12 @@ function IsDateRange(options) {
             propertyName: propertyName,
             constraints: [{ 'type': 'isDateRange', value: options }],
             validator: {
-                /**
+                validate: /**
                  * @param {?} value
                  * @param {?} args
                  * @return {?}
                  */
-                validate: function (value, args) {
+                function (value, args) {
                     return true;
                 }
             }
@@ -1865,6 +2331,10 @@ function IsDateRange(options) {
     };
 }
 
+/**
+ * @fileoverview added by tsickle
+ * @suppress {checkTypes} checked by tsc
+ */
 /**
  * @return {?}
  */
@@ -1876,11 +2346,11 @@ function IsPassword() {
             propertyName: propertyName,
             constraints: [{ 'type': 'isPassword' }],
             validator: {
-                /**
+                validate: /**
                  * @param {?} value
                  * @return {?}
                  */
-                validate: function (value) {
+                function (value) {
                     return true;
                 }
             }
@@ -1888,6 +2358,10 @@ function IsPassword() {
     };
 }
 
+/**
+ * @fileoverview added by tsickle
+ * @suppress {checkTypes} checked by tsc
+ */
 /**
  * @param {?=} property
  * @param {?=} validationOptions
@@ -1902,12 +2376,12 @@ function IsPhoneNumber(property, validationOptions) {
             constraints: [{ 'type': 'isPhoneNumber', 'value': property }],
             options: validationOptions,
             validator: {
-                /**
+                validate: /**
                  * @param {?} value
                  * @param {?} args
                  * @return {?}
                  */
-                validate: function (value, args) {
+                function (value, args) {
                     var /** @type {?} */ r = /[\\+ 0-9]/;
                     return r.test(value);
                 }
@@ -1916,6 +2390,10 @@ function IsPhoneNumber(property, validationOptions) {
     };
 }
 
+/**
+ * @fileoverview added by tsickle
+ * @suppress {checkTypes} checked by tsc
+ */
 /**
  * @param {?=} options
  * @param {?=} validationOptions
@@ -1930,12 +2408,12 @@ function IsRating(options, validationOptions) {
             constraints: [{ 'type': 'isRating', 'value': options }],
             options: validationOptions,
             validator: {
-                /**
+                validate: /**
                  * @param {?} value
                  * @param {?} args
                  * @return {?}
                  */
-                validate: function (value, args) {
+                function (value, args) {
                     return true;
                 }
             }
@@ -1943,6 +2421,10 @@ function IsRating(options, validationOptions) {
     };
 }
 
+/**
+ * @fileoverview added by tsickle
+ * @suppress {checkTypes} checked by tsc
+ */
 /**
  * @param {?=} length
  * @param {?=} validationOptions
@@ -1957,12 +2439,12 @@ function IsText(length, validationOptions) {
             constraints: [{ 'type': 'isText', 'value': length }],
             options: validationOptions,
             validator: {
-                /**
+                validate: /**
                  * @param {?} value
                  * @param {?} args
                  * @return {?}
                  */
-                validate: function (value, args) {
+                function (value, args) {
                     return (!length || value.length < length ? true : false);
                 }
             }
@@ -1970,6 +2452,10 @@ function IsText(length, validationOptions) {
     };
 }
 
+/**
+ * @fileoverview added by tsickle
+ * @suppress {checkTypes} checked by tsc
+ */
 /**
  * @param {?=} options
  * @param {?=} validationOptions
@@ -1984,12 +2470,12 @@ function IsNumpad(options, validationOptions) {
             constraints: [{ 'type': 'isNumpad', 'value': options }],
             options: validationOptions,
             validator: {
-                /**
+                validate: /**
                  * @param {?} value
                  * @param {?} args
                  * @return {?}
                  */
-                validate: function (value, args) {
+                function (value, args) {
                     return true;
                 }
             }
@@ -1997,6 +2483,10 @@ function IsNumpad(options, validationOptions) {
     };
 }
 
+/**
+ * @fileoverview added by tsickle
+ * @suppress {checkTypes} checked by tsc
+ */
 /**
  * @param {?=} options
  * @return {?}
@@ -2009,12 +2499,12 @@ function IsSelect(options) {
             propertyName: propertyName,
             constraints: [{ 'type': 'isSelect', value: options }],
             validator: {
-                /**
+                validate: /**
                  * @param {?} value
                  * @param {?} args
                  * @return {?}
                  */
-                validate: function (value, args) {
+                function (value, args) {
                     return new Promise(function (resolve, reject) {
                         var /** @type {?} */ optionValidator = {
                             target: value,
@@ -2095,6 +2585,10 @@ function IsSelect(options) {
 }
 
 /**
+ * @fileoverview added by tsickle
+ * @suppress {checkTypes} checked by tsc
+ */
+/**
  * @param {?} typeOfItems
  * @param {?=} usePropertyAsUuid
  * @param {?=} uniqueItems
@@ -2108,12 +2602,12 @@ function IsList(typeOfItems, usePropertyAsUuid, uniqueItems) {
             propertyName: propertyName,
             constraints: [{ 'type': 'isList', 'value': typeOfItems, 'usePropertyAsUuid': usePropertyAsUuid, 'uniqueItems': uniqueItems == undefined ? false : uniqueItems }],
             validator: {
-                /**
+                validate: /**
                  * @param {?} value
                  * @param {?} args
                  * @return {?}
                  */
-                validate: function (value, args) {
+                function (value, args) {
                     return new Promise(function (resolve, reject) {
                         var /** @type {?} */ requiredValidations = value.length;
                         var /** @type {?} */ proceededValidations = 0;
@@ -2135,7 +2629,7 @@ function IsList(typeOfItems, usePropertyAsUuid, uniqueItems) {
                                 item = typeof global == 'undefined' ? new typeOfItems() : (typeof typeOfItems == 'string' && global[typeOfItems] !== undefined ? new global[typeOfItems]() : new typeOfItems());
                                 item.loadJson(itemOriginal).then().catch();
                             }
-                            catch (e) {
+                            catch (/** @type {?} */ e) {
                                 item = new itemOriginal.constructor();
                             }
                             if (item.validate !== undefined && typeof item.validate == 'function') {
@@ -2171,6 +2665,10 @@ function IsList(typeOfItems, usePropertyAsUuid, uniqueItems) {
 }
 
 /**
+ * @fileoverview added by tsickle
+ * @suppress {checkTypes} checked by tsc
+ */
+/**
  * @param {?=} options
  * @return {?}
  */
@@ -2182,12 +2680,12 @@ function IsTime(options) {
             propertyName: propertyName,
             constraints: [{ 'type': 'isTime', value: options }],
             validator: {
-                /**
+                validate: /**
                  * @param {?} value
                  * @param {?} args
                  * @return {?}
                  */
-                validate: function (value, args) {
+                function (value, args) {
                     return true;
                 }
             }
@@ -2195,6 +2693,16 @@ function IsTime(options) {
     };
 }
 
+/**
+ * @fileoverview added by tsickle
+ * @suppress {checkTypes} checked by tsc
+ */
+/**
+ * @record
+ */
+function appRequest() { }
+
+exports.appRequest = appRequest;
 exports.PersistableModel = PersistableModel;
 exports.HasConditions = HasConditions;
 exports.HasDescription = HasDescription;
@@ -2215,6 +2723,7 @@ exports.IsTime = IsTime;
 exports.ValidatorConstraint = decorators.ValidatorConstraint;
 exports.Validate = decorators.Validate;
 exports.ValidateNested = decorators.ValidateNested;
+exports.Allow = decorators.Allow;
 exports.ValidateIf = decorators.ValidateIf;
 exports.IsDefined = decorators.IsDefined;
 exports.Equals = decorators.Equals;
@@ -2281,6 +2790,7 @@ exports.ArrayNotEmpty = decorators.ArrayNotEmpty;
 exports.ArrayMinSize = decorators.ArrayMinSize;
 exports.ArrayMaxSize = decorators.ArrayMaxSize;
 exports.ArrayUnique = decorators.ArrayUnique;
+exports.IsInstance = decorators.IsInstance;
 
 Object.defineProperty(exports, '__esModule', { value: true });
 

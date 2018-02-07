@@ -7,6 +7,7 @@ __export(require("./module/models/persistable"));
 __export(require("./module/validation/validators/HasConditions"));
 __export(require("./module/validation/validators/HasDescription"));
 __export(require("./module/validation/validators/HasLabel"));
+__export(require("./module/validation/validators/HasPlaceholder"));
 __export(require("./module/validation/validators/HasPrecision"));
 __export(require("./module/validation/validators/IsBirthDate"));
 __export(require("./module/validation/validators/IsCalendar"));
