@@ -24,21 +24,12 @@
 /**
  * load core modules
  */
+const uuidV1 = require('uuid/v1');
+const base64 = require('base-64');
 const functions = require('firebase-functions');
 const admin = require('firebase-admin');
 admin.initializeApp(functions.config().firebase);
 
-//
-// //Initialize the app with a service account, granting admin privileges
-// var serviceAccount = require("/Users/pamegli/Documents/projects/appsapp.myApp/myApp/serviceAccountKey.json");
-// admin.initializeApp({
-//     credential: admin.credential.cert(serviceAccount),
-//     databaseURL: "https://test-32b81.firebaseio.com"
-// });
-
-const uuidV1 = require('uuid/v1');
-const request = require('request-promise');
-const base64 = require('base-64');
 
 /**
  * load action modules
