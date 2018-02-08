@@ -98,7 +98,9 @@ findModels = function () {
                                         .replace(/require\("appsapp-cli/g, 'require("appsapp-cli/appsapp-cli.umd')
                                         //.replace(/require\("appsapp-module/g, 'require("appsapp-module/appsapp-module.umd')
                                         .replace(/require\("appsapp-module/g, ' ("null')
-                                        .replace(/require\("\.\//g, 'global, dummy = ("');
+                                        .replace(/require\("\.\//g, 'global, dummy = ("')
+                                        .replace(/require\("[^\w]*([A-z0-9-]*)"\);/g,'gobal.$1;');
+
                             }
 
                         }
