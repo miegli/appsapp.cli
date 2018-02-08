@@ -25,7 +25,7 @@ build = function (program) {
                 noResolve: false
             });
 
-            var tsResult = gulp.src(files.getCurrentDirectory()+"/src/**/*.ts") // or tsProject.src()
+            var tsResult = gulp.src(files.getCurrentDirectory() + "/src/**/*.ts") // or tsProject.src()
                 .pipe(tsProject());
 
             return tsResult.js.pipe(gulp.dest('./_tmpdist'));
@@ -59,6 +59,45 @@ findModels = function () {
         buildFiles(files.getCurrentDirectory(), function (err, res) {
             "use strict";
             let build = {};
+            var compileModel = function (line, extendFrom, string) {
+
+                // var regex = /var ([\w])+? = [^]+?PersistableModel\)\);/g;
+                var regex = new RegExp("var ([\\w])+? = [^]+?" + extendFrom + "\\)\\);", 'g');
+                var match = regex.exec(line);
+
+                var classname = null;
+
+                if (match) {
+
+                    var regex2 = /^var (\w+?) =/gm;
+                    var match2 = regex2.exec(match[0]);
+
+                    if (match2 && match2.length == 2) {
+                        var classname = match2[1];
+                        if (classname == '__extends') {
+
+                            var regex2 = /^var (\w+?) = \//gm;
+                            var match2 = regex2.exec(match[0]);
+                            if (match2 && match2.length == 2) {
+                                var classname = match2[1];
+                            }
+
+                        }
+                    }
+
+                    if (classname) {
+                        build[classname] =
+                            injectRequire(match[0].replace("var " + classname + " =", "global." + classname + " ="), string)
+                                .replace(/require\("appsapp-cli/g, 'require("appsapp-cli/appsapp-cli.umd')
+                                //.replace(/require\("appsapp-module/g, 'require("appsapp-module/appsapp-module.umd')
+                                .replace(/require\("appsapp-module/g, ' ("null')
+                                .replace(/require\("\.\//g, 'global, dummy = ("')
+                                .replace(/require\("[^\w]*([A-z0-9-]*)"\);/g, 'global.$1;');
+
+                    }
+
+                }
+            }
 
             if (res) {
                 res.forEach((file) => {
@@ -67,47 +106,25 @@ findModels = function () {
                     var string = fs.readFileSync(file).toString();
                     var result = string.split(/exports\.+[\w]+? = [\w]+?;/g); // String.prototype.split calls re[@@split].
 
+
+                    // first compiler
                     result.forEach((line) => {
-
-
-                        var regex = /var ([\w])+? = [^]+?PersistableModel\)\);/g;
-                        var match = regex.exec(line);
-                        var classname = null;
-
-                        if (match) {
-
-                            var regex2 = /^var (\w+?) =/gm;
-                            var match2 = regex2.exec(match[0]);
-
-                            if (match2 && match2.length == 2) {
-                                var classname = match2[1];
-                                if (classname == '__extends') {
-
-                                    var regex2 = /^var (\w+?) = \//gm;
-                                    var match2 = regex2.exec(match[0]);
-                                    if (match2 && match2.length == 2) {
-                                        var classname = match2[1];
-                                    }
-
-                                }
-                            }
-
-                            if (classname) {
-                                build[classname] =
-                                    injectRequire(match[0].replace("var " + classname + " =", "global." + classname + " ="), string)
-                                        .replace(/require\("appsapp-cli/g, 'require("appsapp-cli/appsapp-cli.umd')
-                                        //.replace(/require\("appsapp-module/g, 'require("appsapp-module/appsapp-module.umd')
-                                        .replace(/require\("appsapp-module/g, ' ("null')
-                                        .replace(/require\("\.\//g, 'global, dummy = ("')
-                                        .replace(/require\("[^\w]*([A-z0-9-]*)"\);/g,'global.$1;');
-
-                            }
-
-                        }
-
-
+                        compileModel(line, 'PersistableModel', string);
                     });
 
+                });
+
+
+                // second compiler (finds extendend from known models)
+                res.forEach((file) => {
+
+                    var string = fs.readFileSync(file).toString();
+                    var result = string.split(/exports\.+[\w]+? = [\w]+?;/g); // String.prototype.split calls re[@@split].
+                    result.forEach((line) => {
+                        Object.keys(build).forEach((classname) => {
+                            compileModel(line, classname, string);
+                        });
+                    });
 
                 });
             }
@@ -129,7 +146,7 @@ findModels = function () {
                             build[classname] = build[classname] + '\n' + build[listRequire].split('/**END_OF_APPSAPPS_INJECT_REQUIRE**/')[1];
                             injectedRequire[listRequire] = true;
                         } else {
-                            build[classname] = build[classname].replace('IsList('+listRequire,'IsList(global');
+                            build[classname] = build[classname].replace('IsList(' + listRequire, 'IsList(global');
                         }
                     });
 
