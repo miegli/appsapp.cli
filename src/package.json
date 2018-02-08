@@ -1,6 +1,6 @@
 {
   "name": "appsapp-cli",
-  "version": "1.6.151",
+  "version": "1.6.152",
   "license": "MIT",
   "dependencies": {
     "chalk": "^2.3.0",
@@ -25,6 +25,7 @@
     "node-watch": "^0.5.5",
     "angular2-uuid": "^1.1.1",
     "angularfire2": "=5.0.0-rc.5-next",
+    "firebase-admin": "^5.8.2",
     "class-transformer": "^0.1.8",
     "class-validator": "^0.7.3",
     "fs-extra": "^4.0.2",

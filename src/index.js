@@ -21,4 +21,3 @@ __export(require("./module/validation/validators/IsSelect"));
 __export(require("./module/validation/validators/IsList"));
 __export(require("./module/validation/validators/IsTime"));
 __export(require("class-validator/decorator/decorators"));
-__export(require("./module/backend/connector"));

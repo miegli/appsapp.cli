@@ -25,11 +25,8 @@
  *
  */
 
-import {firebase} from "@firebase/app";
+import * as firebase from "firebase-admin";
 import {UUID} from "angular2-uuid";
-import {FirebaseOptions} from "@firebase/app-types";
-import {FirebaseDatabase} from "@firebase/database-types";
-
 
 const path = require('path');
 declare var Reflect: any;
@@ -78,7 +75,8 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 
 export class connector {
 
-    db: FirebaseDatabase;
+
+    db: firebase.database.Database;
     watchers: any = [];
     isWatching: boolean = false;
 
@@ -93,6 +91,7 @@ export class connector {
 
     }
 
+
     /**
      *
      * init app
@@ -102,12 +101,14 @@ export class connector {
      * @return mixed
      *
      */
-    init(options: FirebaseOptions) {
+    init(databaseURL: string, serviceAccountKey: string) {
         /**
          * initialize firebase admin
          */
-        firebase.initializeApp(options);
-
+        firebase.initializeApp({
+            credential: firebase.credential.cert(serviceAccountKey),
+            databaseURL: databaseURL
+        });
         this.db = firebase.database();
         this.watchers = [];
         this.loadModels();
