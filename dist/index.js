@@ -308,16 +308,14 @@ var PersistableModel = /** @class */ (function () {
     /**
      * save with optional observable
      * @param {?=} action
-     * @param {?=} silent
      * @return {?}
      */
     PersistableModel.prototype.save = /**
      * save with optional observable
      * @param {?=} action
-     * @param {?=} silent
      * @return {?}
      */
-    function (action, silent) {
+    function (action) {
         var /** @type {?} */ self = this, /** @type {?} */ observer = null;
         if (typeof action === 'string') {
             action = {
@@ -331,28 +329,13 @@ var PersistableModel = /** @class */ (function () {
             if (observer) {
                 observer.next(next);
             }
-            else {
-                if (!silent) {
-                    self.notify(next);
-                }
-            }
         }, function (error) {
             if (observer) {
                 observer.error(error);
             }
-            else {
-                if (!silent) {
-                    self.notify(error, true);
-                }
-            }
         }, function () {
             if (observer) {
                 observer.complete();
-            }
-            else {
-                if (!silent) {
-                    self.notify(self.getMessage('done'));
-                }
             }
         });
         return new rxjs.Observable(function (o) {
@@ -747,7 +730,7 @@ var PersistableModel = /** @class */ (function () {
         this.executeConditionValidatorCircular(property);
         this.executeChangesWithCallback(event);
         if (autosave) {
-            this.save(null, true);
+            this.save(null);
         }
         return this;
     };
@@ -945,6 +928,22 @@ var PersistableModel = /** @class */ (function () {
                 }
             });
             this.setProperty(property, afterRemovedValue);
+        }
+        return this;
+    };
+    /**
+     * clear list entry
+     * @param {?} property
+     * @return {?} this
+     */
+    PersistableModel.prototype.clear = /**
+     * clear list entry
+     * @param {?} property
+     * @return {?} this
+     */
+    function (property) {
+        if (this.getMetadataValue(property, 'isList') && this.__appsAppModuleProvider) {
+            this.setProperty(property, []);
         }
         return this;
     };
@@ -1818,7 +1817,9 @@ var PersistableModel = /** @class */ (function () {
      * @return {?}
      */
     function (message, error) {
-        this.__notificationProvider(message, error);
+        if (this.__notificationProvider !== undefined && this.__notificationProvider) {
+            this.__notificationProvider(message, error);
+        }
         return this;
     };
     /**

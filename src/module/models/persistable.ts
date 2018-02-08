@@ -385,10 +385,9 @@ export class PersistableModel {
     /**
      * save with optional observable
      * @param action
-     * @param silent
      * @returns {Observable<any>}
      */
-    public save(action?: actionEmail | actionWebhook | actionGoogleSheets | actionCustom | string, silent?: boolean) {
+    public save(action?: actionEmail | actionWebhook | actionGoogleSheets | actionCustom | string) {
 
         let self = this, observer = null;
 
@@ -404,26 +403,14 @@ export class PersistableModel {
         self.executeSave(action).subscribe((next) => {
             if (observer) {
                 observer.next(next);
-            } else {
-                if (!silent) {
-                    self.notify(next);
-                }
             }
         }, (error) => {
             if (observer) {
                 observer.error(error);
-            } else {
-                if (!silent) {
-                    self.notify(error, true);
-                }
             }
         }, () => {
             if (observer) {
                 observer.complete();
-            } else {
-                if (!silent) {
-                    self.notify(self.getMessage('done'));
-                }
             }
         });
 
@@ -805,7 +792,7 @@ export class PersistableModel {
         this.executeChangesWithCallback(event);
 
         if (autosave) {
-            this.save(null, true);
+            this.save(null);
         }
 
         return this;
@@ -1024,6 +1011,21 @@ export class PersistableModel {
 
         return this;
 
+
+    }
+
+    /**
+     * clear list entry
+     * @returns this
+     */
+    public clear(property) {
+
+
+        if (this.getMetadataValue(property, 'isList') && this.__appsAppModuleProvider) {
+            this.setProperty(property, []);
+        }
+
+        return this;
 
     }
 
@@ -2001,7 +2003,9 @@ export class PersistableModel {
      */
     public notify(message, error?) {
 
-        this.__notificationProvider(message, error);
+        if (this.__notificationProvider !== undefined && this.__notificationProvider) {
+            this.__notificationProvider(message, error);
+        }
 
         return this;
 

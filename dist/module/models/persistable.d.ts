@@ -141,10 +141,9 @@ export declare class PersistableModel {
     /**
      * save with optional observable
      * @param action
-     * @param silent
      * @returns {Observable<any>}
      */
-    save(action?: actionEmail | actionWebhook | actionGoogleSheets | actionCustom | string, silent?: boolean): Observable<any>;
+    save(action?: actionEmail | actionWebhook | actionGoogleSheets | actionCustom | string): Observable<any>;
     /**
      * save model and persist if is persistable
      * @param {any} action as an optinal argument for transmitting additional action metadata
@@ -299,6 +298,11 @@ export declare class PersistableModel {
      * @returns this
      */
     remove(property: any, uuid?: string | [string]): this;
+    /**
+     * clear list entry
+     * @returns this
+     */
+    clear(property: any): this;
     /**
      * return string representative from given property value
      * @param property
