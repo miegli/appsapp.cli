@@ -64,7 +64,7 @@ admin.database().ref('_config').on('value', (snapshot) => {
             try {
                 eval(base64.decode(config[model].constructor));
             } catch (e) {
-                console.log(model, 'error in constructor config');
+                // skip
             }
         }
     });
