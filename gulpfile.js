@@ -230,7 +230,7 @@ gulp.task('compile', function () {
         'copy:source',
         'inline-resources',
         'ngc',
-       // 'rollup:fesm',
+        'rollup:fesm',
         'rollup:umd',
         'copy:build',
         'copy:buildCLI',
