@@ -3071,15 +3071,21 @@ var connector = /** @class */ (function () {
                         'resolve': function () {
                             data.validate().then(function () {
                                 e.action.state = 'done';
-                                self.db.ref('_queue/' + eventId).update({
-                                    action: e.action,
-                                    targetData: data !== undefined && data.hasChanges() ? data.convertListPropertiesFromArrayToObject().serialize(true, true) : null
-                                });
+                                if (data.hasChanges()) {
+                                    self.db.ref('_queue/' + eventId).update({
+                                        action: e.action,
+                                        targetData: data !== undefined ? data.convertListPropertiesFromArrayToObject().serialize(true, true) : null
+                                    });
+                                }
+                                else {
+                                    self.db.ref('_queue/' + eventId).update({
+                                        action: e.action
+                                    });
+                                }
                             }).catch(function (error) {
                                 e.action.state = 'error';
                                 self.db.ref('_queue/' + eventId).update({
                                     action: e.action,
-                                    targetData: null,
                                     targetMessage: 'Validation error'
                                 });
                                 console.log(error);

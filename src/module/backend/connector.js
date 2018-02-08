@@ -27,8 +27,46 @@
  */
 Object.defineProperty(exports, "__esModule", { value: true });
 var firebase = require("firebase-admin");
-var base_64_1 = require("base-64");
 var angular2_uuid_1 = require("angular2-uuid");
+var path = require('path');
+process.argv.forEach(function (val, index) {
+    require('app-module-path').addPath(path.dirname(val) + path.sep + 'node_modules');
+});
+/**
+ * constructor loader
+ */
+var __extends = (this && this.__extends) || (function () {
+    var extendStatics = Object.setPrototypeOf ||
+        ({ __proto__: [] } instanceof Array && function (d, b) {
+            d.__proto__ = b;
+        }) ||
+        function (d, b) {
+            for (var p in b)
+                if (b.hasOwnProperty(p))
+                    d[p] = b[p];
+        };
+    return function (d, b) {
+        extendStatics(d, b);
+        function __() {
+            this.constructor = d;
+        }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function")
+        r = Reflect.decorate(decorators, target, key, desc);
+    else
+        for (var i = decorators.length - 1; i >= 0; i--)
+            if (d = decorators[i])
+                r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function")
+        return Reflect.metadata(k, v);
+};
 var connector = /** @class */ (function () {
     /**
      *
@@ -78,7 +116,12 @@ var connector = /** @class */ (function () {
              */
             Object.keys(config).forEach(function (model) {
                 if (config[model].constructor !== undefined) {
-                    eval(base_64_1.base64.decode(config[model].constructor));
+                    try {
+                        eval(Buffer.from(config[model].constructor, 'base64').toString());
+                    }
+                    catch (e) {
+                        // skip
+                    }
                 }
             });
             /**
@@ -86,14 +129,30 @@ var connector = /** @class */ (function () {
              */
             Object.keys(config).forEach(function (model) {
                 if (config[model].constructor !== undefined) {
-                    eval(base_64_1.base64.decode(config[model].constructor));
+                    try {
+                        eval(Buffer.from(config[model].constructor, 'base64').toString());
+                    }
+                    catch (e) {
+                        console.log(e);
+                    }
                 }
             });
         });
         this.db.ref('_config').on('child_changed', function (snapshot) {
             var config = snapshot.val();
             if (config.constructor !== undefined) {
-                eval(base_64_1.base64.decode(config.constructor));
+                try {
+                    eval(Buffer.from(config.constructor, 'base64').toString());
+                }
+                catch (e) {
+                    // skip
+                }
+                try {
+                    eval(Buffer.from(config.constructor, 'base64').toString());
+                }
+                catch (e) {
+                    // skip
+                }
             }
         });
     };
