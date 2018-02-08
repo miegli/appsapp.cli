@@ -51,7 +51,8 @@ admin.database().ref("_sha1").on('value', (snapshot) => {
 
 var self = this;
 
-admin.database().ref('_config').once('value', (snapshot) => {
+
+admin.database().ref('_config').on('value', (snapshot) => {
 
     var config = snapshot.val();
 
@@ -60,7 +61,11 @@ admin.database().ref('_config').once('value', (snapshot) => {
      */
     Object.keys(config).forEach((model) => {
         if (config[model].constructor !== undefined) {
-            eval(base64.decode(config[model].constructor));
+            try {
+                eval(base64.decode(config[model].constructor));
+            } catch (e) {
+                console.log(model, 'error in constructor config');
+            }
         }
     });
 
@@ -69,29 +74,15 @@ admin.database().ref('_config').once('value', (snapshot) => {
      */
     Object.keys(config).forEach((model) => {
         if (config[model].constructor !== undefined) {
-            eval(base64.decode(config[model].constructor));
+            try {
+                eval(base64.decode(config[model].constructor));
+            }  catch (e) {
+                console.log(model, 'error in constructor config');
+            }
         }
     });
 
-
 });
-
-admin.database().ref('_config').on('child_changed', (snapshot) => {
-
-    var config = snapshot.val();
-    if (config.constructor !== undefined) {
-        eval(base64.decode(config.constructor));
-    }
-});
-
-admin.database().ref('_config').on('child_added', (snapshot) => {
-
-    var config = snapshot.val();
-    if (config.constructor !== undefined) {
-        eval(base64.decode(config.constructor));
-    }
-});
-
 
 /**
  * constructor loader
