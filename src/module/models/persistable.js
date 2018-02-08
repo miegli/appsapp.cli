@@ -246,10 +246,9 @@ var PersistableModel = /** @class */ (function () {
     /**
      * save with optional observable
      * @param action
-     * @param silent
      * @returns {Observable<any>}
      */
-    PersistableModel.prototype.save = function (action, silent) {
+    PersistableModel.prototype.save = function (action) {
         var self = this, observer = null;
         if (typeof action === 'string') {
             action = {
@@ -263,28 +262,13 @@ var PersistableModel = /** @class */ (function () {
             if (observer) {
                 observer.next(next);
             }
-            else {
-                if (!silent) {
-                    self.notify(next);
-                }
-            }
         }, function (error) {
             if (observer) {
                 observer.error(error);
             }
-            else {
-                if (!silent) {
-                    self.notify(error, true);
-                }
-            }
         }, function () {
             if (observer) {
                 observer.complete();
-            }
-            else {
-                if (!silent) {
-                    self.notify(self.getMessage('done'));
-                }
             }
         });
         return new rxjs_1.Observable(function (o) {
@@ -575,7 +559,7 @@ var PersistableModel = /** @class */ (function () {
         this.executeConditionValidatorCircular(property);
         this.executeChangesWithCallback(event);
         if (autosave) {
-            this.save(null, true);
+            this.save(null);
         }
         return this;
     };
@@ -744,6 +728,16 @@ var PersistableModel = /** @class */ (function () {
                 }
             });
             this.setProperty(property, afterRemovedValue);
+        }
+        return this;
+    };
+    /**
+     * clear list entry
+     * @returns this
+     */
+    PersistableModel.prototype.clear = function (property) {
+        if (this.getMetadataValue(property, 'isList') && this.__appsAppModuleProvider) {
+            this.setProperty(property, []);
         }
         return this;
     };
@@ -1452,7 +1446,9 @@ var PersistableModel = /** @class */ (function () {
      * @returns {PersistableModel}
      */
     PersistableModel.prototype.notify = function (message, error) {
-        this.__notificationProvider(message, error);
+        if (this.__notificationProvider !== undefined && this.__notificationProvider) {
+            this.__notificationProvider(message, error);
+        }
         return this;
     };
     /**

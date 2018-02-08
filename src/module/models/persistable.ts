@@ -638,7 +638,7 @@ export class PersistableModel {
             i++;
         });
 
-       return this.__firebaseDatabaseRoot + '/' + this.getFirebaseDatabasePath().substr(this.__firebaseDatabaseRoot.length + 1).split("/")[0] + '/' + this.getFirebaseDatabasePath().substr(this.__firebaseDatabaseRoot.length + 1).split("/")[1] + path.substr(1);
+        return this.__firebaseDatabaseRoot + '/' + this.getFirebaseDatabasePath().substr(this.__firebaseDatabaseRoot.length + 1).split("/")[0] + '/' + this.getFirebaseDatabasePath().substr(this.__firebaseDatabaseRoot.length + 1).split("/")[1] + path.substr(1);
 
     }
 
@@ -921,10 +921,14 @@ export class PersistableModel {
                         n = new constructor();
                         if (uuid !== undefined) {
                             n.setUuid(uuid);
-                            if (d !== undefined) {
-                                n.loadJson(d);
-                            }
+                        } else {
+                            n.setUuid(UUID.UUID());
                         }
+
+                        if (d !== undefined) {
+                            n.loadJson(d);
+                        }
+
 
                     } else {
 
