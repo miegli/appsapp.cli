@@ -17,7 +17,6 @@ export * from './module/validation/validators/IsList';
 export * from './module/validation/validators/IsTime';
 export * from './module/interfaces/messages';
 export * from 'class-validator/decorator/decorators'
-export * from './module/backend/connector';
 
 export interface appRequest {
     user: string,

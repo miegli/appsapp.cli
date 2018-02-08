@@ -666,9 +666,12 @@ var PersistableModel = /** @class */ (function () {
                     n = new constructor();
                     if (uuid !== undefined) {
                         n.setUuid(uuid);
-                        if (d !== undefined) {
-                            n.loadJson(d);
-                        }
+                    }
+                    else {
+                        n.setUuid(angular2_uuid_1.UUID.UUID());
+                    }
+                    if (d !== undefined) {
+                        n.loadJson(d);
                     }
                 }
                 else {
