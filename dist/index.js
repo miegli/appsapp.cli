@@ -1,12 +1,8 @@
-import { MetadataStorage, Validator, getFromContainer, registerDecorator, validate, validateSync } from 'class-validator';
-import { plainToClass, serialize } from 'class-transformer';
-import { UUID } from 'angular2-uuid';
-import { sha1 } from 'object-hash';
-import { Observable } from 'rxjs';
-import { get } from 'unirest';
-
-import { credential, database, initializeApp } from 'firebase-admin';
-import { base64 as base64$1 } from 'base-64';
+(function (global, factory) {
+	typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports, require('class-validator'), require('class-transformer'), require('angular2-uuid'), require('object-hash'), require('rxjs'), require('unirest'), require('class-validator/decorator/decorators'), require('firebase-admin'), require('base-64')) :
+	typeof define === 'function' && define.amd ? define(['exports', 'class-validator', 'class-transformer', 'angular2-uuid', 'object-hash', 'rxjs', 'unirest', 'class-validator/decorator/decorators', 'firebase-admin', 'base-64'], factory) :
+	(factory((global['appsapp-cli'] = {}),global.classValidator,global.classTransformer,global.angular2Uuid,global.objectHash,global.rxjs,global.Unirest,global.decorators,global.firebase,global.base64));
+}(this, (function (exports,classValidator,classTransformer,angular2Uuid,objectHash,rxjs,Unirest,decorators,firebase,base64) { 'use strict';
 
 /**
  * @fileoverview added by tsickle
@@ -60,7 +56,7 @@ var PersistableModel = /** @class */ (function () {
         this.__conditionContraintsPropertiesValue = {};
         this.__conditionContraintsAffectedProperties = {};
         this.__hashedValues = {};
-        this.__metadata = getFromContainer(MetadataStorage).getTargetValidationMetadatas(this.constructor, '');
+        this.__metadata = classValidator.getFromContainer(classValidator.MetadataStorage).getTargetValidationMetadatas(this.constructor, '');
         // check if all loaded metadata has corresponding properties
         this.__metadata.forEach(function (metadata) {
             if (_this[metadata.propertyName] == undefined) {
@@ -83,13 +79,13 @@ var PersistableModel = /** @class */ (function () {
         /**
                  * create observerable and observer for handling the models data changes
                  */
-        this.__editedObservable = new Observable(function (observer) {
+        this.__editedObservable = new rxjs.Observable(function (observer) {
             self.__editedObserver = observer;
         });
         /**
                  * create observerable and observer for handling the models data changes
                  */
-        this.__observable = new Observable(function (observer) {
+        this.__observable = new rxjs.Observable(function (observer) {
             self.__observer = observer;
             self.__observer.next(_this);
         });
@@ -214,7 +210,7 @@ var PersistableModel = /** @class */ (function () {
      */
     function (action) {
         var /** @type {?} */ self = this;
-        var /** @type {?} */ observable = new Observable(function (observer) {
+        var /** @type {?} */ observable = new rxjs.Observable(function (observer) {
             if (self.__persistenceManager) {
                 self.__persistenceManager.action(self, observer, action).then(function (success) {
                     observer.complete();
@@ -247,7 +243,7 @@ var PersistableModel = /** @class */ (function () {
      */
     function (action) {
         var /** @type {?} */ self = this;
-        return new Observable(function (observer) {
+        return new rxjs.Observable(function (observer) {
             if (self.__isLoaded) {
                 self.getPersistenceManager().trigger(self, observer, {
                     name: 'custom',
@@ -284,7 +280,7 @@ var PersistableModel = /** @class */ (function () {
      */
     function (url, method, type) {
         var /** @type {?} */ self = this;
-        return new Observable(function (observer) {
+        return new rxjs.Observable(function (observer) {
             if (self.__isLoaded) {
                 self.getPersistenceManager().trigger(self, observer, {
                     name: 'webhook',
@@ -359,7 +355,7 @@ var PersistableModel = /** @class */ (function () {
                 }
             }
         });
-        return new Observable(function (o) {
+        return new rxjs.Observable(function (o) {
             observer = o;
         });
     };
@@ -378,7 +374,7 @@ var PersistableModel = /** @class */ (function () {
         Object.keys(self.__edited).forEach(function (property) {
             self[property] = self.__edited[property];
         });
-        return new Observable(function (observer) {
+        return new rxjs.Observable(function (observer) {
             self.setHasPendingChanges(true, action);
             if (self.__persistenceManager) {
                 self.__persistenceManager.save(self, observer, action).then(function (success) {
@@ -466,7 +462,7 @@ var PersistableModel = /** @class */ (function () {
      * @return {?}
      */
     function (uuid) {
-        this.__uuid = uuid !== undefined ? uuid : UUID.UUID();
+        this.__uuid = uuid !== undefined ? uuid : angular2Uuid.UUID.UUID();
         return this;
     };
     /**
@@ -658,7 +654,7 @@ var PersistableModel = /** @class */ (function () {
         }
         else {
             if (!self.__bindings[property]) {
-                self.__bindings[property] = new Observable(function (observer) {
+                self.__bindings[property] = new rxjs.Observable(function (observer) {
                     self.__bindingsObserver[property] = observer;
                 });
                 window.setTimeout(function () {
@@ -999,7 +995,7 @@ var PersistableModel = /** @class */ (function () {
             this.__persistenceManager = persistenceManager;
         }
         if (this.__uuid.length == 0) {
-            this.__uuid = UUID.UUID();
+            this.__uuid = angular2Uuid.UUID.UUID();
         }
         return this;
     };
@@ -1017,7 +1013,7 @@ var PersistableModel = /** @class */ (function () {
         var /** @type {?} */ self = this;
         return new Promise(function (resolve, reject) {
             self.removeConditionProperties();
-            validate(self, { skipMissingProperties: true }).then(function (errors) {
+            classValidator.validate(self, { skipMissingProperties: true }).then(function (errors) {
                 // errors is an array of validation errors
                 if (errors.length > 0) {
                     if (softcheck) {
@@ -1081,7 +1077,7 @@ var PersistableModel = /** @class */ (function () {
     function (property) {
         var /** @type {?} */ self = this;
         if (self.__validator[property] === undefined) {
-            self.__validator[property] = new Observable(function (observer) {
+            self.__validator[property] = new rxjs.Observable(function (observer) {
                 self.__validatorObserver[property] = observer;
             });
         }
@@ -1104,7 +1100,7 @@ var PersistableModel = /** @class */ (function () {
                 this.registerConditionValidators(true);
             }
             if (this.__conditionActionIfMatches[property] === undefined) {
-                this.__conditionActionIfMatches[property] = new Observable(function (observer) {
+                this.__conditionActionIfMatches[property] = new rxjs.Observable(function (observer) {
                     _this.__conditionActionIfMatchesObserver[property] = observer;
                 });
             }
@@ -1188,7 +1184,7 @@ var PersistableModel = /** @class */ (function () {
     function (json) {
         var /** @type {?} */ self = this;
         json = typeof json == 'string' ? JSON.parse(json) : json;
-        var /** @type {?} */ model = /** @type {?} */ (plainToClass(/** @type {?} */ (this.constructor), json, { excludePrefixes: ["__"] }));
+        var /** @type {?} */ model = /** @type {?} */ (classTransformer.plainToClass(/** @type {?} */ (this.constructor), json, { excludePrefixes: ["__"] }));
         return new Promise(function (resolve, reject) {
             if (model) {
                 var /** @type {?} */ propertiesWithValidationError_1 = {};
@@ -1369,10 +1365,10 @@ var PersistableModel = /** @class */ (function () {
     function (noUnderScoreData, asObject) {
         var /** @type {?} */ json = '';
         if (noUnderScoreData || noUnderScoreData === undefined) {
-            json = serialize(this, { excludePrefixes: ["__", "_"] });
+            json = classTransformer.serialize(this, { excludePrefixes: ["__", "_"] });
         }
         else {
-            json = serialize(this, { excludePrefixes: ["__"] });
+            json = classTransformer.serialize(this, { excludePrefixes: ["__"] });
         }
         if (asObject) {
             return JSON.parse(json);
@@ -1580,7 +1576,7 @@ var PersistableModel = /** @class */ (function () {
             var /** @type {?} */ hasRealtimeTypes = false;
             self.__conditionActionIfMatchesRemovedProperties[validator.propertyName] = true;
             if (self.__conditionActionIfMatches[validator.propertyName] == undefined) {
-                self.__conditionActionIfMatches[validator.propertyName] = new Observable(function (observer) {
+                self.__conditionActionIfMatches[validator.propertyName] = new rxjs.Observable(function (observer) {
                     self.__conditionActionIfMatchesObserver[validator.propertyName] = observer;
                     self.__conditionActionIfMatchesObserver[validator.propertyName].next({
                         'action': self.__conditionActionIfMatchesAction[validator.propertyName],
@@ -1700,7 +1696,7 @@ var PersistableModel = /** @class */ (function () {
                 self.__conditionBindings['properties'][property].set(self.__conditionContraintsPropertiesValue[property]);
             }
         }
-        var /** @type {?} */ result = validateSync(self, { groups: ["condition_" + property] });
+        var /** @type {?} */ result = classValidator.validateSync(self, { groups: ["condition_" + property] });
         if (result.length) {
             self.__conditionContraintsPropertiesValue[property] = null;
         }
@@ -1720,7 +1716,7 @@ var PersistableModel = /** @class */ (function () {
         }
         if (this.__conditionContraintsAffectedProperties[property] !== undefined) {
             Object.keys(this.__conditionContraintsAffectedProperties[property]).forEach(function (affectedProperty) {
-                var /** @type {?} */ result = validateSync(self, { groups: ["condition_" + affectedProperty] });
+                var /** @type {?} */ result = classValidator.validateSync(self, { groups: ["condition_" + affectedProperty] });
                 if (self.__conditionActionIfMatchesObserver[affectedProperty] !== undefined) {
                     self.__conditionActionIfMatchesObserver[affectedProperty].next({
                         action: self.__conditionActionIfMatchesAction[affectedProperty],
@@ -1749,7 +1745,7 @@ var PersistableModel = /** @class */ (function () {
     function (property) {
         if (Object.keys(this).indexOf(property) == -1) {
             if (this.__temp[property] == undefined) {
-                var /** @type {?} */ tmpmodel = /** @type {?} */ (plainToClass(/** @type {?} */ (this.constructor), {}, { excludePrefixes: ["__"] }));
+                var /** @type {?} */ tmpmodel = /** @type {?} */ (classTransformer.plainToClass(/** @type {?} */ (this.constructor), {}, { excludePrefixes: ["__"] }));
                 this[property] = tmpmodel[property];
             }
             else {
@@ -1889,7 +1885,7 @@ var PersistableModel = /** @class */ (function () {
      * @return {?}
      */
     function (value) {
-        var /** @type {?} */ hash = typeof value == 'object' ? sha1(value) : value;
+        var /** @type {?} */ hash = typeof value == 'object' ? objectHash.sha1(value) : value;
         this.__hashedValues[hash] = value;
         return hash;
     };
@@ -2070,7 +2066,7 @@ function HasConditions(options, actionIfMatches, validationOptions) {
                 option.value = true;
             }
         });
-        registerDecorator({
+        classValidator.registerDecorator({
             name: "hasConditions",
             target: object.constructor,
             propertyName: propertyName,
@@ -2083,7 +2079,7 @@ function HasConditions(options, actionIfMatches, validationOptions) {
                  * @return {?}
                  */
                 function (value, args) {
-                    var /** @type {?} */ validator = new Validator();
+                    var /** @type {?} */ validator = new classValidator.Validator();
                     var /** @type {?} */ state = true;
                     /**
                                          * iterates over all rules synchronous
@@ -2134,7 +2130,7 @@ function HasConditions(options, actionIfMatches, validationOptions) {
  */
 function HasDescription(description, validationOptions) {
     return function (object, propertyName) {
-        registerDecorator({
+        classValidator.registerDecorator({
             name: "hasDescription",
             target: object.constructor,
             propertyName: propertyName,
@@ -2165,7 +2161,7 @@ function HasDescription(description, validationOptions) {
  */
 function HasLabel(label, validationOptions) {
     return function (object, propertyName) {
-        registerDecorator({
+        classValidator.registerDecorator({
             name: "hasLabel",
             target: object.constructor,
             propertyName: propertyName,
@@ -2196,7 +2192,7 @@ function HasLabel(label, validationOptions) {
  */
 function HasPlaceholder(label, validationOptions) {
     return function (object, propertyName) {
-        registerDecorator({
+        classValidator.registerDecorator({
             name: "hasPlaceholder",
             target: object.constructor,
             propertyName: propertyName,
@@ -2227,7 +2223,7 @@ function HasPlaceholder(label, validationOptions) {
  */
 function HasPrecision(precision, validationOptions) {
     return function (object, propertyName) {
-        registerDecorator({
+        classValidator.registerDecorator({
             name: "hasPrecision",
             target: object.constructor,
             propertyName: propertyName,
@@ -2257,7 +2253,7 @@ function HasPrecision(precision, validationOptions) {
  */
 function IsBirthDate(validationOptions) {
     return function (object, propertyName) {
-        registerDecorator({
+        classValidator.registerDecorator({
             name: "IsBirthDate",
             target: object.constructor,
             propertyName: propertyName,
@@ -2287,7 +2283,7 @@ function IsBirthDate(validationOptions) {
  */
 function IsCalendar(options) {
     return function (object, propertyName) {
-        registerDecorator({
+        classValidator.registerDecorator({
             name: "isCalendar",
             target: object.constructor,
             propertyName: propertyName,
@@ -2316,7 +2312,7 @@ function IsCalendar(options) {
  */
 function IsDateRange(options) {
     return function (object, propertyName) {
-        registerDecorator({
+        classValidator.registerDecorator({
             name: "isDateRange",
             target: object.constructor,
             propertyName: propertyName,
@@ -2344,7 +2340,7 @@ function IsDateRange(options) {
  */
 function IsPassword() {
     return function (object, propertyName) {
-        registerDecorator({
+        classValidator.registerDecorator({
             name: "isPassword",
             target: object.constructor,
             propertyName: propertyName,
@@ -2373,7 +2369,7 @@ function IsPassword() {
  */
 function IsPhoneNumber(property, validationOptions) {
     return function (object, propertyName) {
-        registerDecorator({
+        classValidator.registerDecorator({
             name: "isPhoneNumber",
             target: object.constructor,
             propertyName: propertyName,
@@ -2405,7 +2401,7 @@ function IsPhoneNumber(property, validationOptions) {
  */
 function IsRating(options, validationOptions) {
     return function (object, propertyName) {
-        registerDecorator({
+        classValidator.registerDecorator({
             name: "isRating",
             target: object.constructor,
             propertyName: propertyName,
@@ -2436,7 +2432,7 @@ function IsRating(options, validationOptions) {
  */
 function IsText(length, validationOptions) {
     return function (object, propertyName) {
-        registerDecorator({
+        classValidator.registerDecorator({
             name: "isText",
             target: object.constructor,
             propertyName: propertyName,
@@ -2467,7 +2463,7 @@ function IsText(length, validationOptions) {
  */
 function IsNumpad(options, validationOptions) {
     return function (object, propertyName) {
-        registerDecorator({
+        classValidator.registerDecorator({
             name: "isNumpad",
             target: object.constructor,
             propertyName: propertyName,
@@ -2497,7 +2493,7 @@ function IsNumpad(options, validationOptions) {
  */
 function IsSelect(options) {
     return function (object, propertyName) {
-        registerDecorator({
+        classValidator.registerDecorator({
             name: "isSelect",
             target: object.constructor,
             propertyName: propertyName,
@@ -2517,7 +2513,7 @@ function IsSelect(options) {
                                 return new Promise(function (resolveOptions, rejectOptions) {
                                     if (optionValidator.source) {
                                         if (optionValidator.source.url.substr(0, 4) == 'http') {
-                                            get(optionValidator.source.url).type('json').end(function (response) {
+                                            Unirest.get(optionValidator.source.url).type('json').end(function (response) {
                                                 var /** @type {?} */ options = [];
                                                 if (response.error) {
                                                     rejectOptions(response.error);
@@ -2563,11 +2559,11 @@ function IsSelect(options) {
                             var /** @type {?} */ values = {};
                             options.forEach(function (option) {
                                 if (!option.disabled) {
-                                    values[typeof option.value == 'object' ? sha1(option.value) : option.value] = true;
+                                    values[typeof option.value == 'object' ? objectHash.sha1(option.value) : option.value] = true;
                                 }
                             });
                             optionValidator.target.forEach(function (value) {
-                                if (values[typeof value == 'object' ? sha1(value) : value] == undefined) {
+                                if (values[typeof value == 'object' ? objectHash.sha1(value) : value] == undefined) {
                                     allValide = false;
                                 }
                             });
@@ -2600,7 +2596,7 @@ function IsSelect(options) {
  */
 function IsList(typeOfItems, usePropertyAsUuid, uniqueItems) {
     return function (object, propertyName) {
-        registerDecorator({
+        classValidator.registerDecorator({
             name: "isList",
             target: object.constructor,
             propertyName: propertyName,
@@ -2678,7 +2674,7 @@ function IsList(typeOfItems, usePropertyAsUuid, uniqueItems) {
  */
 function IsTime(options) {
     return function (object, propertyName) {
-        registerDecorator({
+        classValidator.registerDecorator({
             name: "isTime",
             target: object.constructor,
             propertyName: propertyName,
@@ -2770,11 +2766,11 @@ var connector = /** @class */ (function () {
         /**
                  * initialize firebase admin
                  */
-        initializeApp({
-            credential: credential.cert(serviceAccountKey),
+        firebase.initializeApp({
+            credential: firebase.credential.cert(serviceAccountKey),
             databaseURL: databaseURL
         });
-        this.db = database();
+        this.db = firebase.database();
         this.watchers = [];
         this.loadModels();
         return this;
@@ -2802,7 +2798,7 @@ var connector = /** @class */ (function () {
                          */
             Object.keys(config).forEach(function (model) {
                 if (config[model].constructor !== undefined) {
-                    eval(base64$1.decode(config[model].constructor));
+                    eval(base64.base64.decode(config[model].constructor));
                 }
             });
             /**
@@ -2810,14 +2806,14 @@ var connector = /** @class */ (function () {
                          */
             Object.keys(config).forEach(function (model) {
                 if (config[model].constructor !== undefined) {
-                    eval(base64$1.decode(config[model].constructor));
+                    eval(base64.base64.decode(config[model].constructor));
                 }
             });
         });
         this.db.ref('_config').on('child_changed', function (snapshot) {
             var /** @type {?} */ config = snapshot.val();
             if (config.constructor !== undefined) {
-                eval(base64$1.decode(config.constructor));
+                eval(base64.base64.decode(config.constructor));
             }
         });
     };
@@ -2853,7 +2849,7 @@ var connector = /** @class */ (function () {
      */
     function (userid, title, time) {
         var /** @type {?} */ self = this;
-        var /** @type {?} */ u = new UUID();
+        var /** @type {?} */ u = new angular2Uuid.UUID();
         this.db.ref('user/' + userid + '/notification/' + u).set(title);
         setTimeout(function () {
             self.db.ref('user/' + userid + '/notification/' + u).remove();
@@ -2891,7 +2887,7 @@ var connector = /** @class */ (function () {
      */
     function (userid, title, time) {
         var /** @type {?} */ self = this;
-        var /** @type {?} */ u = new UUID();
+        var /** @type {?} */ u = new angular2Uuid.UUID();
         this.db.ref('user/' + userid + '/error/' + u).set(title);
         setTimeout(function () {
             self.db.ref('user/' + userid + '/error/' + u).remove();
@@ -2929,7 +2925,7 @@ var connector = /** @class */ (function () {
      */
     function (userid, title, time) {
         var /** @type {?} */ self = this;
-        var /** @type {?} */ u = new UUID();
+        var /** @type {?} */ u = new angular2Uuid.UUID();
         this.db.ref('user/' + userid + '/warning/' + u).set(title);
         setTimeout(function () {
             self.db.ref('user/' + userid + '/warning/' + u).remove();
@@ -3075,5 +3071,97 @@ var connector = /** @class */ (function () {
  */
 function appRequest() { }
 
-export { appRequest, PersistableModel, HasConditions, HasDescription, HasLabel, HasPlaceholder, HasPrecision, IsBirthDate, IsCalendar, IsDateRange, IsPassword, IsPhoneNumber, IsRating, IsText, IsNumpad, IsSelect, IsList, IsTime, connector };
-export { ValidatorConstraint, Validate, ValidateNested, Allow, ValidateIf, IsDefined, Equals, NotEquals, IsEmpty, IsNotEmpty, IsIn, IsNotIn, IsOptional, IsBoolean, IsDate, IsNumber, IsInt, IsString, IsDateString, IsArray, IsEnum, IsDivisibleBy, IsPositive, IsNegative, Min, Max, MinDate, MaxDate, IsBooleanString, IsNumberString, Contains, NotContains, IsAlpha, IsAlphanumeric, IsAscii, IsBase64, IsByteLength, IsCreditCard, IsCurrency, IsEmail, IsFQDN, IsFullWidth, IsHalfWidth, IsVariableWidth, IsHexColor, IsHexadecimal, IsIP, IsISBN, IsISIN, IsISO8601, IsJSON, IsLowercase, IsMobilePhone, IsMongoId, IsMultibyte, IsSurrogatePair, IsUrl, IsUUID, IsUppercase, Length, MinLength, MaxLength, Matches, IsMilitaryTime, ArrayContains, ArrayNotContains, ArrayNotEmpty, ArrayMinSize, ArrayMaxSize, ArrayUnique, IsInstance } from 'class-validator/decorator/decorators';
+exports.appRequest = appRequest;
+exports.PersistableModel = PersistableModel;
+exports.HasConditions = HasConditions;
+exports.HasDescription = HasDescription;
+exports.HasLabel = HasLabel;
+exports.HasPlaceholder = HasPlaceholder;
+exports.HasPrecision = HasPrecision;
+exports.IsBirthDate = IsBirthDate;
+exports.IsCalendar = IsCalendar;
+exports.IsDateRange = IsDateRange;
+exports.IsPassword = IsPassword;
+exports.IsPhoneNumber = IsPhoneNumber;
+exports.IsRating = IsRating;
+exports.IsText = IsText;
+exports.IsNumpad = IsNumpad;
+exports.IsSelect = IsSelect;
+exports.IsList = IsList;
+exports.IsTime = IsTime;
+exports.ValidatorConstraint = decorators.ValidatorConstraint;
+exports.Validate = decorators.Validate;
+exports.ValidateNested = decorators.ValidateNested;
+exports.Allow = decorators.Allow;
+exports.ValidateIf = decorators.ValidateIf;
+exports.IsDefined = decorators.IsDefined;
+exports.Equals = decorators.Equals;
+exports.NotEquals = decorators.NotEquals;
+exports.IsEmpty = decorators.IsEmpty;
+exports.IsNotEmpty = decorators.IsNotEmpty;
+exports.IsIn = decorators.IsIn;
+exports.IsNotIn = decorators.IsNotIn;
+exports.IsOptional = decorators.IsOptional;
+exports.IsBoolean = decorators.IsBoolean;
+exports.IsDate = decorators.IsDate;
+exports.IsNumber = decorators.IsNumber;
+exports.IsInt = decorators.IsInt;
+exports.IsString = decorators.IsString;
+exports.IsDateString = decorators.IsDateString;
+exports.IsArray = decorators.IsArray;
+exports.IsEnum = decorators.IsEnum;
+exports.IsDivisibleBy = decorators.IsDivisibleBy;
+exports.IsPositive = decorators.IsPositive;
+exports.IsNegative = decorators.IsNegative;
+exports.Min = decorators.Min;
+exports.Max = decorators.Max;
+exports.MinDate = decorators.MinDate;
+exports.MaxDate = decorators.MaxDate;
+exports.IsBooleanString = decorators.IsBooleanString;
+exports.IsNumberString = decorators.IsNumberString;
+exports.Contains = decorators.Contains;
+exports.NotContains = decorators.NotContains;
+exports.IsAlpha = decorators.IsAlpha;
+exports.IsAlphanumeric = decorators.IsAlphanumeric;
+exports.IsAscii = decorators.IsAscii;
+exports.IsBase64 = decorators.IsBase64;
+exports.IsByteLength = decorators.IsByteLength;
+exports.IsCreditCard = decorators.IsCreditCard;
+exports.IsCurrency = decorators.IsCurrency;
+exports.IsEmail = decorators.IsEmail;
+exports.IsFQDN = decorators.IsFQDN;
+exports.IsFullWidth = decorators.IsFullWidth;
+exports.IsHalfWidth = decorators.IsHalfWidth;
+exports.IsVariableWidth = decorators.IsVariableWidth;
+exports.IsHexColor = decorators.IsHexColor;
+exports.IsHexadecimal = decorators.IsHexadecimal;
+exports.IsIP = decorators.IsIP;
+exports.IsISBN = decorators.IsISBN;
+exports.IsISIN = decorators.IsISIN;
+exports.IsISO8601 = decorators.IsISO8601;
+exports.IsJSON = decorators.IsJSON;
+exports.IsLowercase = decorators.IsLowercase;
+exports.IsMobilePhone = decorators.IsMobilePhone;
+exports.IsMongoId = decorators.IsMongoId;
+exports.IsMultibyte = decorators.IsMultibyte;
+exports.IsSurrogatePair = decorators.IsSurrogatePair;
+exports.IsUrl = decorators.IsUrl;
+exports.IsUUID = decorators.IsUUID;
+exports.IsUppercase = decorators.IsUppercase;
+exports.Length = decorators.Length;
+exports.MinLength = decorators.MinLength;
+exports.MaxLength = decorators.MaxLength;
+exports.Matches = decorators.Matches;
+exports.IsMilitaryTime = decorators.IsMilitaryTime;
+exports.ArrayContains = decorators.ArrayContains;
+exports.ArrayNotContains = decorators.ArrayNotContains;
+exports.ArrayNotEmpty = decorators.ArrayNotEmpty;
+exports.ArrayMinSize = decorators.ArrayMinSize;
+exports.ArrayMaxSize = decorators.ArrayMaxSize;
+exports.ArrayUnique = decorators.ArrayUnique;
+exports.IsInstance = decorators.IsInstance;
+exports.connector = connector;
+
+Object.defineProperty(exports, '__esModule', { value: true });
+
+})));

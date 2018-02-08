@@ -60,6 +60,37 @@ gulp.task('ngc', function () {
  * 5. Run rollup inside the /build folder to generate our Flat ES module and place the
  *    generated file into the /dist folder
  */
+// gulp.task('rollup:fesm', function () {
+//     return gulp.src(`${buildFolder}/**/*.js`)
+//     // transform the files here.
+//         .pipe(rollup({
+//
+//             // Bundle's entry point
+//             // See "input" in https://rollupjs.org/#core-functionality
+//             input: `${buildFolder}/index.js`,
+//
+//             // Allow mixing of hypothetical and actual files. "Actual" files can be files
+//             // accessed by Rollup or produced by plugins further down the chain.
+//             // This prevents errors like: 'path/file' does not exist in the hypothetical file system
+//             // when subdirectories are used in the `src` directory.
+//             allowRealFiles: true,
+//
+//             // A list of IDs of modules that should remain external to the bundle
+//             // See "external" in https://rollupjs.org/#core-functionality
+//             external: [
+//                 '@angular/core',
+//                 '@angular/common'
+//             ],
+//
+//             // Format of generated bundle
+//             // See "format" in https://rollupjs.org/#core-functionality
+//             output: {
+//                 format: 'es'
+//             }
+//         }))
+//         .pipe(gulp.dest(distFolder));
+// });
+
 gulp.task('rollup:fesm', function () {
     return gulp.src(`${buildFolder}/**/*.js`)
     // transform the files here.
@@ -82,12 +113,30 @@ gulp.task('rollup:fesm', function () {
                 '@angular/common'
             ],
 
+
+            // Export mode to use
+            // See "exports" in https://rollupjs.org/#danger-zone
+            exports: 'named',
+
+            // The name to use for the module for UMD/IIFE bundles
+            // (required for bundles with exports)
+            // See "name" in https://rollupjs.org/#core-functionality
+
+
             // Format of generated bundle
             // See "format" in https://rollupjs.org/#core-functionality
             output: {
-                format: 'es'
+                name: 'appsapp-cli',
+                format: 'umd'
+            },
+
+            // See "globals" in https://rollupjs.org/#core-functionality
+            globals: {
+                typescript: 'ts'
             }
+
         }))
+        .pipe(rename('index.js'))
         .pipe(gulp.dest(distFolder));
 });
 
