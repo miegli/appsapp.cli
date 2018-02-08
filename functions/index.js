@@ -84,6 +84,14 @@ admin.database().ref('_config').on('child_changed', (snapshot) => {
     }
 });
 
+admin.database().ref('_config').on('child_added', (snapshot) => {
+
+    var config = snapshot.val();
+    if (config.constructor !== undefined) {
+        eval(base64.decode(config.constructor));
+    }
+});
+
 
 /**
  * constructor loader
