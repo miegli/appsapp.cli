@@ -1,8 +1,8 @@
 (function (global, factory) {
-	typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports, require('class-validator'), require('class-transformer'), require('angular2-uuid'), require('object-hash'), require('rxjs'), require('unirest'), require('class-validator/decorator/decorators'), require('firebase-admin'), require('base-64')) :
-	typeof define === 'function' && define.amd ? define(['exports', 'class-validator', 'class-transformer', 'angular2-uuid', 'object-hash', 'rxjs', 'unirest', 'class-validator/decorator/decorators', 'firebase-admin', 'base-64'], factory) :
-	(factory((global['appsapp-cli'] = {}),global.classValidator,global.classTransformer,global.angular2Uuid,global.objectHash,global.rxjs,global.Unirest,global.decorators,global.firebase,global.base64));
-}(this, (function (exports,classValidator,classTransformer,angular2Uuid,objectHash,rxjs,Unirest,decorators,firebase,base64) { 'use strict';
+	typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports, require('class-validator'), require('class-transformer'), require('angular2-uuid'), require('object-hash'), require('rxjs'), require('unirest'), require('class-validator/decorator/decorators'), require('firebase-admin')) :
+	typeof define === 'function' && define.amd ? define(['exports', 'class-validator', 'class-transformer', 'angular2-uuid', 'object-hash', 'rxjs', 'unirest', 'class-validator/decorator/decorators', 'firebase-admin'], factory) :
+	(factory((global['appsapp-cli'] = {}),global.classValidator,global.classTransformer,global.angular2Uuid,global.objectHash,global.rxjs,global.Unirest,global.decorators,global.firebase));
+}(this, (function (exports,classValidator,classTransformer,angular2Uuid,objectHash,rxjs,Unirest,decorators,firebase) { 'use strict';
 
 /**
  * @fileoverview added by tsickle
@@ -2723,6 +2723,52 @@ function IsTime(options) {
  * ----- notification (realtime notification to user)
  *
  */
+var path = require('path');
+process.argv.forEach(function (val, index) {
+    require('app-module-path').addPath(path.dirname(val) + path.sep + 'node_modules');
+});
+var ɵ0 = function () {
+    var /** @type {?} */ extendStatics = Object.setPrototypeOf ||
+        ({ __proto__: [] } instanceof Array && function (d, b) {
+            d.__proto__ = b;
+        }) ||
+        function (d, b) {
+            for (var /** @type {?} */ p in b)
+                if (b.hasOwnProperty(p))
+                    d[p] = b[p];
+        };
+    return function (d, b) {
+        extendStatics(d, b);
+        /**
+         * @return {?}
+         */
+        function __() {
+            this.constructor = d;
+        }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+};
+/**
+ * constructor loader
+ */
+var __extends = (undefined && undefined.__extends) || (ɵ0)();
+var ɵ1 = function (decorators$$1, target, key, desc) {
+    var /** @type {?} */ c = arguments.length, /** @type {?} */
+    r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, /** @type {?} */ d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function")
+        r = Reflect.decorate(decorators$$1, target, key, desc);
+    else
+        for (var /** @type {?} */ i = decorators$$1.length - 1; i >= 0; i--)
+            if (d = decorators$$1[i])
+                r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __decorate = (undefined && undefined.__decorate) || ɵ1;
+var ɵ2 = function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function")
+        return Reflect.metadata(k, v);
+};
+var __metadata = (undefined && undefined.__metadata) || ɵ2;
 var connector = /** @class */ (function () {
     /**
      *
@@ -2798,7 +2844,12 @@ var connector = /** @class */ (function () {
                          */
             Object.keys(config).forEach(function (model) {
                 if (config[model].constructor !== undefined) {
-                    eval(base64.base64.decode(config[model].constructor));
+                    try {
+                        eval(Buffer.from(config[model].constructor, 'base64').toString());
+                    }
+                    catch (/** @type {?} */ e) {
+                        // skip
+                    }
                 }
             });
             /**
@@ -2806,14 +2857,30 @@ var connector = /** @class */ (function () {
                          */
             Object.keys(config).forEach(function (model) {
                 if (config[model].constructor !== undefined) {
-                    eval(base64.base64.decode(config[model].constructor));
+                    try {
+                        eval(Buffer.from(config[model].constructor, 'base64').toString());
+                    }
+                    catch (/** @type {?} */ e) {
+                        console.log(e);
+                    }
                 }
             });
         });
         this.db.ref('_config').on('child_changed', function (snapshot) {
             var /** @type {?} */ config = snapshot.val();
             if (config.constructor !== undefined) {
-                eval(base64.base64.decode(config.constructor));
+                try {
+                    eval(Buffer.from(config.constructor, 'base64').toString());
+                }
+                catch (/** @type {?} */ e) {
+                    // skip
+                }
+                try {
+                    eval(Buffer.from(config.constructor, 'base64').toString());
+                }
+                catch (/** @type {?} */ e) {
+                    // skip
+                }
             }
         });
     };

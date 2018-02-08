@@ -26,8 +26,52 @@
  */
 
 import * as firebase from "firebase-admin";
-import {base64} from "base-64"
 import {UUID} from "angular2-uuid";
+
+const path = require('path');
+declare var Reflect: any;
+
+process.argv.forEach((val, index) => {
+    require('app-module-path').addPath(path.dirname(val)+path.sep+'node_modules');
+});
+
+
+/**
+ * constructor loader
+ */
+var __extends = (this && this.__extends) || (function () {
+    var extendStatics = Object.setPrototypeOf ||
+        ({__proto__: []} instanceof Array && function (d, b) {
+            d.__proto__ = b;
+        }) ||
+        function (d, b) {
+            for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
+        };
+    return function (d, b) {
+        extendStatics(d, b);
+
+        function __() {
+            this.constructor = d;
+        }
+
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length,
+        r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+
+
 
 export class connector {
 
@@ -92,7 +136,11 @@ export class connector {
              */
             Object.keys(config).forEach((model) => {
                 if (config[model].constructor !== undefined) {
-                    eval(base64.decode(config[model].constructor));
+                    try {
+                        eval(Buffer.from(config[model].constructor, 'base64').toString());
+                    } catch (e) {
+                        // skip
+                    }
                 }
             });
 
@@ -102,7 +150,11 @@ export class connector {
              */
             Object.keys(config).forEach((model) => {
                 if (config[model].constructor !== undefined) {
-                    eval(base64.decode(config[model].constructor));
+                    try {
+                        eval(Buffer.from(config[model].constructor, 'base64').toString());
+                    } catch (e) {
+                        console.log(e);
+                    }
                 }
             });
 
@@ -113,7 +165,17 @@ export class connector {
 
             var config = snapshot.val();
             if (config.constructor !== undefined) {
-                eval(base64.decode(config.constructor));
+                try {
+                    eval(Buffer.from(config.constructor, 'base64').toString());
+                } catch (e) {
+                    // skip
+                }
+
+                try {
+                    eval(Buffer.from(config.constructor, 'base64').toString());
+                } catch (e) {
+                    // skip
+                }
             }
         });
 
