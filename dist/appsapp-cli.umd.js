@@ -1,8 +1,8 @@
 (function (global, factory) {
-	typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports, require('class-validator'), require('class-transformer'), require('angular2-uuid'), require('object-hash'), require('rxjs'), require('unirest'), require('class-validator/decorator/decorators')) :
-	typeof define === 'function' && define.amd ? define(['exports', 'class-validator', 'class-transformer', 'angular2-uuid', 'object-hash', 'rxjs', 'unirest', 'class-validator/decorator/decorators'], factory) :
-	(factory((global['appsapp-cli'] = {}),global.classValidator,global.classTransformer,global.angular2Uuid,global.objectHash,global.rxjs,global.Unirest,global.decorators));
-}(this, (function (exports,classValidator,classTransformer,angular2Uuid,objectHash,rxjs,Unirest,decorators) { 'use strict';
+	typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports, require('class-validator'), require('class-transformer'), require('angular2-uuid'), require('object-hash'), require('rxjs'), require('unirest'), require('class-validator/decorator/decorators'), require('firebase-admin'), require('base-64')) :
+	typeof define === 'function' && define.amd ? define(['exports', 'class-validator', 'class-transformer', 'angular2-uuid', 'object-hash', 'rxjs', 'unirest', 'class-validator/decorator/decorators', 'firebase-admin', 'base-64'], factory) :
+	(factory((global['appsapp-cli'] = {}),global.classValidator,global.classTransformer,global.angular2Uuid,global.objectHash,global.rxjs,global.Unirest,global.decorators,global.firebase,global.base64));
+}(this, (function (exports,classValidator,classTransformer,angular2Uuid,objectHash,rxjs,Unirest,decorators,firebase,base64) { 'use strict';
 
 /**
  * @fileoverview added by tsickle
@@ -2698,6 +2698,375 @@ function IsTime(options) {
  * @suppress {checkTypes} checked by tsc
  */
 /**
+ * Copyright (c) 2017 by Michael Egli
+ *
+ *
+ *
+ * firebase database structure
+ *
+ * - user
+ * --- {userid}
+ * ----- storage
+ * ------ {object} business objects
+ * ------- {objectid} business object identifier / single record
+ * --------- version (mixed, timestamp|uui|identifier) change it to fetch current content data from api
+ * --------- data (mixed)
+ * ---------- bind (mixed) json data of current version (is three way binding to client)
+ * ---------- stable (mixed) json data of current version (is last version of fetched data)
+ * --------- saved (mixed, timestamp|uui|identifier) change or set it to save current bind data back to api
+ * ----- profile
+ * ------ userid (integer)
+ * ------ name (string)
+ * ------ lastname (string)
+ * ------ email (string)
+ * ----- history (old and new values are stored here)
+ * ----- notification (realtime notification to user)
+ *
+ */
+var connector = /** @class */ (function () {
+    /**
+     *
+     * constructs the connector
+     *
+     * @return void
+     *
+     */
+    function connector() {
+        this.watchers = [];
+        this.isWatching = false;
+    }
+    /**
+     *
+     * init app
+     *
+     * @param string databaseURL of firebase database endpoint
+     * @param string serviceAccountKey file content as json
+     * @return mixed
+     *
+     */
+    /**
+     *
+     * init app
+     *
+     * @param {?} databaseURL
+     * @param {?} serviceAccountKey
+     * @return {?} mixed
+     *
+     */
+    connector.prototype.init = /**
+     *
+     * init app
+     *
+     * @param {?} databaseURL
+     * @param {?} serviceAccountKey
+     * @return {?} mixed
+     *
+     */
+    function (databaseURL, serviceAccountKey) {
+        /**
+                 * initialize firebase admin
+                 */
+        firebase.initializeApp({
+            credential: firebase.credential.cert(serviceAccountKey),
+            databaseURL: databaseURL
+        });
+        this.db = firebase.database();
+        this.watchers = [];
+        this.loadModels();
+        return this;
+    };
+    /**
+     * load all models from config constructors
+     */
+    /**
+     * load all models from config constructors
+     * @return {?}
+     */
+    connector.prototype.loadModels = /**
+     * load all models from config constructors
+     * @return {?}
+     */
+    function () {
+        var /** @type {?} */ self = this;
+        this.db.ref('_config').once('value', function (snapshot) {
+            var /** @type {?} */ config = snapshot.val();
+            if (!self.isWatching) {
+                self.watch();
+            }
+            /**
+                         * first eval
+                         */
+            Object.keys(config).forEach(function (model) {
+                if (config[model].constructor !== undefined) {
+                    eval(base64.base64.decode(config[model].constructor));
+                }
+            });
+            /**
+                         * second eval, must be done two times because of self-referencing injections
+                         */
+            Object.keys(config).forEach(function (model) {
+                if (config[model].constructor !== undefined) {
+                    eval(base64.base64.decode(config[model].constructor));
+                }
+            });
+        });
+        this.db.ref('_config').on('child_changed', function (snapshot) {
+            var /** @type {?} */ config = snapshot.val();
+            if (config.constructor !== undefined) {
+                eval(base64.base64.decode(config.constructor));
+            }
+        });
+    };
+    /**
+     *
+     * push notification to user if he's online
+     *
+     * @param string userid
+     * @param string title
+     * @param integer time
+     * @return void
+     *
+     */
+    /**
+     *
+     * push notification to user if he's online
+     *
+     * @param {?} userid
+     * @param {?} title
+     * @param {?} time
+     * @return {?} void
+     *
+     */
+    connector.prototype.message = /**
+     *
+     * push notification to user if he's online
+     *
+     * @param {?} userid
+     * @param {?} title
+     * @param {?} time
+     * @return {?} void
+     *
+     */
+    function (userid, title, time) {
+        var /** @type {?} */ self = this;
+        var /** @type {?} */ u = new angular2Uuid.UUID();
+        this.db.ref('user/' + userid + '/notification/' + u).set(title);
+        setTimeout(function () {
+            self.db.ref('user/' + userid + '/notification/' + u).remove();
+        }, time ? time : 3000);
+    };
+    /**
+     *
+     * push error notification to user if he's online
+     *
+     * @param string userid
+     * @param string title
+     * @param integer time
+     * @return void
+     *
+     */
+    /**
+     *
+     * push error notification to user if he's online
+     *
+     * @param {?} userid
+     * @param {?} title
+     * @param {?} time
+     * @return {?} void
+     *
+     */
+    connector.prototype.error = /**
+     *
+     * push error notification to user if he's online
+     *
+     * @param {?} userid
+     * @param {?} title
+     * @param {?} time
+     * @return {?} void
+     *
+     */
+    function (userid, title, time) {
+        var /** @type {?} */ self = this;
+        var /** @type {?} */ u = new angular2Uuid.UUID();
+        this.db.ref('user/' + userid + '/error/' + u).set(title);
+        setTimeout(function () {
+            self.db.ref('user/' + userid + '/error/' + u).remove();
+        }, time ? time : 3000);
+    };
+    /**
+     *
+     * push warning notification to user if he's online
+     *
+     * @param string userid
+     * @param string title
+     * @param integer time
+     * @return void
+     *
+     */
+    /**
+     *
+     * push warning notification to user if he's online
+     *
+     * @param {?} userid
+     * @param {?} title
+     * @param {?} time
+     * @return {?} void
+     *
+     */
+    connector.prototype.warning = /**
+     *
+     * push warning notification to user if he's online
+     *
+     * @param {?} userid
+     * @param {?} title
+     * @param {?} time
+     * @return {?} void
+     *
+     */
+    function (userid, title, time) {
+        var /** @type {?} */ self = this;
+        var /** @type {?} */ u = new angular2Uuid.UUID();
+        this.db.ref('user/' + userid + '/warning/' + u).set(title);
+        setTimeout(function () {
+            self.db.ref('user/' + userid + '/warning/' + u).remove();
+        }, time ? time : 3000);
+    };
+    /**
+     *
+     * watch for firebase events
+     *
+     * @return void
+     *
+     */
+    /**
+     *
+     * watch for firebase events
+     *
+     * @return {?} void
+     *
+     */
+    connector.prototype.watch = /**
+     *
+     * watch for firebase events
+     *
+     * @return {?} void
+     *
+     */
+    function () {
+        /**
+         * watch for events and connect signal slots
+         */
+        var /** @type {?} */ self = this;
+        self.isWatching = true;
+        this.db.ref("_queue").on("child_added", function (snapshot) {
+            self.executeQueue(snapshot);
+        });
+    };
+    /**
+     *
+     * execute queue from snapshot data
+     * @param snapshot
+     * @return void
+     *
+     */
+    /**
+     *
+     * execute queue from snapshot data
+     * @param {?} snapshot
+     * @return {?} void
+     *
+     */
+    connector.prototype.executeQueue = /**
+     *
+     * execute queue from snapshot data
+     * @param {?} snapshot
+     * @return {?} void
+     *
+     */
+    function (snapshot) {
+        var /** @type {?} */ self = this;
+        var /** @type {?} */ e = snapshot.val();
+        var /** @type {?} */ eventId = snapshot.key;
+        self.watchers.forEach(function (watcher) {
+            if ((e.object === watcher.object || watcher.object === null) &&
+                (e.project === watcher.project || watcher.project === null) &&
+                ((e.action.data !== undefined && e.action.data.name === watcher.action) || watcher.action === null)) {
+                var /** @type {?} */ model = new global[e.object];
+                model.loadJson(e.snapshot).then(function (data) {
+                    watcher.callback({
+                        user: e.user,
+                        object: e.object,
+                        objectId: e.objectid,
+                        project: e.project,
+                        action: e.action,
+                        eventId: eventId,
+                    }, data, {
+                        'resolve': function () {
+                            data.validate().then(function () {
+                                e.action.state = 'done';
+                                self.db.ref('_queue/' + eventId).update({
+                                    action: e.action,
+                                    targetData: data !== undefined && data.hasChanges() ? data.convertListPropertiesFromArrayToObject().serialize(true, true) : null
+                                });
+                            }).catch(function (error) {
+                                e.action.state = 'error';
+                                self.db.ref('_queue/' + eventId).update({
+                                    action: e.action,
+                                    targetData: null,
+                                    targetMessage: 'Validation error'
+                                });
+                                console.log(error);
+                            });
+                        },
+                        'reject': function (error) {
+                            e.action.state = 'error';
+                            self.db.ref('_queue/' + eventId).update({
+                                action: e.action,
+                                targetData: null,
+                                targetMessage: error !== undefined ? error : null
+                            });
+                        }
+                    });
+                }).catch(function (error) {
+                    console.log(error);
+                });
+            }
+        });
+    };
+    /**
+     * watch events
+     * @param object params
+     * @param function callback function (data,deferred)
+     */
+    /**
+     * watch events
+     * @param {?} params
+     * @param {?} callback
+     * @return {?}
+     */
+    connector.prototype.on = /**
+     * watch events
+     * @param {?} params
+     * @param {?} callback
+     * @return {?}
+     */
+    function (params, callback) {
+        this.watchers.push({
+            object: params.object !== undefined ? params.object : null,
+            action: params.action !== undefined ? params.action : null,
+            project: params.project !== undefined ? params.project : null,
+            callback: callback
+        });
+        return this;
+    };
+    return connector;
+}());
+
+/**
+ * @fileoverview added by tsickle
+ * @suppress {checkTypes} checked by tsc
+ */
+/**
  * @record
  */
 function appRequest() { }
@@ -2791,6 +3160,7 @@ exports.ArrayMinSize = decorators.ArrayMinSize;
 exports.ArrayMaxSize = decorators.ArrayMaxSize;
 exports.ArrayUnique = decorators.ArrayUnique;
 exports.IsInstance = decorators.IsInstance;
+exports.connector = connector;
 
 Object.defineProperty(exports, '__esModule', { value: true });
 

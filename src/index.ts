@@ -1,5 +1,3 @@
-import {actionCustom, actionGoogleSheets, actionWebhook} from "./module/models/persistable";
-
 export * from './module/models/persistable';
 export * from './module/validation/validators/HasConditions';
 export * from './module/validation/validators/HasDescription';
@@ -19,6 +17,7 @@ export * from './module/validation/validators/IsList';
 export * from './module/validation/validators/IsTime';
 export * from './module/interfaces/messages';
 export * from 'class-validator/decorator/decorators'
+export * from './module/backend/connector';
 
 export interface appRequest {
     user: string,
