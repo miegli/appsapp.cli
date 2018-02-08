@@ -6,14 +6,14 @@
 2 info using npm@3.10.10
 3 info using node@v6.11.1
 4 info git [ 'status', '--porcelain' ]
-5 info lifecycle appsapp-cli@1.6.135~preversion: appsapp-cli@1.6.135
-6 verbose lifecycle appsapp-cli@1.6.135~preversion: unsafe-perm in lifecycle true
-7 verbose lifecycle appsapp-cli@1.6.135~preversion: PATH: /usr/local/lib/node_modules/npm/bin/node-gyp-bin:/Users/pamegli/Documents/projects/appsapp.myApp/appsapp/node_modules/.bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/opt/X11/bin
-8 verbose lifecycle appsapp-cli@1.6.135~preversion: CWD: /Users/pamegli/Documents/projects/appsapp.myApp/appsapp
-9 silly lifecycle appsapp-cli@1.6.135~preversion: Args: [ '-c', 'npm test' ]
-10 silly lifecycle appsapp-cli@1.6.135~preversion: Returned: code: 0  signal: null
+5 info lifecycle appsapp-cli@1.6.136~preversion: appsapp-cli@1.6.136
+6 verbose lifecycle appsapp-cli@1.6.136~preversion: unsafe-perm in lifecycle true
+7 verbose lifecycle appsapp-cli@1.6.136~preversion: PATH: /usr/local/lib/node_modules/npm/bin/node-gyp-bin:/Users/pamegli/Documents/projects/appsapp.myApp/appsapp/node_modules/.bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/opt/X11/bin
+8 verbose lifecycle appsapp-cli@1.6.136~preversion: CWD: /Users/pamegli/Documents/projects/appsapp.myApp/appsapp
+9 silly lifecycle appsapp-cli@1.6.136~preversion: Args: [ '-c', 'npm test' ]
+10 silly lifecycle appsapp-cli@1.6.136~preversion: Returned: code: 0  signal: null
 11 verbose version.write data { name: 'appsapp-cli',
-11 verbose version.write   version: '1.6.135',
+11 verbose version.write   version: '1.6.136',
 11 verbose version.write   license: 'MIT',
 11 verbose version.write   scripts:
 11 verbose version.write    { build: 'gulp build',
@@ -123,18 +123,18 @@
 11 verbose version.write   author: { name: 'Michael Egli', email: 'michael.egli@appsapp.io' },
 11 verbose version.write   keywords: [ 'angular', 'ionic' ],
 11 verbose version.write   bugs: { url: 'https://github.com/miegli/appsapps.cli/issues' } } to package.json
-12 info lifecycle appsapp-cli@1.6.135~version: appsapp-cli@1.6.135
-13 verbose lifecycle appsapp-cli@1.6.135~version: unsafe-perm in lifecycle true
-14 verbose lifecycle appsapp-cli@1.6.135~version: PATH: /usr/local/lib/node_modules/npm/bin/node-gyp-bin:/Users/pamegli/Documents/projects/appsapp.myApp/appsapp/node_modules/.bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/opt/X11/bin
-15 verbose lifecycle appsapp-cli@1.6.135~version: CWD: /Users/pamegli/Documents/projects/appsapp.myApp/appsapp
-16 silly lifecycle appsapp-cli@1.6.135~version: Args: [ '-c', 'npm run build && git add -A dist' ]
-17 silly lifecycle appsapp-cli@1.6.135~version: Returned: code: 0  signal: null
+12 info lifecycle appsapp-cli@1.6.136~version: appsapp-cli@1.6.136
+13 verbose lifecycle appsapp-cli@1.6.136~version: unsafe-perm in lifecycle true
+14 verbose lifecycle appsapp-cli@1.6.136~version: PATH: /usr/local/lib/node_modules/npm/bin/node-gyp-bin:/Users/pamegli/Documents/projects/appsapp.myApp/appsapp/node_modules/.bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/opt/X11/bin
+15 verbose lifecycle appsapp-cli@1.6.136~version: CWD: /Users/pamegli/Documents/projects/appsapp.myApp/appsapp
+16 silly lifecycle appsapp-cli@1.6.136~version: Args: [ '-c', 'npm run build && git add -A dist' ]
+17 silly lifecycle appsapp-cli@1.6.136~version: Returned: code: 0  signal: null
 18 info git [ 'add',
 18 info git   '/Users/pamegli/Documents/projects/appsapp.myApp/appsapp/package.json' ]
-19 info git [ 'commit', '-m', '1.6.135' ]
-20 info git [ 'tag', 'v1.6.135', '-am', '1.6.135' ]
-21 verbose stack Error: Command failed: git tag v1.6.135 -am 1.6.135
-21 verbose stack fatal: tag 'v1.6.135' already exists
+19 info git [ 'commit', '-m', '1.6.136' ]
+20 info git [ 'tag', 'v1.6.136', '-am', '1.6.136' ]
+21 verbose stack Error: Command failed: git tag v1.6.136 -am 1.6.136
+21 verbose stack fatal: tag 'v1.6.136' already exists
 21 verbose stack
 21 verbose stack     at ChildProcess.exithandler (child_process.js:204:12)
 21 verbose stack     at emitTwo (events.js:106:13)
@@ -150,8 +150,8 @@
 25 error node v6.11.1
 26 error npm  v3.10.10
 27 error code 128
-28 error Command failed: git tag v1.6.135 -am 1.6.135
-28 error fatal: tag 'v1.6.135' already exists
+28 error Command failed: git tag v1.6.136 -am 1.6.136
+28 error fatal: tag 'v1.6.136' already exists
 29 error If you need help, you may report this error at:
 29 error     <https://github.com/npm/npm/issues>
 30 verbose exit [ 1, true ]
