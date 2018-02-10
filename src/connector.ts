@@ -31,6 +31,7 @@ import {UUID} from "angular2-uuid";
 const path = require('path');
 declare var Reflect: any;
 
+
 process.argv.forEach((val, index) => {
     require('app-module-path').addPath(path.dirname(val)+path.sep+'node_modules');
 });
@@ -73,7 +74,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 
 
 
-export class connector {
+export class Connector {
 
 
     db: firebase.database.Database;
