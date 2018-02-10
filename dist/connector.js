@@ -1,3 +1,4 @@
+"use strict";
 /**
  * Copyright (c) 2017 by Michael Egli
  *
@@ -24,63 +25,49 @@
  * ----- notification (realtime notification to user)
  *
  */
-
-import * as firebase from "firebase-admin";
-import {UUID} from "angular2-uuid";
-
-const path = require('path');
-declare var Reflect: any;
-
-
-process.argv.forEach((val, index) => {
-    require('app-module-path').addPath(path.dirname(val)+path.sep+'node_modules');
+Object.defineProperty(exports, "__esModule", { value: true });
+var firebase = require("firebase-admin");
+var angular2_uuid_1 = require("angular2-uuid");
+var path = require("path");
+process.argv.forEach(function (val, index) {
+    require('app-module-path').addPath(path.dirname(val) + path.sep + 'node_modules');
 });
-
-
 /**
  * constructor loader
  */
 var __extends = (this && this.__extends) || (function () {
     var extendStatics = Object.setPrototypeOf ||
-        ({__proto__: []} instanceof Array && function (d, b) {
+        ({ __proto__: [] } instanceof Array && function (d, b) {
             d.__proto__ = b;
         }) ||
         function (d, b) {
-            for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
+            for (var p in b)
+                if (b.hasOwnProperty(p))
+                    d[p] = b[p];
         };
     return function (d, b) {
         extendStatics(d, b);
-
         function __() {
             this.constructor = d;
         }
-
         d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
     };
 })();
-
-
 var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
-    var c = arguments.length,
-        r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
-    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
-    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function")
+        r = Reflect.decorate(decorators, target, key, desc);
+    else
+        for (var i = decorators.length - 1; i >= 0; i--)
+            if (d = decorators[i])
+                r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
-
 var __metadata = (this && this.__metadata) || function (k, v) {
-    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function")
+        return Reflect.metadata(k, v);
 };
-
-
-
-export class Connector {
-
-
-    db: firebase.database.Database;
-    watchers: any = [];
-    isWatching: boolean = false;
-
+var Connector = /** @class */ (function () {
     /**
      *
      * constructs the connector
@@ -88,11 +75,10 @@ export class Connector {
      * @return void
      *
      */
-    constructor() {
-
+    function Connector() {
+        this.watchers = [];
+        this.isWatching = false;
     }
-
-
     /**
      *
      * init app
@@ -102,7 +88,7 @@ export class Connector {
      * @return mixed
      *
      */
-    init(databaseURL: string, serviceAccountKey: string) {
+    Connector.prototype.init = function (databaseURL, serviceAccountKey) {
         /**
          * initialize firebase admin
          */
@@ -113,75 +99,63 @@ export class Connector {
         this.db = firebase.database();
         this.watchers = [];
         this.loadModels();
-
         return this;
-
-    }
-
+    };
     /**
      * load all models from config constructors
      */
-    loadModels() {
-
+    Connector.prototype.loadModels = function () {
         var self = this;
-
-        this.db.ref('_config').once('value', (snapshot) => {
-
+        this.db.ref('_config').once('value', function (snapshot) {
             var config = snapshot.val();
-            if (!self.isWatching){
+            if (!self.isWatching) {
                 self.watch();
             }
-
             /**
              * first eval
              */
-            Object.keys(config).forEach((model) => {
+            Object.keys(config).forEach(function (model) {
                 if (config[model].constructor !== undefined) {
                     try {
                         eval(Buffer.from(config[model].constructor, 'base64').toString());
-                    } catch (e) {
+                    }
+                    catch (e) {
                         // skip
                     }
                 }
             });
-
-
             /**
              * second eval, must be done two times because of self-referencing injections
              */
-            Object.keys(config).forEach((model) => {
+            Object.keys(config).forEach(function (model) {
                 if (config[model].constructor !== undefined) {
                     try {
                         eval(Buffer.from(config[model].constructor, 'base64').toString());
-                    } catch (e) {
+                    }
+                    catch (e) {
                         console.log(e);
                     }
                 }
             });
-
-
         });
-
-        this.db.ref('_config').on('child_changed', (snapshot) => {
-
+        this.db.ref('_config').on('child_changed', function (snapshot) {
             var config = snapshot.val();
             if (config.constructor !== undefined) {
                 try {
                     eval(Buffer.from(config.constructor, 'base64').toString());
-                } catch (e) {
+                }
+                catch (e) {
                     // skip
                 }
-
                 try {
                     eval(Buffer.from(config.constructor, 'base64').toString());
-                } catch (e) {
+                }
+                catch (e) {
                     // skip
                 }
             }
         });
-
-    }
-
+    };
     /**
      *
      * push notification to user if he's online
@@ -192,17 +166,14 @@ export class Connector {
      * @return void
      *
      */
-    message(userid, title, time) {
-
+    Connector.prototype.message = function (userid, title, time) {
         var self = this;
-        var u = new UUID();
+        var u = new angular2_uuid_1.UUID();
         this.db.ref('user/' + userid + '/notification/' + u).set(title);
         setTimeout(function () {
             self.db.ref('user/' + userid + '/notification/' + u).remove();
         }, time ? time : 3000);
-
-    }
-
+    };
     /**
      *
      * push error notification to user if he's online
@@ -213,16 +184,14 @@ export class Connector {
      * @return void
      *
      */
-    error(userid, title, time) {
-
+    Connector.prototype.error = function (userid, title, time) {
         var self = this;
-        var u = new UUID();
+        var u = new angular2_uuid_1.UUID();
         this.db.ref('user/' + userid + '/error/' + u).set(title);
         setTimeout(function () {
             self.db.ref('user/' + userid + '/error/' + u).remove();
         }, time ? time : 3000);
-    }
-
+    };
     /**
      *
      * push warning notification to user if he's online
@@ -233,19 +202,14 @@ export class Connector {
      * @return void
      *
      */
-    warning(userid, title, time) {
-
-
+    Connector.prototype.warning = function (userid, title, time) {
         var self = this;
-        var u = new UUID();
+        var u = new angular2_uuid_1.UUID();
         this.db.ref('user/' + userid + '/warning/' + u).set(title);
         setTimeout(function () {
             self.db.ref('user/' + userid + '/warning/' + u).remove();
         }, time ? time : 3000);
-
-    }
-
-
+    };
     /**
      *
      * watch for firebase events
@@ -253,23 +217,16 @@ export class Connector {
      * @return void
      *
      */
-    watch() {
+    Connector.prototype.watch = function () {
         /**
          * watch for events and connect signal slots
          */
         var self = this;
         self.isWatching = true;
-
-        this.db.ref("_queue").on(
-            "child_added",
-            function (snapshot) {
-                self.executeQueue(snapshot);
-            }
-        );
-
-    }
-
-
+        this.db.ref("_queue").on("child_added", function (snapshot) {
+            self.executeQueue(snapshot);
+        });
+    };
     /**
      *
      * execute queue from snapshot data
@@ -277,24 +234,16 @@ export class Connector {
      * @return void
      *
      */
-    executeQueue(snapshot) {
-
+    Connector.prototype.executeQueue = function (snapshot) {
         var self = this;
         var e = snapshot.val();
         var eventId = snapshot.key;
-
         self.watchers.forEach(function (watcher) {
-
-
-            if (
-                (e.object === watcher.object || watcher.object === null) &&
+            if ((e.object === watcher.object || watcher.object === null) &&
                 (e.project === watcher.project || watcher.project === null) &&
-                ((e.action.data !== undefined && e.action.data.name === watcher.action) || watcher.action === null)
-            ) {
-
-                let model = new global[e.object];
-                model.loadJson(e.snapshot).then((data) => {
-
+                ((e.action.data !== undefined && e.action.data.name === watcher.action) || watcher.action === null)) {
+                var model = new global[e.object];
+                model.loadJson(e.snapshot).then(function (data) {
                     watcher.callback({
                         user: e.user,
                         object: e.object,
@@ -304,21 +253,20 @@ export class Connector {
                         eventId: eventId,
                     }, data, {
                         'resolve': function () {
-
-                            data.validate().then(() => {
+                            data.validate().then(function () {
                                 e.action.state = 'done';
                                 if (data.hasChanges()) {
                                     self.db.ref('_queue/' + eventId).update({
                                         action: e.action,
                                         targetData: data !== undefined ? data.convertListPropertiesFromArrayToObject().serialize(true, true) : null
                                     });
-                                } else {
+                                }
+                                else {
                                     self.db.ref('_queue/' + eventId).update({
                                         action: e.action
                                     });
                                 }
-
-                            }).catch((error) => {
+                            }).catch(function (error) {
                                 e.action.state = 'error';
                                 self.db.ref('_queue/' + eventId).update({
                                     action: e.action,
@@ -326,56 +274,36 @@ export class Connector {
                                 });
                                 console.log(error);
                             });
-
-
                         },
                         'reject': function (error) {
-
                             e.action.state = 'error';
                             self.db.ref('_queue/' + eventId).update({
                                 action: e.action,
                                 targetData: null,
                                 targetMessage: error !== undefined ? error : null
                             });
-
                         }
                     });
-
-
-                }).catch((error) => {
+                }).catch(function (error) {
                     console.log(error);
                 });
-
-
-
-
-
             }
-
-
         });
-
-
-    }
-
+    };
     /**
      * watch events
      * @param object params
      * @param function callback function (data,deferred)
      */
-    on(params, callback) {
-
-        this.watchers.push(
-            {
-                object: params.object !== undefined ? params.object : null,
-                action: params.action !== undefined ? params.action : null,
-                project: params.project !== undefined ? params.project : null,
-                callback: callback
-            }
-        );
-
+    Connector.prototype.on = function (params, callback) {
+        this.watchers.push({
+            object: params.object !== undefined ? params.object : null,
+            action: params.action !== undefined ? params.action : null,
+            project: params.project !== undefined ? params.project : null,
+            callback: callback
+        });
         return this;
-    }
-
-
-}
+    };
+    return Connector;
+}());
+exports.Connector = Connector;

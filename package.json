@@ -34,6 +34,7 @@
     "gulp": "^3.9.1",
     "gulp-rename": "^1.2.2",
     "gulp-rollup": "^2.16.2",
+    "gulp-typescript": "^3.2.3",
     "jasmine-core": "^3.0.0",
     "jasmine-spec-reporter": "^4.2.1",
     "karma": "^2.0.0",

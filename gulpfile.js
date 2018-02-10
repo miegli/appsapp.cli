@@ -1,5 +1,6 @@
 /* eslint-disable */
 var gulp = require('gulp'),
+    ts = require("gulp-typescript"),
     path = require('path'),
     ngc = require('@angular/compiler-cli/src/main').main,
     rollup = require('gulp-rollup'),
@@ -215,9 +216,29 @@ gulp.task('copy:buildCLI', function () {
  * 7B. Copy all backend function build
  */
 gulp.task('copy:backendFunctions', function () {
-    return gulp.src([`${srcFolder}/connector.ts`, `${srcFolder}/plugins/**/*`], {base: srcFolder})
+    return gulp.src([`${srcFolder}/plugins/**/*`], {base: srcFolder})
         .pipe(gulp.dest(distFolder));
 });
+
+
+/**
+ * (8C. Build connector.ts
+ */
+gulp.task('buildconnector', function () {
+
+    var tsProject = ts.createProject("./tsconfig.json", {
+        target: 'es5',
+        module: "commonjs",
+        noResolve: false
+    });
+
+    var tsResult = gulp.src(`${srcFolder}/connector.ts`) // or tsProject.src()
+        .pipe(tsProject());
+
+    return tsResult.js.pipe(gulp.dest(distFolder));
+});
+
+
 
 /**
  * 8A. increment version for package.json
@@ -284,6 +305,7 @@ gulp.task('compile', function () {
         'copy:build',
         'copy:buildCLI',
         'copy:backendFunctions',
+        'buildconnector',
         'version:manifest',
         'copy:manifest',
         'copy:readme',

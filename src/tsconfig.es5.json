@@ -21,8 +21,8 @@
     "annotateForClosureCompiler": true,
     "strictMetadataEmit": true,
     "skipTemplateCodegen": true,
-    "flatModuleOutFile": "appsapp-module.js",
-    "flatModuleId": "appsapp-module"
+    "flatModuleOutFile": "appsapp-cli.js",
+    "flatModuleId": "appsapp-cli"
   },
   "files": [
     "./index.ts"

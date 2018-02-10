@@ -27,10 +27,9 @@
 
 import * as firebase from "firebase-admin";
 import {UUID} from "angular2-uuid";
+import * as path from "path";
 
-const path = require('path');
 declare var Reflect: any;
-
 
 process.argv.forEach((val, index) => {
     require('app-module-path').addPath(path.dirname(val)+path.sep+'node_modules');
