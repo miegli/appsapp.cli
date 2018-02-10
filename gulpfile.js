@@ -212,17 +212,9 @@ gulp.task('copy:buildCLI', function () {
         .pipe(gulp.dest(distFolderCLI));
 });
 
-/**
- * 7B. Copy all backend function build
- */
-gulp.task('copy:backendFunctions', function () {
-    return gulp.src([`${srcFolder}/plugins/**/*`], {base: srcFolder})
-        .pipe(gulp.dest(distFolder));
-});
-
 
 /**
- * (8C. Build connector.ts
+ * (7A. Build connector.ts
  */
 gulp.task('buildconnector', function () {
 
@@ -237,6 +229,17 @@ gulp.task('buildconnector', function () {
 
     return tsResult.js.pipe(gulp.dest(distFolder));
 });
+
+
+/**
+ * 7B. Copy all backend function build
+ */
+gulp.task('copy:backendFunctions', function () {
+    return gulp.src([`${srcFolder}/connector*`,`${srcFolder}/plugins/**/*`], {base: srcFolder})
+        .pipe(gulp.dest(distFolder));
+});
+
+
 
 
 
@@ -304,8 +307,8 @@ gulp.task('compile', function () {
         'rollup:umd',
         'copy:build',
         'copy:buildCLI',
-        'copy:backendFunctions',
         'buildconnector',
+        'copy:backendFunctions',
         'version:manifest',
         'copy:manifest',
         'copy:readme',
