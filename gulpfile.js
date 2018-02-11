@@ -219,15 +219,20 @@ gulp.task('copy:buildCLI', function () {
 gulp.task('buildconnector', function () {
 
     var tsProject = ts.createProject("./tsconfig.json", {
-        target: 'es5',
-        module: "commonjs",
-        noResolve: false
+        "module": "commonjs",
+        "target": "es6",
+        "emitDecoratorMetadata": true,
+        "experimentalDecorators": true,
+        "declaration": true
     });
 
-    var tsResult = gulp.src(`${srcFolder}/connector.ts`) // or tsProject.src()
+    var tsResult = gulp.src(`${srcFolder}/connector/**/*`) // or tsProject.src()
         .pipe(tsProject());
 
-    return tsResult.js.pipe(gulp.dest(distFolder));
+    tsResult.js.pipe(gulp.dest(distFolder+"/connector")).pipe(gulp.dest('dist'));
+
+    return tsResult.dts
+        .pipe(gulp.dest(distFolder+"/connector"));
 });
 
 
@@ -235,7 +240,7 @@ gulp.task('buildconnector', function () {
  * 7B. Copy all backend function build
  */
 gulp.task('copy:backendFunctions', function () {
-    return gulp.src([`${srcFolder}/connector*`,`${srcFolder}/plugins/**/*`], {base: srcFolder})
+    return gulp.src([`${srcFolder}/connector/*`,`${srcFolder}/plugins/**/*`], {base: srcFolder})
         .pipe(gulp.dest(distFolder));
 });
 

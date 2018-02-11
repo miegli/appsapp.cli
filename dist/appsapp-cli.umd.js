@@ -2702,6 +2702,37 @@ function IsTime(options) {
  * @suppress {checkTypes} checked by tsc
  */
 /**
+ * @param {?} label
+ * @param {?=} validationOptions
+ * @return {?}
+ */
+function IsHidden(label, validationOptions) {
+    return function (object, propertyName) {
+        classValidator.registerDecorator({
+            name: "isHidden",
+            target: object.constructor,
+            propertyName: propertyName,
+            constraints: [{ 'type': 'isHidden', 'value': label }],
+            options: validationOptions,
+            validator: {
+                validate: /**
+                 * @param {?} value
+                 * @param {?} args
+                 * @return {?}
+                 */
+                function (value, args) {
+                    return true;
+                }
+            }
+        });
+    };
+}
+
+/**
+ * @fileoverview added by tsickle
+ * @suppress {checkTypes} checked by tsc
+ */
+/**
  * @record
  */
 function appRequest() { }
@@ -2724,6 +2755,7 @@ exports.IsNumpad = IsNumpad;
 exports.IsSelect = IsSelect;
 exports.IsList = IsList;
 exports.IsTime = IsTime;
+exports.IsHidden = IsHidden;
 exports.ValidatorConstraint = decorators.ValidatorConstraint;
 exports.Validate = decorators.Validate;
 exports.ValidateNested = decorators.ValidateNested;
