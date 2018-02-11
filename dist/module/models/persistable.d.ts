@@ -63,6 +63,7 @@ export declare class PersistableModel {
     private __isOnline;
     private __validationErrors;
     private __metadata;
+    private __metadataCache;
     private _hasPendingChanges;
     private __conditionBindings;
     private __conditionActionIfMatches;
@@ -415,7 +416,7 @@ export declare class PersistableModel {
      * @param {string} type
      * @returns {Array}
      */
-    getMetadata(property?: string, type?: string): any[];
+    getMetadata(property?: string, type?: string): any;
     /**
      * check if property is type of array
      * @param property

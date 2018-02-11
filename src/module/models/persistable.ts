@@ -81,6 +81,7 @@ export class PersistableModel {
     private __isOnline: boolean = true;
     private __validationErrors: any = {};
     private __metadata = [];
+    private __metadataCache = {};
     private _hasPendingChanges: boolean = false;
     private __conditionBindings: any = {};
     private __conditionActionIfMatches: any = {};
@@ -1547,19 +1548,25 @@ export class PersistableModel {
      */
     public getMetadata(property?: string, type?: string) {
 
-        let validationMetadata = [];
+        if (this.__metadataCache[property+'__'+(type === undefined ? '' : type)] === undefined) {
 
-        this.__metadata.forEach((metadata) => {
-            if (!property || metadata.propertyName == property) {
+            let validationMetadata = [];
 
-                if (!type || metadata.type == type || (metadata.type == 'customValidation' && metadata.constraints && metadata.constraints[0].type == type)) {
-                    validationMetadata.push(metadata);
+            this.__metadata.forEach((metadata) => {
+                if (!property || metadata.propertyName == property) {
+
+                    if (!type || metadata.type == type || (metadata.type == 'customValidation' && metadata.constraints && metadata.constraints[0].type == type)) {
+                        validationMetadata.push(metadata);
+                    }
+
                 }
+            });
 
-            }
-        });
+            this.__metadataCache[property+'__'+(type === undefined ? '' : type)] = validationMetadata;
 
-        return validationMetadata;
+        }
+
+        return this.__metadataCache[property+'__'+(type === undefined ? '' : type)];
 
     }
 
@@ -1665,6 +1672,7 @@ export class PersistableModel {
             'isDateRange': 'dates',
             'isCalendar': 'date',
             'isTime': 'time',
+            'isHidden': null,
             'isNumpad': 'number',
             'customValidation': (metadata) => {
 
@@ -1678,7 +1686,7 @@ export class PersistableModel {
 
         this.getMetadata(property).forEach((metadata) => {
 
-            if (type == null && typeMappings[metadata.type] !== undefined) {
+            if (type == null && typeMappings[metadata.type] !== undefined && typeMappings[metadata.type] !== null) {
 
                 if (typeof typeMappings[metadata.type] == 'string') {
                     type = typeMappings[metadata.type];
@@ -1690,7 +1698,7 @@ export class PersistableModel {
         });
 
         if (!type) {
-            type = typeMappings[typeof this[property]] !== undefined ? typeMappings[typeof this[property]] : null;
+            type = typeMappings[typeof this[property]] !== undefined && typeMappings[typeof this[property]] !== null ? typeMappings[typeof this[property]] : null;
         }
 
         return type ? type : 'text';
@@ -1710,19 +1718,20 @@ export class PersistableModel {
 
         self.__conditionBindings = {'request': {}, 'properties': {}};
 
-
-        this.getMetadata(null, 'hasConditions').forEach((validator) => {
+        var registerCondition = (validator, customProperty?: string) => {
 
             let hasRealtimeTypes = false;
+            let customPropertyName = customProperty == undefined ? validator.propertyName : customProperty;
 
 
-            self.__conditionActionIfMatchesRemovedProperties[validator.propertyName] = true;
-
-            if (self.__conditionActionIfMatches[validator.propertyName] == undefined) {
-                self.__conditionActionIfMatches[validator.propertyName] = new Observable<any>((observer: Observer<any>) => {
-                    self.__conditionActionIfMatchesObserver[validator.propertyName] = observer;
-                    self.__conditionActionIfMatchesObserver[validator.propertyName].next({
-                        'action': self.__conditionActionIfMatchesAction[validator.propertyName],
+            if (customPropertyName == validator.propertyName) {
+                self.__conditionActionIfMatchesRemovedProperties[validator.propertyName] = true;
+            }
+            if (self.__conditionActionIfMatches[customPropertyName] == undefined) {
+                self.__conditionActionIfMatches[customPropertyName] = new Observable<any>((observer: Observer<any>) => {
+                    self.__conditionActionIfMatchesObserver[customPropertyName] = observer;
+                    self.__conditionActionIfMatchesObserver[customPropertyName].next({
+                        'action': self.__conditionActionIfMatchesAction[customPropertyName],
                         'state': true
                     });
 
@@ -1733,15 +1742,13 @@ export class PersistableModel {
                 // self.__conditionActionIfMatches[validator.propertyName].share();
                 //
             }
-
-
             if (!prepare) {
 
 
-                if (self.__conditionActionIfMatchesObserver && self.__conditionActionIfMatchesAction[validator.propertyName] === undefined && self.__conditionActionIfMatchesObserver[validator.propertyName]) {
-                    self.__conditionActionIfMatchesAction[validator.propertyName] = validator.constraints[0].actionIfMatches;
-                    self.__conditionActionIfMatchesObserver[validator.propertyName].next({
-                        'action': self.__conditionActionIfMatchesAction[validator.propertyName],
+                if (self.__conditionActionIfMatchesObserver && self.__conditionActionIfMatchesAction[customPropertyName] === undefined && self.__conditionActionIfMatchesObserver[customPropertyName]) {
+                    self.__conditionActionIfMatchesAction[customPropertyName] = validator.constraints[0].actionIfMatches;
+                    self.__conditionActionIfMatchesObserver[customPropertyName].next({
+                        'action': self.__conditionActionIfMatchesAction[customPropertyName],
                         'state': true
                     });
                 }
@@ -1753,15 +1760,15 @@ export class PersistableModel {
                         hasRealtimeTypes = true;
                     }
 
-                    if (self.__conditionContraintsProperties[v.property] === undefined) {
-                        self.__conditionContraintsProperties[v.property] = {}
+                    if (self.__conditionContraintsProperties[customPropertyName] === undefined) {
+                        self.__conditionContraintsProperties[customPropertyName] = {}
                     }
-                    self.__conditionContraintsProperties[v.property][v.type] = true;
+                    self.__conditionContraintsProperties[customPropertyName][v.type] = true;
 
                     if (self.__conditionContraintsAffectedProperties[v.property] === undefined) {
                         self.__conditionContraintsAffectedProperties[v.property] = {}
                     }
-                    self.__conditionContraintsAffectedProperties[v.property][validator.propertyName] = true;
+                    self.__conditionContraintsAffectedProperties[v.property][customPropertyName] = true;
 
 
                 });
@@ -1772,7 +1779,16 @@ export class PersistableModel {
                 }
 
             }
+        }
 
+        this.getMetadata(null, 'hasConditions').forEach((validator) => {
+            registerCondition(validator);
+        });
+
+        this.getMetadata(null, 'isHidden').forEach((validator) => {
+            if (validator.constraints.length && validator.constraints[0].value !== undefined) {
+                registerCondition(validator,'__isHidden__'+validator.propertyName);
+            }
         });
 
 
@@ -1902,7 +1918,15 @@ export class PersistableModel {
             Object.keys(this.__conditionContraintsAffectedProperties[property]).forEach((affectedProperty) => {
 
 
-                let result = validateSync(self, {groups: ["condition_" + affectedProperty]});
+                var result = [];
+
+                if (affectedProperty.substr(0,12) == '__isHidden__') {
+                     result = validateSync(self, {groups: [affectedProperty]});
+                } else {
+                     result = validateSync(self, {groups: ["condition_" + affectedProperty]});
+                }
+
+
                 if (self.__conditionActionIfMatchesObserver[affectedProperty] !== undefined) {
 
                     self.__conditionActionIfMatchesObserver[affectedProperty].next({

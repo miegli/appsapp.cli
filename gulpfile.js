@@ -229,7 +229,7 @@ gulp.task('buildconnector', function () {
     var tsResult = gulp.src(`${srcFolder}/connector/**/*`) // or tsProject.src()
         .pipe(tsProject());
 
-    tsResult.js.pipe(gulp.dest(distFolder+"/connector")).pipe(gulp.dest('dist'));
+    tsResult.js.pipe(gulp.dest(distFolder+"/connector"));
 
     return tsResult.dts
         .pipe(gulp.dest(distFolder+"/connector"));
@@ -240,7 +240,7 @@ gulp.task('buildconnector', function () {
  * 7B. Copy all backend function build
  */
 gulp.task('copy:backendFunctions', function () {
-    return gulp.src([`${srcFolder}/connector/*`,`${srcFolder}/plugins/**/*`], {base: srcFolder})
+    return gulp.src([`${srcFolder}/plugins/**/*`], {base: srcFolder})
         .pipe(gulp.dest(distFolder));
 });
 

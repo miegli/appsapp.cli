@@ -26,10 +26,10 @@
  *
  */
 Object.defineProperty(exports, "__esModule", { value: true });
-const firebase = require("firebase-admin");
-const angular2_uuid_1 = require("angular2-uuid");
-const path = require("path");
-process.argv.forEach((val, index) => {
+var firebase = require("firebase-admin");
+var angular2_uuid_1 = require("angular2-uuid");
+var path = require("path");
+process.argv.forEach(function (val, index) {
     require('app-module-path').addPath(path.dirname(val) + path.sep + 'node_modules');
 });
 /**
@@ -67,7 +67,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function")
         return Reflect.metadata(k, v);
 };
-class Connector {
+var Connector = /** @class */ (function () {
     /**
      *
      * constructs the connector
@@ -75,7 +75,7 @@ class Connector {
      * @return void
      *
      */
-    constructor() {
+    function Connector() {
         this.watchers = [];
         this.isWatching = false;
     }
@@ -88,7 +88,7 @@ class Connector {
      * @return mixed
      *
      */
-    init(databaseURL, serviceAccountKey) {
+    Connector.prototype.init = function (databaseURL, serviceAccountKey) {
         /**
          * initialize firebase admin
          */
@@ -100,13 +100,13 @@ class Connector {
         this.watchers = [];
         this.loadModels();
         return this;
-    }
+    };
     /**
      * load all models from config constructors
      */
-    loadModels() {
+    Connector.prototype.loadModels = function () {
         var self = this;
-        this.db.ref('_config').once('value', (snapshot) => {
+        this.db.ref('_config').once('value', function (snapshot) {
             var config = snapshot.val();
             if (!self.isWatching) {
                 self.watch();
@@ -114,7 +114,7 @@ class Connector {
             /**
              * first eval
              */
-            Object.keys(config).forEach((model) => {
+            Object.keys(config).forEach(function (model) {
                 if (config[model].constructor !== undefined) {
                     try {
                         eval(Buffer.from(config[model].constructor, 'base64').toString());
@@ -127,7 +127,7 @@ class Connector {
             /**
              * second eval, must be done two times because of self-referencing injections
              */
-            Object.keys(config).forEach((model) => {
+            Object.keys(config).forEach(function (model) {
                 if (config[model].constructor !== undefined) {
                     try {
                         eval(Buffer.from(config[model].constructor, 'base64').toString());
@@ -138,7 +138,7 @@ class Connector {
                 }
             });
         });
-        this.db.ref('_config').on('child_changed', (snapshot) => {
+        this.db.ref('_config').on('child_changed', function (snapshot) {
             var config = snapshot.val();
             if (config.constructor !== undefined) {
                 try {
@@ -155,7 +155,7 @@ class Connector {
                 }
             }
         });
-    }
+    };
     /**
      *
      * push notification to user if he's online
@@ -166,14 +166,14 @@ class Connector {
      * @return void
      *
      */
-    message(userid, title, time) {
+    Connector.prototype.message = function (userid, title, time) {
         var self = this;
         var u = new angular2_uuid_1.UUID();
         this.db.ref('user/' + userid + '/notification/' + u).set(title);
         setTimeout(function () {
             self.db.ref('user/' + userid + '/notification/' + u).remove();
         }, time ? time : 3000);
-    }
+    };
     /**
      *
      * push error notification to user if he's online
@@ -184,14 +184,14 @@ class Connector {
      * @return void
      *
      */
-    error(userid, title, time) {
+    Connector.prototype.error = function (userid, title, time) {
         var self = this;
         var u = new angular2_uuid_1.UUID();
         this.db.ref('user/' + userid + '/error/' + u).set(title);
         setTimeout(function () {
             self.db.ref('user/' + userid + '/error/' + u).remove();
         }, time ? time : 3000);
-    }
+    };
     /**
      *
      * push warning notification to user if he's online
@@ -202,14 +202,14 @@ class Connector {
      * @return void
      *
      */
-    warning(userid, title, time) {
+    Connector.prototype.warning = function (userid, title, time) {
         var self = this;
         var u = new angular2_uuid_1.UUID();
         this.db.ref('user/' + userid + '/warning/' + u).set(title);
         setTimeout(function () {
             self.db.ref('user/' + userid + '/warning/' + u).remove();
         }, time ? time : 3000);
-    }
+    };
     /**
      *
      * watch for firebase events
@@ -217,7 +217,7 @@ class Connector {
      * @return void
      *
      */
-    watch() {
+    Connector.prototype.watch = function () {
         /**
          * watch for events and connect signal slots
          */
@@ -226,7 +226,7 @@ class Connector {
         this.db.ref("_queue").on("child_added", function (snapshot) {
             self.executeQueue(snapshot);
         });
-    }
+    };
     /**
      *
      * execute queue from snapshot data
@@ -234,7 +234,7 @@ class Connector {
      * @return void
      *
      */
-    executeQueue(snapshot) {
+    Connector.prototype.executeQueue = function (snapshot) {
         var self = this;
         var e = snapshot.val();
         var eventId = snapshot.key;
@@ -242,8 +242,8 @@ class Connector {
             if ((e.object === watcher.object || watcher.object === null) &&
                 (e.project === watcher.project || watcher.project === null) &&
                 ((e.action.data !== undefined && e.action.data.name === watcher.action) || watcher.action === null)) {
-                let model = new global[e.object];
-                model.loadJson(e.snapshot).then((data) => {
+                var model = new global[e.object];
+                model.loadJson(e.snapshot).then(function (data) {
                     watcher.callback({
                         user: e.user,
                         object: e.object,
@@ -253,7 +253,7 @@ class Connector {
                         eventId: eventId,
                     }, data, {
                         'resolve': function () {
-                            data.validate().then(() => {
+                            data.validate().then(function () {
                                 e.action.state = 'done';
                                 if (data.hasChanges()) {
                                     self.db.ref('_queue/' + eventId).update({
@@ -266,7 +266,7 @@ class Connector {
                                         action: e.action
                                     });
                                 }
-                            }).catch((error) => {
+                            }).catch(function (error) {
                                 e.action.state = 'error';
                                 self.db.ref('_queue/' + eventId).update({
                                     action: e.action,
@@ -284,18 +284,18 @@ class Connector {
                             });
                         }
                     });
-                }).catch((error) => {
+                }).catch(function (error) {
                     console.log(error);
                 });
             }
         });
-    }
+    };
     /**
      * watch events
      * @param object params
      * @param function callback function (data,deferred)
      */
-    on(params, callback) {
+    Connector.prototype.on = function (params, callback) {
         this.watchers.push({
             object: params.object !== undefined ? params.object : null,
             action: params.action !== undefined ? params.action : null,
@@ -303,6 +303,7 @@ class Connector {
             callback: callback
         });
         return this;
-    }
-}
+    };
+    return Connector;
+}());
 exports.Connector = Connector;

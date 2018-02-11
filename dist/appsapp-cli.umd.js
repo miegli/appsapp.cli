@@ -46,6 +46,7 @@ var PersistableModel = /** @class */ (function () {
         this.__isOnline = true;
         this.__validationErrors = {};
         this.__metadata = [];
+        this.__metadataCache = {};
         this._hasPendingChanges = false;
         this.__conditionBindings = {};
         this.__conditionActionIfMatches = {};
@@ -1428,15 +1429,18 @@ var PersistableModel = /** @class */ (function () {
      * @return {?}
      */
     function (property, type) {
-        var /** @type {?} */ validationMetadata = [];
-        this.__metadata.forEach(function (metadata) {
-            if (!property || metadata.propertyName == property) {
-                if (!type || metadata.type == type || (metadata.type == 'customValidation' && metadata.constraints && metadata.constraints[0].type == type)) {
-                    validationMetadata.push(metadata);
+        if (this.__metadataCache[property + '__' + (type === undefined ? '' : type)] === undefined) {
+            var /** @type {?} */ validationMetadata_1 = [];
+            this.__metadata.forEach(function (metadata) {
+                if (!property || metadata.propertyName == property) {
+                    if (!type || metadata.type == type || (metadata.type == 'customValidation' && metadata.constraints && metadata.constraints[0].type == type)) {
+                        validationMetadata_1.push(metadata);
+                    }
                 }
-            }
-        });
-        return validationMetadata;
+            });
+            this.__metadataCache[property + '__' + (type === undefined ? '' : type)] = validationMetadata_1;
+        }
+        return this.__metadataCache[property + '__' + (type === undefined ? '' : type)];
     };
     /**
      * check if property is type of array
@@ -1538,6 +1542,7 @@ var PersistableModel = /** @class */ (function () {
             'isDateRange': 'dates',
             'isCalendar': 'date',
             'isTime': 'time',
+            'isHidden': null,
             'isNumpad': 'number',
             'customValidation': function (metadata) {
                 if (metadata.constraints[0].type && metadata.constraints[0].type && metadata.constraints[0].type.substr(0, 3) !== 'has') {
@@ -1547,7 +1552,7 @@ var PersistableModel = /** @class */ (function () {
             }
         };
         this.getMetadata(property).forEach(function (metadata) {
-            if (type == null && typeMappings[metadata.type] !== undefined) {
+            if (type == null && typeMappings[metadata.type] !== undefined && typeMappings[metadata.type] !== null) {
                 if (typeof typeMappings[metadata.type] == 'string') {
                     type = typeMappings[metadata.type];
                 }
@@ -1557,7 +1562,7 @@ var PersistableModel = /** @class */ (function () {
             }
         });
         if (!type) {
-            type = typeMappings[typeof this[property]] !== undefined ? typeMappings[typeof this[property]] : null;
+            type = typeMappings[typeof this[property]] !== undefined && typeMappings[typeof this[property]] !== null ? typeMappings[typeof this[property]] : null;
         }
         return type ? type : 'text';
     };
@@ -1574,14 +1579,17 @@ var PersistableModel = /** @class */ (function () {
     function (prepare) {
         var /** @type {?} */ self = this;
         self.__conditionBindings = { 'request': {}, 'properties': {} };
-        this.getMetadata(null, 'hasConditions').forEach(function (validator) {
+        var /** @type {?} */ registerCondition = function (validator, customProperty) {
             var /** @type {?} */ hasRealtimeTypes = false;
-            self.__conditionActionIfMatchesRemovedProperties[validator.propertyName] = true;
-            if (self.__conditionActionIfMatches[validator.propertyName] == undefined) {
-                self.__conditionActionIfMatches[validator.propertyName] = new rxjs.Observable(function (observer) {
-                    self.__conditionActionIfMatchesObserver[validator.propertyName] = observer;
-                    self.__conditionActionIfMatchesObserver[validator.propertyName].next({
-                        'action': self.__conditionActionIfMatchesAction[validator.propertyName],
+            var /** @type {?} */ customPropertyName = customProperty == undefined ? validator.propertyName : customProperty;
+            if (customPropertyName == validator.propertyName) {
+                self.__conditionActionIfMatchesRemovedProperties[validator.propertyName] = true;
+            }
+            if (self.__conditionActionIfMatches[customPropertyName] == undefined) {
+                self.__conditionActionIfMatches[customPropertyName] = new rxjs.Observable(function (observer) {
+                    self.__conditionActionIfMatchesObserver[customPropertyName] = observer;
+                    self.__conditionActionIfMatchesObserver[customPropertyName].next({
+                        'action': self.__conditionActionIfMatchesAction[customPropertyName],
                         'state': true
                     });
                 });
@@ -1591,10 +1599,10 @@ var PersistableModel = /** @class */ (function () {
                 //
             }
             if (!prepare) {
-                if (self.__conditionActionIfMatchesObserver && self.__conditionActionIfMatchesAction[validator.propertyName] === undefined && self.__conditionActionIfMatchesObserver[validator.propertyName]) {
-                    self.__conditionActionIfMatchesAction[validator.propertyName] = validator.constraints[0].actionIfMatches;
-                    self.__conditionActionIfMatchesObserver[validator.propertyName].next({
-                        'action': self.__conditionActionIfMatchesAction[validator.propertyName],
+                if (self.__conditionActionIfMatchesObserver && self.__conditionActionIfMatchesAction[customPropertyName] === undefined && self.__conditionActionIfMatchesObserver[customPropertyName]) {
+                    self.__conditionActionIfMatchesAction[customPropertyName] = validator.constraints[0].actionIfMatches;
+                    self.__conditionActionIfMatchesObserver[customPropertyName].next({
+                        'action': self.__conditionActionIfMatchesAction[customPropertyName],
                         'state': true
                     });
                 }
@@ -1602,19 +1610,27 @@ var PersistableModel = /** @class */ (function () {
                     if (v.type == 'limit') {
                         hasRealtimeTypes = true;
                     }
-                    if (self.__conditionContraintsProperties[v.property] === undefined) {
-                        self.__conditionContraintsProperties[v.property] = {};
+                    if (self.__conditionContraintsProperties[customPropertyName] === undefined) {
+                        self.__conditionContraintsProperties[customPropertyName] = {};
                     }
-                    self.__conditionContraintsProperties[v.property][v.type] = true;
+                    self.__conditionContraintsProperties[customPropertyName][v.type] = true;
                     if (self.__conditionContraintsAffectedProperties[v.property] === undefined) {
                         self.__conditionContraintsAffectedProperties[v.property] = {};
                     }
-                    self.__conditionContraintsAffectedProperties[v.property][validator.propertyName] = true;
+                    self.__conditionContraintsAffectedProperties[v.property][customPropertyName] = true;
                 });
                 if (hasRealtimeTypes) {
                     self.__conditionBindings['request'][validator.propertyName] = self.getFirebaseDatabase().object(self.getFirebaseDatabasePath() + "/condition/request/" + validator.propertyName);
                     self.__conditionBindings['request'][validator.propertyName].set(validator.constraints[0].value);
                 }
+            }
+        };
+        this.getMetadata(null, 'hasConditions').forEach(function (validator) {
+            registerCondition(validator);
+        });
+        this.getMetadata(null, 'isHidden').forEach(function (validator) {
+            if (validator.constraints.length && validator.constraints[0].value !== undefined) {
+                registerCondition(validator, '__isHidden__' + validator.propertyName);
             }
         });
         if (!prepare) {
@@ -1718,7 +1734,13 @@ var PersistableModel = /** @class */ (function () {
         }
         if (this.__conditionContraintsAffectedProperties[property] !== undefined) {
             Object.keys(this.__conditionContraintsAffectedProperties[property]).forEach(function (affectedProperty) {
-                var /** @type {?} */ result = classValidator.validateSync(self, { groups: ["condition_" + affectedProperty] });
+                var /** @type {?} */ result = [];
+                if (affectedProperty.substr(0, 12) == '__isHidden__') {
+                    result = classValidator.validateSync(self, { groups: [affectedProperty] });
+                }
+                else {
+                    result = classValidator.validateSync(self, { groups: ["condition_" + affectedProperty] });
+                }
                 if (self.__conditionActionIfMatchesObserver[affectedProperty] !== undefined) {
                     self.__conditionActionIfMatchesObserver[affectedProperty].next({
                         action: self.__conditionActionIfMatchesAction[affectedProperty],
@@ -2702,18 +2724,35 @@ function IsTime(options) {
  * @suppress {checkTypes} checked by tsc
  */
 /**
- * @param {?} label
+ * @param {?} options
  * @param {?=} validationOptions
  * @return {?}
  */
-function IsHidden(label, validationOptions) {
+function IsHidden(options, validationOptions) {
     return function (object, propertyName) {
+        var /** @type {?} */ self = this, /** @type {?} */ actionIfMatches = true;
+        if (options !== undefined) {
+            options.forEach(function (option) {
+                if (option.property == undefined) {
+                    option.property = propertyName;
+                }
+                if (option.validator == undefined) {
+                    option.validator = 'equals';
+                }
+                if (option.type == undefined) {
+                    option.type = 'condition';
+                }
+                if (option.value == undefined) {
+                    option.value = true;
+                }
+            });
+        }
         classValidator.registerDecorator({
             name: "isHidden",
             target: object.constructor,
             propertyName: propertyName,
-            constraints: [{ 'type': 'isHidden', 'value': label }],
-            options: validationOptions,
+            constraints: [{ 'type': 'isHidden', 'value': options, 'actionIfMatches': actionIfMatches }],
+            options: { groups: ['__isHidden__' + propertyName] },
             validator: {
                 validate: /**
                  * @param {?} value
@@ -2721,7 +2760,34 @@ function IsHidden(label, validationOptions) {
                  * @return {?}
                  */
                 function (value, args) {
-                    return true;
+                    var /** @type {?} */ validator = new classValidator.Validator();
+                    var /** @type {?} */ state = true;
+                    /**
+                                         * iterates over all rules synchronous
+                                         */
+                    if (options) {
+                        options.forEach(function (condition) {
+                            if (state) {
+                                if (condition.type == 'condition') {
+                                    if (condition.validator == 'equals' && value !== undefined && value !== null && value.length !== undefined && value.length == 0) {
+                                        state = true;
+                                    }
+                                    else {
+                                        if (!validator[condition.validator](args.object.__conditionContraintsPropertiesValue[condition.property] === undefined ? args.object[condition.property] : args.object.__conditionContraintsPropertiesValue[condition.property], condition.value, condition.validatorAdditionalArgument)) {
+                                            state = false;
+                                        }
+                                    }
+                                }
+                            }
+                        });
+                    }
+                    /**
+                                         *  if is in backend service mode, so override property value and condition validator state
+                                         */
+                    if (args.object.isInBackendMode()) {
+                        return true;
+                    }
+                    return state;
                 }
             }
         });
