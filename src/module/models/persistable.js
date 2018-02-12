@@ -29,6 +29,7 @@ var PersistableModel = /** @class */ (function () {
         this.__isOnline = true;
         this.__validationErrors = {};
         this.__metadata = [];
+        this.__metadataCache = {};
         this._hasPendingChanges = false;
         this.__conditionBindings = {};
         this.__conditionActionIfMatches = {};
@@ -1127,15 +1128,18 @@ var PersistableModel = /** @class */ (function () {
      * @returns {Array}
      */
     PersistableModel.prototype.getMetadata = function (property, type) {
-        var validationMetadata = [];
-        this.__metadata.forEach(function (metadata) {
-            if (!property || metadata.propertyName == property) {
-                if (!type || metadata.type == type || (metadata.type == 'customValidation' && metadata.constraints && metadata.constraints[0].type == type)) {
-                    validationMetadata.push(metadata);
+        if (this.__metadataCache[property + '__' + (type === undefined ? '' : type)] === undefined) {
+            var validationMetadata_1 = [];
+            this.__metadata.forEach(function (metadata) {
+                if (!property || metadata.propertyName == property) {
+                    if (!type || metadata.type == type || (metadata.type == 'customValidation' && metadata.constraints && metadata.constraints[0].type == type)) {
+                        validationMetadata_1.push(metadata);
+                    }
                 }
-            }
-        });
-        return validationMetadata;
+            });
+            this.__metadataCache[property + '__' + (type === undefined ? '' : type)] = validationMetadata_1;
+        }
+        return this.__metadataCache[property + '__' + (type === undefined ? '' : type)];
     };
     /**
      * check if property is type of array
@@ -1219,6 +1223,7 @@ var PersistableModel = /** @class */ (function () {
             'isDateRange': 'dates',
             'isCalendar': 'date',
             'isTime': 'time',
+            'isHidden': null,
             'isNumpad': 'number',
             'customValidation': function (metadata) {
                 if (metadata.constraints[0].type && metadata.constraints[0].type && metadata.constraints[0].type.substr(0, 3) !== 'has') {
@@ -1228,7 +1233,7 @@ var PersistableModel = /** @class */ (function () {
             }
         };
         this.getMetadata(property).forEach(function (metadata) {
-            if (type == null && typeMappings[metadata.type] !== undefined) {
+            if (type == null && typeMappings[metadata.type] !== undefined && typeMappings[metadata.type] !== null) {
                 if (typeof typeMappings[metadata.type] == 'string') {
                     type = typeMappings[metadata.type];
                 }
@@ -1238,7 +1243,7 @@ var PersistableModel = /** @class */ (function () {
             }
         });
         if (!type) {
-            type = typeMappings[typeof this[property]] !== undefined ? typeMappings[typeof this[property]] : null;
+            type = typeMappings[typeof this[property]] !== undefined && typeMappings[typeof this[property]] !== null ? typeMappings[typeof this[property]] : null;
         }
         return type ? type : 'text';
     };
@@ -1250,14 +1255,17 @@ var PersistableModel = /** @class */ (function () {
     PersistableModel.prototype.registerConditionValidators = function (prepare) {
         var self = this;
         self.__conditionBindings = { 'request': {}, 'properties': {} };
-        this.getMetadata(null, 'hasConditions').forEach(function (validator) {
+        var registerCondition = function (validator, customProperty) {
             var hasRealtimeTypes = false;
-            self.__conditionActionIfMatchesRemovedProperties[validator.propertyName] = true;
-            if (self.__conditionActionIfMatches[validator.propertyName] == undefined) {
-                self.__conditionActionIfMatches[validator.propertyName] = new rxjs_1.Observable(function (observer) {
-                    self.__conditionActionIfMatchesObserver[validator.propertyName] = observer;
-                    self.__conditionActionIfMatchesObserver[validator.propertyName].next({
-                        'action': self.__conditionActionIfMatchesAction[validator.propertyName],
+            var customPropertyName = customProperty == undefined ? validator.propertyName : customProperty;
+            if (customPropertyName == validator.propertyName) {
+                self.__conditionActionIfMatchesRemovedProperties[validator.propertyName] = true;
+            }
+            if (self.__conditionActionIfMatches[customPropertyName] == undefined) {
+                self.__conditionActionIfMatches[customPropertyName] = new rxjs_1.Observable(function (observer) {
+                    self.__conditionActionIfMatchesObserver[customPropertyName] = observer;
+                    self.__conditionActionIfMatchesObserver[customPropertyName].next({
+                        'action': self.__conditionActionIfMatchesAction[customPropertyName],
                         'state': true
                     });
                 });
@@ -1267,10 +1275,10 @@ var PersistableModel = /** @class */ (function () {
                 //
             }
             if (!prepare) {
-                if (self.__conditionActionIfMatchesObserver && self.__conditionActionIfMatchesAction[validator.propertyName] === undefined && self.__conditionActionIfMatchesObserver[validator.propertyName]) {
-                    self.__conditionActionIfMatchesAction[validator.propertyName] = validator.constraints[0].actionIfMatches;
-                    self.__conditionActionIfMatchesObserver[validator.propertyName].next({
-                        'action': self.__conditionActionIfMatchesAction[validator.propertyName],
+                if (self.__conditionActionIfMatchesObserver && self.__conditionActionIfMatchesAction[customPropertyName] === undefined && self.__conditionActionIfMatchesObserver[customPropertyName]) {
+                    self.__conditionActionIfMatchesAction[customPropertyName] = validator.constraints[0].actionIfMatches;
+                    self.__conditionActionIfMatchesObserver[customPropertyName].next({
+                        'action': self.__conditionActionIfMatchesAction[customPropertyName],
                         'state': true
                     });
                 }
@@ -1278,19 +1286,27 @@ var PersistableModel = /** @class */ (function () {
                     if (v.type == 'limit') {
                         hasRealtimeTypes = true;
                     }
-                    if (self.__conditionContraintsProperties[v.property] === undefined) {
-                        self.__conditionContraintsProperties[v.property] = {};
+                    if (self.__conditionContraintsProperties[customPropertyName] === undefined) {
+                        self.__conditionContraintsProperties[customPropertyName] = {};
                     }
-                    self.__conditionContraintsProperties[v.property][v.type] = true;
+                    self.__conditionContraintsProperties[customPropertyName][v.type] = true;
                     if (self.__conditionContraintsAffectedProperties[v.property] === undefined) {
                         self.__conditionContraintsAffectedProperties[v.property] = {};
                     }
-                    self.__conditionContraintsAffectedProperties[v.property][validator.propertyName] = true;
+                    self.__conditionContraintsAffectedProperties[v.property][customPropertyName] = true;
                 });
                 if (hasRealtimeTypes) {
                     self.__conditionBindings['request'][validator.propertyName] = self.getFirebaseDatabase().object(self.getFirebaseDatabasePath() + "/condition/request/" + validator.propertyName);
                     self.__conditionBindings['request'][validator.propertyName].set(validator.constraints[0].value);
                 }
+            }
+        };
+        this.getMetadata(null, 'hasConditions').forEach(function (validator) {
+            registerCondition(validator);
+        });
+        this.getMetadata(null, 'isHidden').forEach(function (validator) {
+            if (validator.constraints.length && validator.constraints[0].value !== undefined) {
+                registerCondition(validator, '__isHidden__' + validator.propertyName);
             }
         });
         if (!prepare) {
@@ -1372,7 +1388,13 @@ var PersistableModel = /** @class */ (function () {
         }
         if (this.__conditionContraintsAffectedProperties[property] !== undefined) {
             Object.keys(this.__conditionContraintsAffectedProperties[property]).forEach(function (affectedProperty) {
-                var result = class_validator_1.validateSync(self, { groups: ["condition_" + affectedProperty] });
+                var result = [];
+                if (affectedProperty.substr(0, 12) == '__isHidden__') {
+                    result = class_validator_1.validateSync(self, { groups: [affectedProperty] });
+                }
+                else {
+                    result = class_validator_1.validateSync(self, { groups: ["condition_" + affectedProperty] });
+                }
                 if (self.__conditionActionIfMatchesObserver[affectedProperty] !== undefined) {
                     self.__conditionActionIfMatchesObserver[affectedProperty].next({
                         action: self.__conditionActionIfMatchesAction[affectedProperty],
