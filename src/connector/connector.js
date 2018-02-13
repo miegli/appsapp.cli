@@ -243,50 +243,57 @@ var Connector = /** @class */ (function () {
                 (e.project === watcher.project || watcher.project === null) &&
                 ((e.action.data !== undefined && e.action.data.name === watcher.action) || watcher.action === null)) {
                 var model = new global[e.object];
-                model.loadJson(e.snapshot).then(function (data) {
-                    watcher.callback({
-                        user: e.user,
-                        object: e.object,
-                        objectId: e.objectid,
-                        project: e.project,
-                        action: e.action,
-                        eventId: eventId,
-                    }, data, {
-                        'resolve': function () {
-                            data.validate().then(function () {
-                                e.action.state = 'done';
-                                if (data.hasChanges()) {
+                if (e.object === undefined || e.action.state == 'done') {
+                    self.db.ref('_queue/' + eventId).remove(function () {
+                        // removed old queue entry
+                    });
+                }
+                else {
+                    model.loadJson(e.snapshot).then(function (data) {
+                        watcher.callback({
+                            user: e.user,
+                            object: e.object,
+                            objectId: e.objectid,
+                            project: e.project,
+                            action: e.action,
+                            eventId: eventId,
+                        }, data, {
+                            'resolve': function () {
+                                data.validate().then(function () {
+                                    e.action.state = 'done';
+                                    if (data.hasChanges()) {
+                                        self.db.ref('_queue/' + eventId).update({
+                                            action: e.action,
+                                            targetData: data !== undefined ? data.convertListPropertiesFromArrayToObject().serialize(true, true) : null
+                                        });
+                                    }
+                                    else {
+                                        self.db.ref('_queue/' + eventId).update({
+                                            action: e.action
+                                        });
+                                    }
+                                }).catch(function (error) {
+                                    e.action.state = 'error';
                                     self.db.ref('_queue/' + eventId).update({
                                         action: e.action,
-                                        targetData: data !== undefined ? data.convertListPropertiesFromArrayToObject().serialize(true, true) : null
+                                        targetMessage: 'Validation error'
                                     });
-                                }
-                                else {
-                                    self.db.ref('_queue/' + eventId).update({
-                                        action: e.action
-                                    });
-                                }
-                            }).catch(function (error) {
+                                    console.log(error);
+                                });
+                            },
+                            'reject': function (error) {
                                 e.action.state = 'error';
                                 self.db.ref('_queue/' + eventId).update({
                                     action: e.action,
-                                    targetMessage: 'Validation error'
+                                    targetData: null,
+                                    targetMessage: error !== undefined ? error : null
                                 });
-                                console.log(error);
-                            });
-                        },
-                        'reject': function (error) {
-                            e.action.state = 'error';
-                            self.db.ref('_queue/' + eventId).update({
-                                action: e.action,
-                                targetData: null,
-                                targetMessage: error !== undefined ? error : null
-                            });
-                        }
+                            }
+                        });
+                    }).catch(function (error) {
+                        console.log(error);
                     });
-                }).catch(function (error) {
-                    console.log(error);
-                });
+                }
             }
         });
     };
