@@ -2,6 +2,13 @@
   "name": "appsapp-cli",
   "version": "1.6.165",
   "license": "MIT",
+  "dependencies": {
+    "angularfire2": "=5.0.0-rc.6",
+    "firebase": "^4.9.1",
+    "class-transformer": "^0.1.9",
+    "class-validator": "^0.8.1",
+    "object-hash": "^1.2.0"
+  },
   "devDependencies ": {
     "chalk": "^2.3.0",
     "clear": "0.0.1",
