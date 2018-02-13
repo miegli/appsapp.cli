@@ -1027,8 +1027,8 @@ export class PersistableModel {
     public clear(property) {
 
 
-        if (this.getMetadataValue(property, 'isList') && this.__appsAppModuleProvider) {
-            this.setProperty(property, []);
+        if (this.getMetadataValue(property, 'isList')) {
+            this[property] = [];
         }
 
         return this;

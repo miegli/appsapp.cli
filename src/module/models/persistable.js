@@ -184,10 +184,11 @@ var PersistableModel = /** @class */ (function () {
     /**
      * trigger custom action
      * @param string action
-     * @param boolean silent
+     * @param integer interval repeat this trigger every interval seconds
+     * @param integer maximal successfully execution counts
      * @returns {Observable<any>}
      */
-    PersistableModel.prototype.trigger = function (action) {
+    PersistableModel.prototype.trigger = function (action, interval, maxExecutions) {
         var self = this;
         return new rxjs_1.Observable(function (observer) {
             if (self.__isLoaded) {
@@ -196,7 +197,7 @@ var PersistableModel = /** @class */ (function () {
                     data: {
                         name: action
                     }
-                });
+                }, interval, maxExecutions);
             }
             else {
                 self.loaded().then(function (model) {
@@ -205,7 +206,7 @@ var PersistableModel = /** @class */ (function () {
                         data: {
                             name: action
                         }
-                    });
+                    }, interval, maxExecutions);
                 });
             }
         });
