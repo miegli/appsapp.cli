@@ -242,13 +242,13 @@ var Connector = /** @class */ (function () {
             if ((e.object === watcher.object || watcher.object === null) &&
                 (e.project === watcher.project || watcher.project === null) &&
                 ((e.action.data !== undefined && e.action.data.name === watcher.action) || watcher.action === null)) {
-                var model = new global[e.object];
                 if (e.object === undefined || e.action.state == 'done') {
                     self.db.ref('_queue/' + eventId).remove(function () {
                         // removed old queue entry
                     });
                 }
                 else {
+                    var model = new global[e.object];
                     model.loadJson(e.snapshot).then(function (data) {
                         watcher.callback({
                             user: e.user,

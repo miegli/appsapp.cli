@@ -307,10 +307,11 @@ export class PersistableModel {
     /**
      * trigger custom action
      * @param string action
-     * @param boolean silent
+     * @param integer interval repeat this trigger every interval seconds
+     * @param integer maximal successfully execution counts
      * @returns {Observable<any>}
      */
-    public trigger(action: string) {
+    public trigger(action: string, interval?, maxExecutions?) {
 
         var self = this;
 
@@ -323,7 +324,7 @@ export class PersistableModel {
                     data: {
                         name: action
                     }
-                });
+                },interval,maxExecutions);
             } else {
                 self.loaded().then((model) => {
                     self.getPersistenceManager().trigger(model, observer, {
@@ -331,7 +332,7 @@ export class PersistableModel {
                         data: {
                             name: action
                         }
-                    });
+                    },interval,maxExecutions);
                 });
             }
 

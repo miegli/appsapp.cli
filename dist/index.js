@@ -235,14 +235,18 @@ var PersistableModel = /** @class */ (function () {
     /**
      * trigger custom action
      * @param {?} action
+     * @param {?=} interval
+     * @param {?=} maxExecutions
      * @return {?}
      */
     PersistableModel.prototype.trigger = /**
      * trigger custom action
      * @param {?} action
+     * @param {?=} interval
+     * @param {?=} maxExecutions
      * @return {?}
      */
-    function (action) {
+    function (action, interval, maxExecutions) {
         var /** @type {?} */ self = this;
         return new rxjs.Observable(function (observer) {
             if (self.__isLoaded) {
@@ -251,7 +255,7 @@ var PersistableModel = /** @class */ (function () {
                     data: {
                         name: action
                     }
-                });
+                }, interval, maxExecutions);
             }
             else {
                 self.loaded().then(function (model) {
@@ -260,7 +264,7 @@ var PersistableModel = /** @class */ (function () {
                         data: {
                             name: action
                         }
-                    });
+                    }, interval, maxExecutions);
                 });
             }
         });

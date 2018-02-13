@@ -127,10 +127,11 @@ export declare class PersistableModel {
     /**
      * trigger custom action
      * @param string action
-     * @param boolean silent
+     * @param integer interval repeat this trigger every interval seconds
+     * @param integer maximal successfully execution counts
      * @returns {Observable<any>}
      */
-    trigger(action: string): Observable<any>;
+    trigger(action: string, interval?: any, maxExecutions?: any): Observable<any>;
     /**
      * trigger a webhook url
      * @param {string} url
