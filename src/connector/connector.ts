@@ -32,7 +32,7 @@ import * as path from "path";
 declare var Reflect: any;
 
 process.argv.forEach((val, index) => {
-    require('app-module-path').addPath(path.dirname(val)+path.sep+'node_modules');
+    require('app-module-path').addPath(path.dirname(val) + path.sep + 'node_modules');
 });
 
 
@@ -70,7 +70,6 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
-
 
 
 export class Connector {
@@ -127,7 +126,7 @@ export class Connector {
         this.db.ref('_config').once('value', (snapshot) => {
 
             var config = snapshot.val();
-            if (!self.isWatching){
+            if (!self.isWatching) {
                 self.watch();
             }
 
@@ -292,61 +291,64 @@ export class Connector {
             ) {
 
                 let model = new global[e.object];
-                model.loadJson(e.snapshot).then((data) => {
+                if (e.object === undefined || e.action.state == 'done') {
+                    self.db.ref('_queue/' + eventId).remove(() => {
+                        // removed old queue entry
+                    });
+                } else {
+                    model.loadJson(e.snapshot).then((data) => {
 
-                    watcher.callback({
-                        user: e.user,
-                        object: e.object,
-                        objectId: e.objectid,
-                        project: e.project,
-                        action: e.action,
-                        eventId: eventId,
-                    }, data, {
-                        'resolve': function () {
+                        watcher.callback({
+                            user: e.user,
+                            object: e.object,
+                            objectId: e.objectid,
+                            project: e.project,
+                            action: e.action,
+                            eventId: eventId,
+                        }, data, {
+                            'resolve': function () {
 
-                            data.validate().then(() => {
-                                e.action.state = 'done';
-                                if (data.hasChanges()) {
+                                data.validate().then(() => {
+                                    e.action.state = 'done';
+                                    if (data.hasChanges()) {
+                                        self.db.ref('_queue/' + eventId).update({
+                                            action: e.action,
+                                            targetData: data !== undefined ? data.convertListPropertiesFromArrayToObject().serialize(true, true) : null
+                                        });
+                                    } else {
+                                        self.db.ref('_queue/' + eventId).update({
+                                            action: e.action
+                                        });
+                                    }
+
+                                }).catch((error) => {
+                                    e.action.state = 'error';
                                     self.db.ref('_queue/' + eventId).update({
                                         action: e.action,
-                                        targetData: data !== undefined ? data.convertListPropertiesFromArrayToObject().serialize(true, true) : null
+                                        targetMessage: 'Validation error'
                                     });
-                                } else {
-                                    self.db.ref('_queue/' + eventId).update({
-                                        action: e.action
-                                    });
-                                }
+                                    console.log(error);
+                                });
 
-                            }).catch((error) => {
+
+                            },
+                            'reject': function (error) {
+
                                 e.action.state = 'error';
                                 self.db.ref('_queue/' + eventId).update({
                                     action: e.action,
-                                    targetMessage: 'Validation error'
+                                    targetData: null,
+                                    targetMessage: error !== undefined ? error : null
                                 });
-                                console.log(error);
-                            });
+
+                            }
+                        });
 
 
-                        },
-                        'reject': function (error) {
-
-                            e.action.state = 'error';
-                            self.db.ref('_queue/' + eventId).update({
-                                action: e.action,
-                                targetData: null,
-                                targetMessage: error !== undefined ? error : null
-                            });
-
-                        }
+                    }).catch((error) => {
+                        console.log(error);
                     });
-
-
-                }).catch((error) => {
-                    console.log(error);
-                });
-
-
-
+                }
 
 
             }
