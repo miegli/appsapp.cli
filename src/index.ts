@@ -25,7 +25,7 @@ export interface appRequest {
     objectId: string,
     project: string,
     action: {
-        data: { name: string },
+        data: { name: string, identifier: string,  interval?: number, maxExecutions?: number, currentExecutions?: number},
         name: 'custom',
         state: string
     },

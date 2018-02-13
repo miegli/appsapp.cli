@@ -741,8 +741,8 @@ var PersistableModel = /** @class */ (function () {
      * @returns this
      */
     PersistableModel.prototype.clear = function (property) {
-        if (this.getMetadataValue(property, 'isList') && this.__appsAppModuleProvider) {
-            this.setProperty(property, []);
+        if (this.getMetadataValue(property, 'isList')) {
+            this[property] = [];
         }
         return this;
     };
