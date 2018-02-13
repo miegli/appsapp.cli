@@ -1,6 +1,6 @@
 {
   "name": "appsapp-cli",
-  "version": "1.6.168",
+  "version": "1.6.169",
   "license": "MIT",
   "dependencies": {
     "angularfire2": "=5.0.0-rc.6",
@@ -8,7 +8,8 @@
     "class-transformer": "^0.1.9",
     "class-validator": "^0.8.1",
     "object-hash": "^1.2.0",
-    "angular2-uuid": "^1.1.1"
+    "angular2-uuid": "^1.1.1",
+    "unirest": "^0.5.1",
   },
   "devDependencies ": {
     "chalk": "^2.3.0",
