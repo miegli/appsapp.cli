@@ -26,6 +26,10 @@ export interface appRequest {
     action: {
         data: {
             name: string;
+            identifier: string;
+            interval?: number;
+            maxExecutions?: number;
+            currentExecutions?: number;
         };
         name: 'custom';
         state: string;
