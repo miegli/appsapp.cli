@@ -242,13 +242,13 @@ class Connector {
             if ((e.object === watcher.object || watcher.object === null) &&
                 (e.project === watcher.project || watcher.project === null) &&
                 ((e.action.data !== undefined && e.action.data.name === watcher.action) || watcher.action === null)) {
-                let model = new global[e.object];
                 if (e.object === undefined || e.action.state == 'done') {
                     self.db.ref('_queue/' + eventId).remove(() => {
                         // removed old queue entry
                     });
                 }
                 else {
+                    let model = new global[e.object];
                     model.loadJson(e.snapshot).then((data) => {
                         watcher.callback({
                             user: e.user,
