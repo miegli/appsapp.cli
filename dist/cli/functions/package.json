@@ -8,6 +8,9 @@
     "deploy": "firebase deploy --only functions",
     "logs": "firebase functions:log"
   },
+  "dependencies": {
+    "appsapp-cli": "^1.6.168"
+  },
   "devDependencies": {
     "aws-sdk": "^2.190.0",
     "firebase-admin": "^5.8.2",
