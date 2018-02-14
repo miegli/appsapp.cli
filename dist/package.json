@@ -1,6 +1,6 @@
 {
   "name": "appsapp-cli",
-  "version": "1.6.172",
+  "version": "1.6.173",
   "license": "MIT",
   "dependencies": {
     "angularfire2": "=5.0.0-rc.6",
@@ -9,9 +9,7 @@
     "class-validator": "^0.8.1",
     "object-hash": "^1.2.0",
     "angular2-uuid": "^1.1.1",
-    "unirest": "^0.5.1"
-  },
-  "devDependencies ": {
+    "unirest": "^0.5.1",
     "chalk": "^2.3.0",
     "clear": "0.0.1",
     "clui": "^0.3.6",
@@ -32,14 +30,8 @@
     "rxjs": "^5.5.2",
     "node-cmd": "^3.0.0",
     "node-watch": "^0.5.5",
-    "angular2-uuid": "^1.1.1",
-    "angularfire2": "=5.0.0-rc.5-next",
     "firebase-admin": "^5.8.2",
-    "class-transformer": "^0.1.8",
-    "class-validator": "^0.7.3",
     "fs-extra": "^4.0.2",
-    "unirest": "^0.5.1",
-    "object-hash": "^1.2.0",
     "app-module-path": "^2.2.0",
     "request-promise": "^4.2.2"
   },
