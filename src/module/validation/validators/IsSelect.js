@@ -69,11 +69,13 @@ function IsSelect(options) {
                                     values[typeof option.value == 'object' ? objectHash.sha1(option.value) : option.value] = true;
                                 }
                             });
-                            optionValidator.target.forEach(function (value) {
-                                if (values[typeof value == 'object' ? objectHash.sha1(value) : value] == undefined) {
-                                    allValide = false;
-                                }
-                            });
+                            if (typeof optionValidator.target.forEach == 'function') {
+                                optionValidator.target.forEach(function (value) {
+                                    if (values[typeof value == 'object' ? objectHash.sha1(value) : value] == undefined) {
+                                        allValide = false;
+                                    }
+                                });
+                            }
                             if (allValide) {
                                 resolve(true);
                             }

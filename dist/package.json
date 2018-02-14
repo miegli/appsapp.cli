@@ -33,7 +33,9 @@
     "firebase-admin": "^5.8.2",
     "fs-extra": "^4.0.2",
     "app-module-path": "^2.2.0",
-    "request-promise": "^4.2.2"
+    "request-promise": "^4.2.2",
+    "mssql": "^4.1.0",
+    "tedious": "2.2.4"
   },
   "preferGlobal": true,
   "bin": {"appsapp": "./cli/appsapp.js"},
