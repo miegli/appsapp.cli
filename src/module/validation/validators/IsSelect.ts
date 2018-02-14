@@ -95,16 +95,20 @@ export function IsSelect(options?: {
 
                             let allValide = true;
                             let values = {};
+
                             options.forEach((option) => {
                                 if (!option.disabled) {
                                     values[typeof option.value == 'object' ? objectHash.sha1(option.value) : option.value] = true;
                                 }
                             });
-                            optionValidator.target.forEach((value) => {
-                                if (values[typeof value == 'object' ? objectHash.sha1(value) : value] == undefined) {
-                                    allValide = false;
-                                }
-                            });
+
+                            if (typeof optionValidator.target.forEach == 'function') {
+                                optionValidator.target.forEach((value) => {
+                                    if (values[typeof value == 'object' ? objectHash.sha1(value) : value] == undefined) {
+                                        allValide = false;
+                                    }
+                                });
+                            }
 
                             if (allValide) {
                                 resolve(true);
