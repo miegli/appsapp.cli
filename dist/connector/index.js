@@ -5,3 +5,4 @@ function __export(m) {
 Object.defineProperty(exports, "__esModule", { value: true });
 __export(require("./connector"));
 __export(require("./lib/mssql"));
+__export(require("rxjs"));

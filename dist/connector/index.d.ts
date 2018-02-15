@@ -1,6 +1,7 @@
 export * from './connector';
 export * from "./lib/mssql";
-export interface request {
+export * from "rxjs";
+export interface Request {
     user: string;
     object: string;
     objectId: string;

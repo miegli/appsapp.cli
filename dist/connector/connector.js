@@ -29,6 +29,9 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const firebase = require("firebase-admin");
 const angular2_uuid_1 = require("angular2-uuid");
 const path = require("path");
+const chalk = require("chalk");
+const clui = require("clui");
+const figlet = require("figlet");
 process.argv.forEach((val, index) => {
     require('app-module-path').addPath(path.dirname(val) + path.sep + 'node_modules');
 });
@@ -78,6 +81,19 @@ class Connector {
     constructor() {
         this.watchers = [];
         this.isWatching = false;
+        this.output = {
+            log: (message) => {
+                console.log(message);
+            },
+            figlet: (message) => {
+                console.log(chalk.default(figlet.textSync(message, { horizontalLayout: 'full' })));
+            },
+            spinner: (message, callback) => {
+                var status = new clui.Spinner(message);
+                status.start();
+                return callback(status);
+            }
+        };
     }
     /**
      *

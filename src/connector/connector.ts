@@ -29,6 +29,12 @@ import * as firebase from "firebase-admin";
 import {UUID} from "angular2-uuid";
 import * as path from "path";
 
+import * as chalk from "chalk";
+import * as clear from "clear";
+import * as clui from "clui";
+import * as figlet from "figlet";
+
+
 declare var Reflect: any;
 
 process.argv.forEach((val, index) => {
@@ -87,6 +93,35 @@ export class Connector {
      *
      */
     constructor() {
+
+    }
+
+    output = {
+
+        clear:() => {
+            clear();
+        },
+
+        log: (message: string) => {
+            console.log(message);
+        },
+
+        figlet: (message: string) => {
+            console.log(
+                chalk.default(
+                    figlet.textSync(message, {horizontalLayout: 'full'})
+                )
+            );
+        },
+
+        spinner: (message, callback) => {
+
+            var status = new clui.Spinner(message);
+            status.start();
+            return callback(status);
+
+        }
+
 
     }
 

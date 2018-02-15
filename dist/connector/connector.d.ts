@@ -37,6 +37,11 @@ export declare class Connector {
      *
      */
     constructor();
+    output: {
+        log: (message: string) => void;
+        figlet: (message: string) => void;
+        spinner: (message: any, callback: any) => any;
+    };
     /**
      *
      * init app
