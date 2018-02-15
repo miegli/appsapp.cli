@@ -2878,12 +2878,7 @@ function IsHidden(options, validationOptions) {
  * @fileoverview added by tsickle
  * @suppress {checkTypes} checked by tsc
  */
-/**
- * @record
- */
-function appRequest() { }
 
-exports.appRequest = appRequest;
 exports.PersistableModel = PersistableModel;
 exports.HasConditions = HasConditions;
 exports.HasDescription = HasDescription;
