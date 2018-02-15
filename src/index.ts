@@ -18,17 +18,3 @@ export * from './module/validation/validators/IsTime';
 export * from './module/validation/validators/IsHidden';
 export * from './module/interfaces/messages';
 export * from 'class-validator/decorator/decorators'
-
-export interface appRequest {
-    user: string,
-    object: string,
-    objectId: string,
-    project: string,
-    action: {
-        data: { name: string, identifier: string,  interval?: number, maxExecutions?: number, currentExecutions?: number},
-        name: 'custom',
-        state: string
-    },
-    eventId: string
-}
-
