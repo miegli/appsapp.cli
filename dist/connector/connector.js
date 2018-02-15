@@ -30,6 +30,7 @@ const firebase = require("firebase-admin");
 const angular2_uuid_1 = require("angular2-uuid");
 const path = require("path");
 const chalk = require("chalk");
+const clear = require("clear");
 const clui = require("clui");
 const figlet = require("figlet");
 process.argv.forEach((val, index) => {
@@ -82,6 +83,9 @@ class Connector {
         this.watchers = [];
         this.isWatching = false;
         this.output = {
+            clear: () => {
+                clear();
+            },
             log: (message) => {
                 console.log(message);
             },

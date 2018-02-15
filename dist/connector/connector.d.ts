@@ -38,6 +38,7 @@ export declare class Connector {
      */
     constructor();
     output: {
+        clear: () => void;
         log: (message: string) => void;
         figlet: (message: string) => void;
         spinner: (message: any, callback: any) => any;
