@@ -939,6 +939,17 @@ export class PersistableModel {
                 } else {
 
                     n = self.__appsAppModuleProvider.new(self.getMetadataValue(property, 'isList'), uuid, d);
+
+                    var usePropertyAsUuid = self.getMetadataValue(property, 'isList', null, 'usePropertyAsUuid');
+                    if (usePropertyAsUuid) {
+                        n.watch(usePropertyAsUuid, (uuid) => {
+                            if (uuid && typeof uuid == 'string' && uuid.length) {
+                                n.setUuid(uuid);
+                                self.refreshListArray(property);
+                            }
+                        });
+                    }
+
                     if (self.__isAutosave) {
                         n.autosave();
                     }
@@ -970,12 +981,11 @@ export class PersistableModel {
 
             var t = this.getPropertyValue(property);
 
-            toAddModels.forEach((n) => {
-                let uuid = n.getUuid() ? n.getUuid() : UUID.UUID();
-                n.setUuid(uuid);
-                t.push(n);
+            toAddModels.forEach((d) => {
+                t.push(d);
             });
 
+            this.refreshListArray(property, t);
             return this.transformTypeFromMetadata(property, t);
 
         } else {

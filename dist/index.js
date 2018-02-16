@@ -877,6 +877,15 @@ var PersistableModel = /** @class */ (function () {
                 }
                 else {
                     n = self.__appsAppModuleProvider.new(self.getMetadataValue(property, 'isList'), uuid, d);
+                    var /** @type {?} */ usePropertyAsUuid = self.getMetadataValue(property, 'isList', null, 'usePropertyAsUuid');
+                    if (usePropertyAsUuid) {
+                        n.watch(usePropertyAsUuid, function (uuid) {
+                            if (uuid && typeof uuid == 'string' && uuid.length) {
+                                n.setUuid(uuid);
+                                self.refreshListArray(property);
+                            }
+                        });
+                    }
                     if (self.__isAutosave) {
                         n.autosave();
                     }
@@ -899,11 +908,10 @@ var PersistableModel = /** @class */ (function () {
                 }
             });
             var /** @type {?} */ t = this.getPropertyValue(property);
-            toAddModels.forEach(function (n) {
-                var /** @type {?} */ uuid = n.getUuid() ? n.getUuid() : angular2Uuid.UUID.UUID();
-                n.setUuid(uuid);
-                t.push(n);
+            toAddModels.forEach(function (d) {
+                t.push(d);
             });
+            this.refreshListArray(property, t);
             return this.transformTypeFromMetadata(property, t);
         }
         else {
