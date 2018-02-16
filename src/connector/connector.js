@@ -29,6 +29,10 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var firebase = require("firebase-admin");
 var angular2_uuid_1 = require("angular2-uuid");
 var path = require("path");
+var chalk = require("chalk");
+var clear = require("clear");
+var clui = require("clui");
+var figlet = require("figlet");
 process.argv.forEach(function (val, index) {
     require('app-module-path').addPath(path.dirname(val) + path.sep + 'node_modules');
 });
@@ -78,6 +82,22 @@ var Connector = /** @class */ (function () {
     function Connector() {
         this.watchers = [];
         this.isWatching = false;
+        this.output = {
+            clear: function () {
+                clear();
+            },
+            log: function (message) {
+                console.log(message);
+            },
+            figlet: function (message) {
+                console.log(chalk.default(figlet.textSync(message, { horizontalLayout: 'full' })));
+            },
+            spinner: function (message, callback) {
+                var status = new clui.Spinner(message);
+                status.start();
+                return callback(status);
+            }
+        };
     }
     /**
      *

@@ -78,6 +78,7 @@ export declare class PersistableModel {
     private __notificationProvider;
     private __parent;
     private __hashedValues;
+    private __listArrays;
     /**
      * PersistanceManager as an optional argument when changes were persisted to stable database
      */
@@ -373,6 +374,13 @@ export declare class PersistableModel {
      */
     private transformTypeFromMetadata(property, value);
     /**
+     * transform type from metadata to avoid non matching data types
+     * @param property
+     * @param value
+     * @returns {any}
+     */
+    private transformTypeFromMetadataExecute(property, value);
+    /**
      * Transform all properties
      * @returns {PersistableModel}
      */
@@ -571,4 +579,17 @@ export declare class PersistableModel {
      * @returns {boolean}
      */
     isValid(): boolean;
+    /**
+     * create list array
+     * @param property
+     * @returns {any}
+     */
+    private createListArray(property);
+    /**
+     * refresh list array
+     * @param property
+     * @param property
+     * @returns {any}
+     */
+    private refreshListArray(property, value?);
 }
