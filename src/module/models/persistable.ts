@@ -708,11 +708,9 @@ export class PersistableModel {
                     self.__bindingsObserver[property] = observer;
                 });
 
-                window.setTimeout(() => {
-                    if (self.__bindingsObserver[property] !== undefined) {
-                        self.__bindingsObserver[property].next(self[property]);
-                    }
-                });
+                if (self.__bindingsObserver[property] !== undefined) {
+                    self.__bindingsObserver[property].next(self[property]);
+                }
 
             }
 
@@ -960,7 +958,6 @@ export class PersistableModel {
 
                 // force conditions to be calculated initially
                 if (!n.isInBackendMode()) {
-                    window.setTimeout(() => {
 
                         Object.keys(n.__conditionActionIfMatchesAction).forEach((property) => {
                             n.getProperty(property).subscribe((value) => {
@@ -973,7 +970,6 @@ export class PersistableModel {
                             });
 
                         });
-                    }, 1);
                 }
 
 

@@ -647,11 +647,9 @@ var PersistableModel = /** @class */ (function () {
                 self.__bindings[property] = new rxjs.Observable(function (observer) {
                     self.__bindingsObserver[property] = observer;
                 });
-                window.setTimeout(function () {
-                    if (self.__bindingsObserver[property] !== undefined) {
-                        self.__bindingsObserver[property].next(self[property]);
-                    }
-                });
+                if (self.__bindingsObserver[property] !== undefined) {
+                    self.__bindingsObserver[property].next(self[property]);
+                }
             }
             return self.__bindings[property];
         }
@@ -893,18 +891,16 @@ var PersistableModel = /** @class */ (function () {
                 toAddModels.push(n);
                 // force conditions to be calculated initially
                 if (!n.isInBackendMode()) {
-                    window.setTimeout(function () {
-                        Object.keys(n.__conditionActionIfMatchesAction).forEach(function (property) {
-                            n.getProperty(property).subscribe(function (value) {
-                                // skip
-                            });
+                    Object.keys(n.__conditionActionIfMatchesAction).forEach(function (property) {
+                        n.getProperty(property).subscribe(function (value) {
+                            // skip
                         });
-                        Object.keys(n.__conditionActionIfMatchesRemovedProperties).forEach(function (property) {
-                            n.getProperty(property).subscribe(function (value) {
-                                // skip
-                            });
+                    });
+                    Object.keys(n.__conditionActionIfMatchesRemovedProperties).forEach(function (property) {
+                        n.getProperty(property).subscribe(function (value) {
+                            // skip
                         });
-                    }, 1);
+                    });
                 }
             });
             var /** @type {?} */ t = this.getPropertyValue(property);
