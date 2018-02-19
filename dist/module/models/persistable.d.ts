@@ -297,10 +297,10 @@ export declare class PersistableModel {
     /**
      * remove a new list entry
      * @param property
-     * @param uuid string or array set of string
+     * @param uuidOrObject string or array set of string or PersistableModel or array set of PersistableModel
      * @returns this
      */
-    remove(property: any, uuid?: string | [string]): this;
+    remove(property: any, uuidOrObject?: any): this;
     /**
      * clear list entry
      * @returns this
@@ -384,7 +384,7 @@ export declare class PersistableModel {
      * Transform all properties
      * @returns {PersistableModel}
      */
-    private transformAllProperties();
+    transformAllProperties(): this;
     /**
      * has model pending changes that are not synchronised yet or not
      * @returns {boolean}
@@ -478,6 +478,7 @@ export declare class PersistableModel {
      * @returns {PersistableModel}
      */
     private setNotificationProvider(notificationProvider);
+    private updateArrayLength();
     /**
      *
      * @param promise

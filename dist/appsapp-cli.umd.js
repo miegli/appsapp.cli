@@ -917,26 +917,36 @@ var PersistableModel = /** @class */ (function () {
     /**
      * remove a new list entry
      * @param {?} property
-     * @param {?=} uuid string or array set of string
+     * @param {?=} uuidOrObject string or array set of string or PersistableModel or array set of PersistableModel
      * @return {?} this
      */
     PersistableModel.prototype.remove = /**
      * remove a new list entry
      * @param {?} property
-     * @param {?=} uuid string or array set of string
+     * @param {?=} uuidOrObject string or array set of string or PersistableModel or array set of PersistableModel
      * @return {?} this
      */
-    function (property, uuid) {
-        if (this.getMetadataValue(property, 'isList') && this.__appsAppModuleProvider) {
+    function (property, uuidOrObject) {
+        if (this.getMetadataValue(property, 'isList')) {
             var /** @type {?} */ toRemoveUuids = {};
             var /** @type {?} */ afterRemovedValue = [];
-            if (typeof uuid === 'string') {
-                toRemoveUuids[uuid] = true;
+            if (typeof uuidOrObject === 'string') {
+                toRemoveUuids[uuidOrObject] = true;
             }
             else {
-                uuid.forEach(function (id) {
-                    toRemoveUuids[id] = true;
-                });
+                if (uuidOrObject instanceof PersistableModel) {
+                    toRemoveUuids[uuidOrObject.getUuid()] = true;
+                }
+                else {
+                    uuidOrObject.forEach(function (o) {
+                        if (uuidOrObject instanceof PersistableModel) {
+                            toRemoveUuids[o.getUuid()] = true;
+                        }
+                        else {
+                            toRemoveUuids[o] = true;
+                        }
+                    });
+                }
             }
             this.getPropertyValue(property).forEach(function (m) {
                 if (toRemoveUuids[m.getUuid()] === undefined) {
@@ -1282,7 +1292,7 @@ var PersistableModel = /** @class */ (function () {
             }
             if (value && value.length) {
                 value.forEach(function (itemOriginal) {
-                    if (itemOriginal instanceof PersistableModel == false) {
+                    if (itemOriginal !== undefined && itemOriginal && itemOriginal instanceof PersistableModel == false) {
                         var /** @type {?} */ uuid = itemOriginal[self.getMetadataValue(property, 'isList', null, 'usePropertyAsUuid')];
                         var /** @type {?} */ item_1 = null;
                         if (self.getAppsAppModuleProvider() !== undefined) {
@@ -1820,6 +1830,27 @@ var PersistableModel = /** @class */ (function () {
         return this;
     };
     /**
+     * @return {?}
+     */
+    PersistableModel.prototype.updateArrayLength = /**
+     * @return {?}
+     */
+    function () {
+        var /** @type {?} */ self = this;
+        Object.keys(self).forEach(function (property) {
+            if (property.substr(0, 1) !== '_' && self.getMetadataValue(property, 'isList')) {
+                if (self.getPropertyValue(property).length) {
+                    var /** @type {?} */ constructor = self.getMetadataValue(property, 'isList');
+                    var /** @type {?} */ n = new constructor();
+                    self.getPropertyValue(property).push(n);
+                    window.setTimeout(function () {
+                        self.getPropertyValue(property).pop();
+                    });
+                }
+            }
+        });
+    };
+    /**
      *
      * @param {?} promise
      * @return {?}
@@ -1831,6 +1862,9 @@ var PersistableModel = /** @class */ (function () {
      */
     function (promise) {
         var /** @type {?} */ self = this;
+        window.setTimeout(function () {
+            self.updateArrayLength();
+        });
         this.__isLoadedPromise = promise;
         this.__isLoadedPromise.then(function () {
             self.__isLoaded = true;
@@ -2128,11 +2162,13 @@ var PersistableModel = /** @class */ (function () {
         var /** @type {?} */ properties = {}, /** @type {?} */ v = value == undefined ? this.getPropertyValue(property) : value;
         if (v && v.length) {
             v.forEach(function (item) {
-                properties[item.getUuid()] = {
-                    value: item,
-                    enumerable: false,
-                    configurable: true
-                };
+                if (item && item !== undefined) {
+                    properties[item.getUuid()] = {
+                        value: item,
+                        enumerable: false,
+                        configurable: true
+                    };
+                }
             });
         }
         Object.defineProperties(this.__listArrays[property], properties);

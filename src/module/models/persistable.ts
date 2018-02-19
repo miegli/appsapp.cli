@@ -9,6 +9,7 @@ import {AppsappModuleProviderMessages} from "../interfaces/messages";
 import {HttpClient} from "@angular/common/http";
 import * as objectHash from 'object-hash';
 import {Observable, Observer} from 'rxjs';
+import {after} from "selenium-webdriver/testing";
 
 
 declare var global: any;
@@ -993,23 +994,35 @@ export class PersistableModel {
     /**
      * remove a new list entry
      * @param property
-     * @param uuid string or array set of string
+     * @param uuidOrObject string or array set of string or PersistableModel or array set of PersistableModel
      * @returns this
      */
-    public remove(property, uuid?: string | [string]) {
+    public remove(property, uuidOrObject?: any) {
 
 
-        if (this.getMetadataValue(property, 'isList') && this.__appsAppModuleProvider) {
+        if (this.getMetadataValue(property, 'isList')) {
 
             var toRemoveUuids = {};
             var afterRemovedValue = [];
 
-            if (typeof uuid === 'string') {
-                toRemoveUuids[uuid] = true;
+            if (typeof uuidOrObject === 'string') {
+                toRemoveUuids[uuidOrObject] = true;
             } else {
-                uuid.forEach((id) => {
-                    toRemoveUuids[id] = true;
-                })
+
+                if (uuidOrObject instanceof PersistableModel) {
+                      toRemoveUuids[uuidOrObject.getUuid()] = true;
+                } else {
+                    uuidOrObject.forEach((o) => {
+                        if (uuidOrObject instanceof PersistableModel) {
+                            toRemoveUuids[o.getUuid()] = true;
+                        } else {
+                            toRemoveUuids[o] = true;
+                        }
+                    })
+                }
+
+
+
             }
 
             this.getPropertyValue(property).forEach((m: any) => {
@@ -1401,7 +1414,7 @@ export class PersistableModel {
 
             if (value && value.length) {
                 value.forEach((itemOriginal) => {
-                    if (itemOriginal instanceof PersistableModel == false) {
+                    if (itemOriginal !== undefined && itemOriginal && itemOriginal instanceof PersistableModel == false) {
                         let uuid = itemOriginal[self.getMetadataValue(property, 'isList', null, 'usePropertyAsUuid')];
                         let item = null;
                         if (self.getAppsAppModuleProvider() !== undefined) {
@@ -1438,7 +1451,6 @@ export class PersistableModel {
                 });
             }
 
-
             return valueAsObjects;
         }
 
@@ -1464,7 +1476,7 @@ export class PersistableModel {
      * Transform all properties
      * @returns {PersistableModel}
      */
-    private transformAllProperties() {
+    public transformAllProperties() {
 
         let self = this;
 
@@ -2007,6 +2019,25 @@ export class PersistableModel {
         return this;
     }
 
+    private updateArrayLength() {
+
+        let self = this;
+
+        Object.keys(self).forEach((property) => {
+            if (property.substr(0, 1) !== '_' && self.getMetadataValue(property, 'isList')) {
+                if (self.getPropertyValue(property).length) {
+                    var constructor = self.getMetadataValue(property, 'isList');
+                    var n = new constructor();
+                    self.getPropertyValue(property).push(n);
+                    window.setTimeout(() => {
+                        self.getPropertyValue(property).pop();
+                    })
+                }
+            }
+        });
+
+    }
+
 
     /**
      *
@@ -2016,6 +2047,10 @@ export class PersistableModel {
     private setIsLoadedPromise(promise) {
 
         let self = this;
+
+        window.setTimeout(() => {
+            self.updateArrayLength();
+        });
 
         this.__isLoadedPromise = promise;
 
@@ -2273,13 +2308,18 @@ export class PersistableModel {
 
         if (v && v.length) {
             v.forEach((item) => {
-                properties[item.getUuid()] = {
-                    value: item,
-                    enumerable: false,
-                    configurable: true
+                if (item && item !== undefined) {
+                    properties[item.getUuid()] = {
+                        value: item,
+                        enumerable: false,
+                        configurable: true
+                    }
                 }
+
             });
         }
+
+
 
         Object.defineProperties(this.__listArrays[property], properties);
 
