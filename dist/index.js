@@ -1830,27 +1830,6 @@ var PersistableModel = /** @class */ (function () {
         return this;
     };
     /**
-     * @return {?}
-     */
-    PersistableModel.prototype.updateArrayLength = /**
-     * @return {?}
-     */
-    function () {
-        var /** @type {?} */ self = this;
-        Object.keys(self).forEach(function (property) {
-            if (property.substr(0, 1) !== '_' && self.getMetadataValue(property, 'isList')) {
-                if (self.getPropertyValue(property).length) {
-                    var /** @type {?} */ constructor = self.getMetadataValue(property, 'isList');
-                    var /** @type {?} */ n = new constructor();
-                    self.getPropertyValue(property).push(n);
-                    window.setTimeout(function () {
-                        self.getPropertyValue(property).pop();
-                    });
-                }
-            }
-        });
-    };
-    /**
      *
      * @param {?} promise
      * @return {?}
@@ -1862,9 +1841,6 @@ var PersistableModel = /** @class */ (function () {
      */
     function (promise) {
         var /** @type {?} */ self = this;
-        window.setTimeout(function () {
-            self.updateArrayLength();
-        });
         this.__isLoadedPromise = promise;
         this.__isLoadedPromise.then(function () {
             self.__isLoaded = true;
@@ -2162,7 +2138,7 @@ var PersistableModel = /** @class */ (function () {
         var /** @type {?} */ properties = {}, /** @type {?} */ v = value == undefined ? this.getPropertyValue(property) : value;
         if (v && v.length) {
             v.forEach(function (item) {
-                if (item && item !== undefined) {
+                if (item && item instanceof PersistableModel) {
                     properties[item.getUuid()] = {
                         value: item,
                         enumerable: false,
@@ -2176,6 +2152,96 @@ var PersistableModel = /** @class */ (function () {
     };
     return PersistableModel;
 }());
+
+/**
+ * @fileoverview added by tsickle
+ * @suppress {checkTypes} checked by tsc
+ */
+/**
+ * @param {?=} validationOptions
+ * @return {?}
+ */
+function HasBadge(validationOptions) {
+    return function (object, propertyName) {
+        classValidator.registerDecorator({
+            name: "hasBadge",
+            target: object.constructor,
+            propertyName: propertyName,
+            constraints: [{ 'type': 'hasBadge' }],
+            options: validationOptions,
+            validator: {
+                validate: /**
+                 * @param {?} value
+                 * @param {?} args
+                 * @return {?}
+                 */
+                function (value, args) {
+                    return true;
+                }
+            }
+        });
+    };
+}
+
+/**
+ * @fileoverview added by tsickle
+ * @suppress {checkTypes} checked by tsc
+ */
+/**
+ * @param {?=} validationOptions
+ * @return {?}
+ */
+function HasIcon(validationOptions) {
+    return function (object, propertyName) {
+        classValidator.registerDecorator({
+            name: "hasIcon",
+            target: object.constructor,
+            propertyName: propertyName,
+            constraints: [{ 'type': 'hasIcon' }],
+            options: validationOptions,
+            validator: {
+                validate: /**
+                 * @param {?} value
+                 * @param {?} args
+                 * @return {?}
+                 */
+                function (value, args) {
+                    return true;
+                }
+            }
+        });
+    };
+}
+
+/**
+ * @fileoverview added by tsickle
+ * @suppress {checkTypes} checked by tsc
+ */
+/**
+ * @param {?=} validationOptions
+ * @return {?}
+ */
+function HasName(validationOptions) {
+    return function (object, propertyName) {
+        classValidator.registerDecorator({
+            name: "hasName",
+            target: object.constructor,
+            propertyName: propertyName,
+            constraints: [{ 'type': 'hasName' }],
+            options: validationOptions,
+            validator: {
+                validate: /**
+                 * @param {?} value
+                 * @param {?} args
+                 * @return {?}
+                 */
+                function (value, args) {
+                    return true;
+                }
+            }
+        });
+    };
+}
 
 /**
  * @fileoverview added by tsickle
@@ -2990,6 +3056,9 @@ function IsHidden(options, validationOptions) {
  */
 
 exports.PersistableModel = PersistableModel;
+exports.HasBadge = HasBadge;
+exports.HasIcon = HasIcon;
+exports.HasName = HasName;
 exports.HasConditions = HasConditions;
 exports.HasDescription = HasDescription;
 exports.HasLabel = HasLabel;

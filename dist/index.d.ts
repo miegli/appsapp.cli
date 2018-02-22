@@ -1,4 +1,7 @@
 export * from './module/models/persistable';
+export * from './module/validation/validators/HasBadge';
+export * from './module/validation/validators/HasIcon';
+export * from './module/validation/validators/HasName';
 export * from './module/validation/validators/HasConditions';
 export * from './module/validation/validators/HasDescription';
 export * from './module/validation/validators/HasLabel';

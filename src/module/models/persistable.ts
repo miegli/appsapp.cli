@@ -977,6 +977,9 @@ export class PersistableModel {
             });
 
             var t = this.getPropertyValue(property);
+            if (!t || t == undefined) {
+                t = this.createListArray(property);
+            }
 
             toAddModels.forEach((d) => {
                 t.push(d);
@@ -2019,24 +2022,6 @@ export class PersistableModel {
         return this;
     }
 
-    private updateArrayLength() {
-
-        let self = this;
-
-        Object.keys(self).forEach((property) => {
-            if (property.substr(0, 1) !== '_' && self.getMetadataValue(property, 'isList')) {
-                if (self.getPropertyValue(property).length) {
-                    var constructor = self.getMetadataValue(property, 'isList');
-                    var n = new constructor();
-                    self.getPropertyValue(property).push(n);
-                    window.setTimeout(() => {
-                        self.getPropertyValue(property).pop();
-                    })
-                }
-            }
-        });
-
-    }
 
 
     /**
@@ -2048,9 +2033,6 @@ export class PersistableModel {
 
         let self = this;
 
-        window.setTimeout(() => {
-            self.updateArrayLength();
-        });
 
         this.__isLoadedPromise = promise;
 
@@ -2308,7 +2290,7 @@ export class PersistableModel {
 
         if (v && v.length) {
             v.forEach((item) => {
-                if (item && item !== undefined) {
+                if (item && item instanceof PersistableModel) {
                     properties[item.getUuid()] = {
                         value: item,
                         enumerable: false,

@@ -720,20 +720,30 @@ var PersistableModel = /** @class */ (function () {
     /**
      * remove a new list entry
      * @param property
-     * @param uuid string or array set of string
+     * @param uuidOrObject string or array set of string or PersistableModel or array set of PersistableModel
      * @returns this
      */
-    PersistableModel.prototype.remove = function (property, uuid) {
-        if (this.getMetadataValue(property, 'isList') && this.__appsAppModuleProvider) {
+    PersistableModel.prototype.remove = function (property, uuidOrObject) {
+        if (this.getMetadataValue(property, 'isList')) {
             var toRemoveUuids = {};
             var afterRemovedValue = [];
-            if (typeof uuid === 'string') {
-                toRemoveUuids[uuid] = true;
+            if (typeof uuidOrObject === 'string') {
+                toRemoveUuids[uuidOrObject] = true;
             }
             else {
-                uuid.forEach(function (id) {
-                    toRemoveUuids[id] = true;
-                });
+                if (uuidOrObject instanceof PersistableModel) {
+                    toRemoveUuids[uuidOrObject.getUuid()] = true;
+                }
+                else {
+                    uuidOrObject.forEach(function (o) {
+                        if (uuidOrObject instanceof PersistableModel) {
+                            toRemoveUuids[o.getUuid()] = true;
+                        }
+                        else {
+                            toRemoveUuids[o] = true;
+                        }
+                    });
+                }
             }
             this.getPropertyValue(property).forEach(function (m) {
                 if (toRemoveUuids[m.getUuid()] === undefined) {
@@ -1012,7 +1022,7 @@ var PersistableModel = /** @class */ (function () {
             }
             if (value && value.length) {
                 value.forEach(function (itemOriginal) {
-                    if (itemOriginal instanceof PersistableModel == false) {
+                    if (itemOriginal !== undefined && itemOriginal && itemOriginal instanceof PersistableModel == false) {
                         var uuid = itemOriginal[self.getMetadataValue(property, 'isList', null, 'usePropertyAsUuid')];
                         var item_1 = null;
                         if (self.getAppsAppModuleProvider() !== undefined) {
@@ -1454,6 +1464,21 @@ var PersistableModel = /** @class */ (function () {
         this.__notificationProvider = notificationProvider;
         return this;
     };
+    PersistableModel.prototype.updateArrayLength = function () {
+        var self = this;
+        Object.keys(self).forEach(function (property) {
+            if (property.substr(0, 1) !== '_' && self.getMetadataValue(property, 'isList')) {
+                if (self.getPropertyValue(property).length) {
+                    var constructor = self.getMetadataValue(property, 'isList');
+                    var n = new constructor();
+                    self.getPropertyValue(property).push(n);
+                    window.setTimeout(function () {
+                        self.getPropertyValue(property).pop();
+                    });
+                }
+            }
+        });
+    };
     /**
      *
      * @param promise
@@ -1461,6 +1486,9 @@ var PersistableModel = /** @class */ (function () {
      */
     PersistableModel.prototype.setIsLoadedPromise = function (promise) {
         var self = this;
+        window.setTimeout(function () {
+            self.updateArrayLength();
+        });
         this.__isLoadedPromise = promise;
         this.__isLoadedPromise.then(function () {
             self.__isLoaded = true;
@@ -1657,11 +1685,13 @@ var PersistableModel = /** @class */ (function () {
         var properties = {}, v = value == undefined ? this.getPropertyValue(property) : value;
         if (v && v.length) {
             v.forEach(function (item) {
-                properties[item.getUuid()] = {
-                    value: item,
-                    enumerable: false,
-                    configurable: true
-                };
+                if (item && item !== undefined) {
+                    properties[item.getUuid()] = {
+                        value: item,
+                        enumerable: false,
+                        configurable: true
+                    };
+                }
             });
         }
         Object.defineProperties(this.__listArrays[property], properties);

@@ -478,7 +478,6 @@ export declare class PersistableModel {
      * @returns {PersistableModel}
      */
     private setNotificationProvider(notificationProvider);
-    private updateArrayLength();
     /**
      *
      * @param promise
