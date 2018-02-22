@@ -904,7 +904,7 @@ var PersistableModel = /** @class */ (function () {
                 }
             });
             var /** @type {?} */ t = this.getPropertyValue(property);
-            if (!t || t == undefined) {
+            if (!t || typeof t == 'undefined') {
                 t = this.createListArray(property);
             }
             toAddModels.forEach(function (d) {
@@ -2119,7 +2119,7 @@ var PersistableModel = /** @class */ (function () {
             });
         }
         else {
-            if (this.__listArrays[property] !== undefined) {
+            if (this.__listArrays[property] === undefined) {
                 this.__listArrays[property] = new Array();
             }
         }
