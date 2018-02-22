@@ -904,6 +904,9 @@ var PersistableModel = /** @class */ (function () {
                 }
             });
             var /** @type {?} */ t = this.getPropertyValue(property);
+            if (!t || t == undefined) {
+                t = this.createListArray(property);
+            }
             toAddModels.forEach(function (d) {
                 t.push(d);
             });
