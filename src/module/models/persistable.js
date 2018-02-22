@@ -707,6 +707,9 @@ var PersistableModel = /** @class */ (function () {
                 }
             });
             var t = this.getPropertyValue(property);
+            if (!t || t == undefined) {
+                t = this.createListArray(property);
+            }
             toAddModels.forEach(function (d) {
                 t.push(d);
             });
@@ -1464,21 +1467,6 @@ var PersistableModel = /** @class */ (function () {
         this.__notificationProvider = notificationProvider;
         return this;
     };
-    PersistableModel.prototype.updateArrayLength = function () {
-        var self = this;
-        Object.keys(self).forEach(function (property) {
-            if (property.substr(0, 1) !== '_' && self.getMetadataValue(property, 'isList')) {
-                if (self.getPropertyValue(property).length) {
-                    var constructor = self.getMetadataValue(property, 'isList');
-                    var n = new constructor();
-                    self.getPropertyValue(property).push(n);
-                    window.setTimeout(function () {
-                        self.getPropertyValue(property).pop();
-                    });
-                }
-            }
-        });
-    };
     /**
      *
      * @param promise
@@ -1486,9 +1474,6 @@ var PersistableModel = /** @class */ (function () {
      */
     PersistableModel.prototype.setIsLoadedPromise = function (promise) {
         var self = this;
-        window.setTimeout(function () {
-            self.updateArrayLength();
-        });
         this.__isLoadedPromise = promise;
         this.__isLoadedPromise.then(function () {
             self.__isLoaded = true;
@@ -1685,7 +1670,7 @@ var PersistableModel = /** @class */ (function () {
         var properties = {}, v = value == undefined ? this.getPropertyValue(property) : value;
         if (v && v.length) {
             v.forEach(function (item) {
-                if (item && item !== undefined) {
+                if (item && item instanceof PersistableModel) {
                     properties[item.getUuid()] = {
                         value: item,
                         enumerable: false,

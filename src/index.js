@@ -4,6 +4,9 @@ function __export(m) {
 }
 Object.defineProperty(exports, "__esModule", { value: true });
 __export(require("./module/models/persistable"));
+__export(require("./module/validation/validators/HasBadge"));
+__export(require("./module/validation/validators/HasIcon"));
+__export(require("./module/validation/validators/HasName"));
 __export(require("./module/validation/validators/HasConditions"));
 __export(require("./module/validation/validators/HasDescription"));
 __export(require("./module/validation/validators/HasLabel"));
