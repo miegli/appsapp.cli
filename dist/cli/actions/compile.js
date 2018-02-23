@@ -89,12 +89,15 @@ findModels = function () {
                         build[classname] =
                             injectRequire(match[0].replace("var " + classname + " =", "global." + classname + " ="), string)
                                 .replace(/require\("appsapp-cli/g, 'require("appsapp-cli/appsapp-cli.umd')
-                                //.replace(/require\("appsapp-module/g, 'require("appsapp-module/appsapp-module.umd')
                                 .replace(/require\("appsapp-module/g, ' require("appsapp-cli/appsapp-cli.umd')
-                                .replace(/require\("\.\//g, 'global, dummy = ("')
+//                                .replace(/require\("\.\//g, 'global, dummy = ("')
+                                //.replace(/require\("(?!appsapp-module|!global)([^)]*)"\)/g, ' null')
+                                .replace(/require\("(?!appsapp-cli)([^)]*)"\)/g, ' global')
                                 .replace(/require\("[^\w]*([A-z0-9-]*)"\);/g, 'global.$1;');
 
                     }
+
+                    console.log(build[classname]);
 
                 }
             }
