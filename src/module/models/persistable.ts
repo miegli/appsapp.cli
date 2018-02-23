@@ -1446,7 +1446,7 @@ export class PersistableModel {
                                 });
                             }
                             valueAsObjects.push(item);
-                            item.refreshListArrays();
+                            item.refreshAllListArrays();
                         }
 
                     } else {
