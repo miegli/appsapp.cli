@@ -1405,7 +1405,7 @@ export class PersistableModel {
 
         if (this.getMetadata(property, 'isList').length) {
 
-            let valueAsObjects = this.createListArray(property);
+            let valueAsObjects = this.createListArray(property, true);
 
             if (value && typeof value.forEach !== 'function') {
                 var tmp = [];
@@ -1420,7 +1420,7 @@ export class PersistableModel {
                     if (itemOriginal !== undefined && itemOriginal && itemOriginal instanceof PersistableModel == false) {
                         let uuid = itemOriginal[self.getMetadataValue(property, 'isList', null, 'usePropertyAsUuid')];
                         let item = null;
-                        if (self.getAppsAppModuleProvider() !== undefined) {
+                        if (!self.isInBackendMode()) {
                             item = self.getAppsAppModuleProvider().new(self.getMetadataValue(property, 'isList'), uuid);
                         } else {
                             // backend mode
@@ -2255,10 +2255,18 @@ export class PersistableModel {
      * @param property
      * @returns {any}
      */
-    private createListArray(property) {
+    private createListArray(property, reset?) {
 
 
         let self = this;
+
+        if (reset !== undefined) {
+            try {
+                delete this.__listArrays[property];
+            } catch (e) {
+                //
+            }
+        }
 
         if (!self.isInBackendMode() && this.__listArrays[property] === undefined) {
 
@@ -2290,7 +2298,7 @@ export class PersistableModel {
 
         if (v && v.length) {
             v.forEach((item) => {
-                if (item && item instanceof PersistableModel) {
+                if (item && item instanceof PersistableModel && item.getUuid().length) {
                     properties[item.getUuid()] = {
                         value: item,
                         enumerable: false,
