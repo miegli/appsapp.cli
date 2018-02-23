@@ -976,8 +976,6 @@ export class PersistableModel {
 
             });
 
-            this.transformTypeFromMetadata(property, this.getPropertyValue(property));
-
             toAddModels.forEach((d) => {
                 this.getPropertyValue(property).push(d);
             });
@@ -1337,6 +1335,7 @@ export class PersistableModel {
                         if (Object.keys(self).indexOf(property) >= 0) {
                             self.transformTypeFromMetadata(property, model[property]);
                             if (model.isInBackendMode()) {
+                                self[property] = model[property];
                                 self.__edited[property] = self[property];
                             }
                         }
@@ -2274,7 +2273,7 @@ export class PersistableModel {
 
         if (v && v.length) {
             v.forEach((item) => {
-                if (item && item instanceof PersistableModel) {
+                if (item && item instanceof PersistableModel && typeof item.getUuid == 'function') {
                     properties[item.getUuid()] = {
                         value: item,
                         enumerable: false,
