@@ -56,31 +56,38 @@ admin.database().ref('_config').on('value', (snapshot) => {
 
     var config = snapshot.val();
 
+
     /**
      * first eval
      */
     Object.keys(config).forEach((model) => {
+
+
         if (config[model].constructor !== undefined) {
             try {
-                eval(base64.decode(config[model].constructor));
-            } catch (e) {
+                eval(Buffer.from(config[model].constructor, 'base64').toString());
+            }
+            catch (e) {
                 // skip
             }
         }
     });
-
     /**
      * second eval, must be done two times because of self-referencing injections
      */
     Object.keys(config).forEach((model) => {
+
+
         if (config[model].constructor !== undefined) {
             try {
-                eval(base64.decode(config[model].constructor));
-            }  catch (e) {
-                console.log(model, 'error in constructor config');
+                eval(Buffer.from(config[model].constructor, 'base64').toString());
+            }
+            catch (e) {
+                console.log(e);
             }
         }
     });
+
 
 });
 
@@ -432,7 +439,13 @@ function call(action, data) {
 
                     if (config && config['constructor'] !== undefined) {
 
-                       // eval(base64.decode(config.constructor));
+                        try {
+                            eval(Buffer.from(config[model].constructor, 'base64').toString());
+                        }
+                        catch (e) {
+                            // skip
+                        }
+
                         model = new global[action.object];
 
                         model.loadJson(data).then(() => {
