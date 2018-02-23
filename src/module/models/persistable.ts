@@ -862,12 +862,30 @@ export class PersistableModel {
                     });
                     self[property] = tmp;
                 }
-                this.refreshListArray(property);
+
             }
         });
 
         return this;
 
+
+    }
+
+    /**
+     * get properties
+     * @param stringify
+     */
+    public refreshAllListArrays() {
+
+        let self = this;
+
+        Object.keys(self).forEach((property) => {
+            if (property.substr(0, 1) !== '_' && self.getMetadataValue(property, 'isList', null, 'usePropertyAsUuid')) {
+                this.refreshListArray(property);
+            }
+        });
+
+        return this;
 
     }
 

@@ -137,7 +137,6 @@ var PersistableModel = /** @class */ (function () {
         if (this.__observer) {
             this.__observer.next(this);
         }
-        this.convertListPropertiesFromArrayToObject();
         return this;
     };
     /**
@@ -608,7 +607,7 @@ var PersistableModel = /** @class */ (function () {
         Object.keys(self).forEach(function (property) {
             if (property.substr(0, 1) !== '_' && self.getMetadataValue(property, 'isList', null, 'usePropertyAsUuid')) {
                 var tmp_1 = {}, usePropertyAsUuid_1 = self.getMetadataValue(property, 'isList', null, 'usePropertyAsUuid');
-                if (usePropertyAsUuid_1 && usePropertyAsUuid_1 !== undefined && usePropertyAsUuid_1 !== true) {
+                if (usePropertyAsUuid_1 && usePropertyAsUuid_1 !== undefined && usePropertyAsUuid_1 !== true && self.getPropertyValue(property) && self.getPropertyValue(property).length) {
                     self.getPropertyValue(property).forEach(function (val) {
                         if (val[usePropertyAsUuid_1] !== undefined) {
                             tmp_1[val[usePropertyAsUuid_1]] = val;
