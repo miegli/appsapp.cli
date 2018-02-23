@@ -97,7 +97,6 @@ findModels = function () {
 
                     }
 
-                    console.log(build[classname]);
 
                 }
             }

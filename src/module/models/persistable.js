@@ -985,6 +985,8 @@ var PersistableModel = /** @class */ (function () {
                         }
                     }
                 });
+                self.transformAllProperties();
+                self.refreshAllListArrays();
                 resolve(self);
             }
             else {

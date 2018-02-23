@@ -854,7 +854,7 @@ export class PersistableModel {
             if (property.substr(0, 1) !== '_' && self.getMetadataValue(property, 'isList', null, 'usePropertyAsUuid')) {
                 let tmp = {}, usePropertyAsUuid = self.getMetadataValue(property, 'isList', null, 'usePropertyAsUuid');
 
-                if (usePropertyAsUuid && usePropertyAsUuid !== undefined && usePropertyAsUuid !== true && self.getPropertyValue(property) && self.getPropertyValue(property).length) {
+                if (usePropertyAsUuid && usePropertyAsUuid !== undefined && usePropertyAsUuid !== true) {
                     self.getPropertyValue(property).forEach((val) => {
                         if (val[usePropertyAsUuid] !== undefined) {
                             tmp[val[usePropertyAsUuid]] = val;
@@ -862,30 +862,11 @@ export class PersistableModel {
                     });
                     self[property] = tmp;
                 }
-
             }
         });
 
         return this;
 
-
-    }
-
-    /**
-     * get properties
-     * @param stringify
-     */
-    public refreshAllListArrays() {
-
-        let self = this;
-
-        Object.keys(self).forEach((property) => {
-            if (property.substr(0, 1) !== '_' && self.getMetadataValue(property, 'isList', null, 'usePropertyAsUuid')) {
-                this.refreshListArray(property);
-            }
-        });
-
-        return this;
 
     }
 
@@ -995,11 +976,17 @@ export class PersistableModel {
 
             });
 
+            var t = this.getPropertyValue(property);
+            if (!t || typeof t == 'undefined') {
+                t = this.createListArray(property);
+            }
+
             toAddModels.forEach((d) => {
-                this.getPropertyValue(property).push(d);
+                t.push(d);
             });
 
-            return this;
+            this.refreshListArray(property, t);
+            return this.transformTypeFromMetadata(property, t);
 
         } else {
             return this;
@@ -1047,7 +1034,7 @@ export class PersistableModel {
                 }
             });
 
-            this.setProperty(property, afterRemovedValue);
+            this.transformTypeFromMetadata(property, afterRemovedValue);
 
         }
 
@@ -1354,15 +1341,11 @@ export class PersistableModel {
                         if (Object.keys(self).indexOf(property) >= 0) {
                             self.transformTypeFromMetadata(property, model[property]);
                             if (model.isInBackendMode()) {
-                                self[property] = model[property];
                                 self.__edited[property] = self[property];
                             }
                         }
                     }
                 });
-
-                self.transformAllProperties();
-                self.refreshAllListArrays();
 
                 resolve(self);
 
@@ -1374,6 +1357,18 @@ export class PersistableModel {
 
     }
 
+    /**
+     * transform type from metadata to avoid non matching data types
+     * @param property
+     * @param value
+     * @returns {any}
+     */
+    private transformTypeFromMetadata(property, value) {
+
+        return this.setProperty(property, this.transformTypeFromMetadataExecute(property, value));
+
+
+    }
 
 
     /**
@@ -1382,7 +1377,7 @@ export class PersistableModel {
      * @param value
      * @returns {any}
      */
-    private transformTypeFromMetadata(property, value) {
+    private transformTypeFromMetadataExecute(property, value) {
 
         let self = this;
 
@@ -2295,7 +2290,7 @@ export class PersistableModel {
 
         if (v && v.length) {
             v.forEach((item) => {
-                if (item && item instanceof PersistableModel && typeof item.getUuid == 'function') {
+                if (item && item instanceof PersistableModel) {
                     properties[item.getUuid()] = {
                         value: item,
                         enumerable: false,
@@ -2309,6 +2304,24 @@ export class PersistableModel {
 
 
         Object.defineProperties(this.__listArrays[property], properties);
+
+        return this;
+
+    }
+
+    /**
+     * get properties
+     * @param stringify
+     */
+    public refreshAllListArrays() {
+
+        let self = this;
+
+        Object.keys(self).forEach((property) => {
+            if (property.substr(0, 1) !== '_' && self.getMetadataValue(property, 'isList', null, 'usePropertyAsUuid')) {
+                this.refreshListArray(property);
+            }
+        });
 
         return this;
 
