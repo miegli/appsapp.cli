@@ -1322,6 +1322,7 @@ var PersistableModel = /** @class */ (function () {
                                 });
                             }
                             valueAsObjects_1.push(item_1);
+                            item_1.refreshListArrays();
                         }
                     }
                     else {
@@ -1329,6 +1330,7 @@ var PersistableModel = /** @class */ (function () {
                     }
                 });
             }
+            this.refreshListArray(property);
             return valueAsObjects_1;
         }
         if (this.getMetadata(property, 'isSelect').length) {
@@ -2151,7 +2153,7 @@ var PersistableModel = /** @class */ (function () {
         var /** @type {?} */ properties = {}, /** @type {?} */ v = value == undefined ? this.getPropertyValue(property) : value;
         if (v && v.length) {
             v.forEach(function (item) {
-                if (item && item instanceof PersistableModel && item.getUuid().length) {
+                if (item && item instanceof PersistableModel && item.getUuid() && item.getUuid().length) {
                     properties[item.getUuid()] = {
                         value: item,
                         enumerable: false,
