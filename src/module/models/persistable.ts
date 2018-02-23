@@ -1420,7 +1420,7 @@ export class PersistableModel {
                     if (itemOriginal !== undefined && itemOriginal && itemOriginal instanceof PersistableModel == false) {
                         let uuid = itemOriginal[self.getMetadataValue(property, 'isList', null, 'usePropertyAsUuid')];
                         let item = null;
-                        if (!self.isInBackendMode() && self.getAppsAppModuleProvider) {
+                        if (!self.isInBackendMode() && self.getAppsAppModuleProvider()) {
                             item = self.getAppsAppModuleProvider().new(self.getMetadataValue(property, 'isList'), uuid);
                         } else {
                             // backend mode
