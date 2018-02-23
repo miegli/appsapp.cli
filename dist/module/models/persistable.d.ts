@@ -287,6 +287,11 @@ export declare class PersistableModel {
      */
     convertListPropertiesFromArrayToObject(): this;
     /**
+     * get properties
+     * @param stringify
+     */
+    refreshAllListArrays(): this;
+    /**
      * add a new list entry
      * @param property
      * @param data (json object, persistable model or array of those
