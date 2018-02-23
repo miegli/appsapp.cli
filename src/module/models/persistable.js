@@ -662,7 +662,7 @@ var PersistableModel = /** @class */ (function () {
                     d = d[0];
                 }
                 var n = null;
-                if (self.__appsAppModuleProvider === undefined) {
+                if (self.isInBackendMode()) {
                     // backend mode
                     var constructor = self.getMetadataValue(property, 'isList');
                     n = new constructor();
@@ -706,15 +706,11 @@ var PersistableModel = /** @class */ (function () {
                     });
                 }
             });
-            var t = this.getPropertyValue(property);
-            if (!t || typeof t == 'undefined') {
-                t = this.createListArray(property);
-            }
+            this.transformTypeFromMetadata(property, this.getPropertyValue(property));
             toAddModels.forEach(function (d) {
-                t.push(d);
+                _this.getPropertyValue(property).push(d);
             });
-            this.refreshListArray(property, t);
-            return this.transformTypeFromMetadata(property, t);
+            return this;
         }
         else {
             return this;
@@ -753,7 +749,7 @@ var PersistableModel = /** @class */ (function () {
                     afterRemovedValue.push(m);
                 }
             });
-            this.transformTypeFromMetadata(property, afterRemovedValue);
+            this.setProperty(property, afterRemovedValue);
         }
         return this;
     };
@@ -989,15 +985,6 @@ var PersistableModel = /** @class */ (function () {
      * @returns {any}
      */
     PersistableModel.prototype.transformTypeFromMetadata = function (property, value) {
-        return this.setProperty(property, this.transformTypeFromMetadataExecute(property, value));
-    };
-    /**
-     * transform type from metadata to avoid non matching data types
-     * @param property
-     * @param value
-     * @returns {any}
-     */
-    PersistableModel.prototype.transformTypeFromMetadataExecute = function (property, value) {
         var self = this;
         if (this.getMetadata(property, 'isTime').length) {
             return typeof value == 'string' ? new Date(value) : (value ? value : new Date());
