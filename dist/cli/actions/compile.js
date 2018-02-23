@@ -90,7 +90,7 @@ findModels = function () {
                             injectRequire(match[0].replace("var " + classname + " =", "global." + classname + " ="), string)
                                 .replace(/require\("appsapp-cli/g, 'require("appsapp-cli/appsapp-cli.umd')
                                 //.replace(/require\("appsapp-module/g, 'require("appsapp-module/appsapp-module.umd')
-                                .replace(/require\("appsapp-module/g, ' ("null')
+                                .replace(/require\("appsapp-module/g, ' require("appsapp-cli/appsapp-cli.umd')
                                 .replace(/require\("\.\//g, 'global, dummy = ("')
                                 .replace(/require\("[^\w]*([A-z0-9-]*)"\);/g, 'global.$1;');
 
