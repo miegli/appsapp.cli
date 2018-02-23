@@ -584,7 +584,7 @@ export declare class PersistableModel {
      * @param property
      * @returns {any}
      */
-    private createListArray(property);
+    private createListArray(property, reset?);
     /**
      * refresh list array
      * @param property

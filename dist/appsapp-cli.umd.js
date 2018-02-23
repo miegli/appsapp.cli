@@ -1285,7 +1285,7 @@ var PersistableModel = /** @class */ (function () {
             return typeof value == 'object' ? value : [];
         }
         if (this.getMetadata(property, 'isList').length) {
-            var /** @type {?} */ valueAsObjects_1 = this.createListArray(property);
+            var /** @type {?} */ valueAsObjects_1 = this.createListArray(property, true);
             if (value && typeof value.forEach !== 'function') {
                 var /** @type {?} */ tmp = [];
                 Object.keys(value).forEach(function (v) {
@@ -1298,7 +1298,7 @@ var PersistableModel = /** @class */ (function () {
                     if (itemOriginal !== undefined && itemOriginal && itemOriginal instanceof PersistableModel == false) {
                         var /** @type {?} */ uuid = itemOriginal[self.getMetadataValue(property, 'isList', null, 'usePropertyAsUuid')];
                         var /** @type {?} */ item_1 = null;
-                        if (self.getAppsAppModuleProvider() !== undefined) {
+                        if (!self.isInBackendMode()) {
                             item_1 = self.getAppsAppModuleProvider().new(self.getMetadataValue(property, 'isList'), uuid);
                         }
                         else {
@@ -2103,15 +2103,25 @@ var PersistableModel = /** @class */ (function () {
     /**
      * create list array
      * @param {?} property
+     * @param {?=} reset
      * @return {?}
      */
     PersistableModel.prototype.createListArray = /**
      * create list array
      * @param {?} property
+     * @param {?=} reset
      * @return {?}
      */
-    function (property) {
+    function (property, reset) {
         var /** @type {?} */ self = this;
+        if (reset !== undefined) {
+            try {
+                delete this.__listArrays[property];
+            }
+            catch (/** @type {?} */ e) {
+                //
+            }
+        }
         if (!self.isInBackendMode() && this.__listArrays[property] === undefined) {
             this.__listArrays[property] = new Array();
             self.watch(property, function (value) {
@@ -2141,7 +2151,7 @@ var PersistableModel = /** @class */ (function () {
         var /** @type {?} */ properties = {}, /** @type {?} */ v = value == undefined ? this.getPropertyValue(property) : value;
         if (v && v.length) {
             v.forEach(function (item) {
-                if (item && item instanceof PersistableModel) {
+                if (item && item instanceof PersistableModel && item.getUuid().length) {
                     properties[item.getUuid()] = {
                         value: item,
                         enumerable: false,
