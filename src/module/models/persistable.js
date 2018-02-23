@@ -1028,7 +1028,7 @@ var PersistableModel = /** @class */ (function () {
                     if (itemOriginal !== undefined && itemOriginal && itemOriginal instanceof PersistableModel == false) {
                         var uuid = itemOriginal[self.getMetadataValue(property, 'isList', null, 'usePropertyAsUuid')];
                         var item_1 = null;
-                        if (!self.isInBackendMode() && self.getAppsAppModuleProvider) {
+                        if (!self.isInBackendMode() && self.getAppsAppModuleProvider()) {
                             item_1 = self.getAppsAppModuleProvider().new(self.getMetadataValue(property, 'isList'), uuid);
                         }
                         else {

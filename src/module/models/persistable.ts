@@ -1446,6 +1446,7 @@ export class PersistableModel {
                                 });
                             }
                             valueAsObjects.push(item);
+                            item.refreshListArrays();
                         }
 
                     } else {
@@ -1453,6 +1454,8 @@ export class PersistableModel {
                     }
                 });
             }
+
+            this.refreshListArray(property);
 
             return valueAsObjects;
         }
@@ -2298,7 +2301,7 @@ export class PersistableModel {
 
         if (v && v.length) {
             v.forEach((item) => {
-                if (item && item instanceof PersistableModel && item.getUuid().length) {
+                if (item && item instanceof PersistableModel && item.getUuid() && item.getUuid().length) {
                     properties[item.getUuid()] = {
                         value: item,
                         enumerable: false,
@@ -2308,7 +2311,6 @@ export class PersistableModel {
 
             });
         }
-
 
 
         Object.defineProperties(this.__listArrays[property], properties);
