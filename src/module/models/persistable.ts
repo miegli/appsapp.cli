@@ -236,7 +236,6 @@ export class PersistableModel {
         if (this.__observer) {
             this.__observer.next(this);
         }
-        this.convertListPropertiesFromArrayToObject();
         return this;
     }
 
@@ -855,7 +854,7 @@ export class PersistableModel {
             if (property.substr(0, 1) !== '_' && self.getMetadataValue(property, 'isList', null, 'usePropertyAsUuid')) {
                 let tmp = {}, usePropertyAsUuid = self.getMetadataValue(property, 'isList', null, 'usePropertyAsUuid');
 
-                if (usePropertyAsUuid && usePropertyAsUuid !== undefined && usePropertyAsUuid !== true) {
+                if (usePropertyAsUuid && usePropertyAsUuid !== undefined && usePropertyAsUuid !== true && self.getPropertyValue(property) && self.getPropertyValue(property).length) {
                     self.getPropertyValue(property).forEach((val) => {
                         if (val[usePropertyAsUuid] !== undefined) {
                             tmp[val[usePropertyAsUuid]] = val;
