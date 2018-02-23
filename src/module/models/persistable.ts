@@ -236,6 +236,7 @@ export class PersistableModel {
         if (this.__observer) {
             this.__observer.next(this);
         }
+        this.convertListPropertiesFromArrayToObject();
         return this;
     }
 
@@ -862,6 +863,7 @@ export class PersistableModel {
                     });
                     self[property] = tmp;
                 }
+                this.refreshListArray(property);
             }
         });
 
