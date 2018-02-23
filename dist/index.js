@@ -796,7 +796,7 @@ var PersistableModel = /** @class */ (function () {
         Object.keys(self).forEach(function (property) {
             if (property.substr(0, 1) !== '_' && self.getMetadataValue(property, 'isList', null, 'usePropertyAsUuid')) {
                 var /** @type {?} */ tmp_1 = {}, /** @type {?} */ usePropertyAsUuid_1 = self.getMetadataValue(property, 'isList', null, 'usePropertyAsUuid');
-                if (usePropertyAsUuid_1 && usePropertyAsUuid_1 !== undefined && usePropertyAsUuid_1 !== true && self.getPropertyValue(property) && self.getPropertyValue(property).length) {
+                if (usePropertyAsUuid_1 && usePropertyAsUuid_1 !== undefined && usePropertyAsUuid_1 !== true) {
                     self.getPropertyValue(property).forEach(function (val) {
                         if (val[usePropertyAsUuid_1] !== undefined) {
                             tmp_1[val[usePropertyAsUuid_1]] = val;
@@ -804,24 +804,6 @@ var PersistableModel = /** @class */ (function () {
                     });
                     self[property] = tmp_1;
                 }
-            }
-        });
-        return this;
-    };
-    /**
-     * get properties
-     * @return {?}
-     */
-    PersistableModel.prototype.refreshAllListArrays = /**
-     * get properties
-     * @return {?}
-     */
-    function () {
-        var _this = this;
-        var /** @type {?} */ self = this;
-        Object.keys(self).forEach(function (property) {
-            if (property.substr(0, 1) !== '_' && self.getMetadataValue(property, 'isList', null, 'usePropertyAsUuid')) {
-                _this.refreshListArray(property);
             }
         });
         return this;
@@ -921,10 +903,15 @@ var PersistableModel = /** @class */ (function () {
                     });
                 }
             });
+            var /** @type {?} */ t = this.getPropertyValue(property);
+            if (!t || typeof t == 'undefined') {
+                t = this.createListArray(property);
+            }
             toAddModels.forEach(function (d) {
-                _this.getPropertyValue(property).push(d);
+                t.push(d);
             });
-            return this;
+            this.refreshListArray(property, t);
+            return this.transformTypeFromMetadata(property, t);
         }
         else {
             return this;
@@ -969,7 +956,7 @@ var PersistableModel = /** @class */ (function () {
                     afterRemovedValue.push(m);
                 }
             });
-            this.setProperty(property, afterRemovedValue);
+            this.transformTypeFromMetadata(property, afterRemovedValue);
         }
         return this;
     };
@@ -1241,14 +1228,11 @@ var PersistableModel = /** @class */ (function () {
                         if (Object.keys(self).indexOf(property) >= 0) {
                             self.transformTypeFromMetadata(property, model[property]);
                             if (model.isInBackendMode()) {
-                                self[property] = model[property];
                                 self.__edited[property] = self[property];
                             }
                         }
                     }
                 });
-                self.transformAllProperties();
-                self.refreshAllListArrays();
                 resolve(self);
             }
             else {
@@ -1263,6 +1247,21 @@ var PersistableModel = /** @class */ (function () {
      * @return {?}
      */
     PersistableModel.prototype.transformTypeFromMetadata = /**
+     * transform type from metadata to avoid non matching data types
+     * @param {?} property
+     * @param {?} value
+     * @return {?}
+     */
+    function (property, value) {
+        return this.setProperty(property, this.transformTypeFromMetadataExecute(property, value));
+    };
+    /**
+     * transform type from metadata to avoid non matching data types
+     * @param {?} property
+     * @param {?} value
+     * @return {?}
+     */
+    PersistableModel.prototype.transformTypeFromMetadataExecute = /**
      * transform type from metadata to avoid non matching data types
      * @param {?} property
      * @param {?} value
@@ -2142,7 +2141,7 @@ var PersistableModel = /** @class */ (function () {
         var /** @type {?} */ properties = {}, /** @type {?} */ v = value == undefined ? this.getPropertyValue(property) : value;
         if (v && v.length) {
             v.forEach(function (item) {
-                if (item && item instanceof PersistableModel && typeof item.getUuid == 'function') {
+                if (item && item instanceof PersistableModel) {
                     properties[item.getUuid()] = {
                         value: item,
                         enumerable: false,
@@ -2152,6 +2151,24 @@ var PersistableModel = /** @class */ (function () {
             });
         }
         Object.defineProperties(this.__listArrays[property], properties);
+        return this;
+    };
+    /**
+     * get properties
+     * @return {?}
+     */
+    PersistableModel.prototype.refreshAllListArrays = /**
+     * get properties
+     * @return {?}
+     */
+    function () {
+        var _this = this;
+        var /** @type {?} */ self = this;
+        Object.keys(self).forEach(function (property) {
+            if (property.substr(0, 1) !== '_' && self.getMetadataValue(property, 'isList', null, 'usePropertyAsUuid')) {
+                _this.refreshListArray(property);
+            }
+        });
         return this;
     };
     return PersistableModel;

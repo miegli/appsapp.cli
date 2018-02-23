@@ -287,11 +287,6 @@ export declare class PersistableModel {
      */
     convertListPropertiesFromArrayToObject(): this;
     /**
-     * get properties
-     * @param stringify
-     */
-    refreshAllListArrays(): this;
-    /**
      * add a new list entry
      * @param property
      * @param data (json object, persistable model or array of those
@@ -378,6 +373,13 @@ export declare class PersistableModel {
      * @returns {any}
      */
     private transformTypeFromMetadata(property, value);
+    /**
+     * transform type from metadata to avoid non matching data types
+     * @param property
+     * @param value
+     * @returns {any}
+     */
+    private transformTypeFromMetadataExecute(property, value);
     /**
      * Transform all properties
      * @returns {PersistableModel}
@@ -590,4 +592,9 @@ export declare class PersistableModel {
      * @returns {any}
      */
     private refreshListArray(property, value?);
+    /**
+     * get properties
+     * @param stringify
+     */
+    refreshAllListArrays(): this;
 }
