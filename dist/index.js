@@ -903,7 +903,6 @@ var PersistableModel = /** @class */ (function () {
                     });
                 }
             });
-            this.transformTypeFromMetadata(property, this.getPropertyValue(property));
             toAddModels.forEach(function (d) {
                 _this.getPropertyValue(property).push(d);
             });
@@ -1224,6 +1223,7 @@ var PersistableModel = /** @class */ (function () {
                         if (Object.keys(self).indexOf(property) >= 0) {
                             self.transformTypeFromMetadata(property, model[property]);
                             if (model.isInBackendMode()) {
+                                self[property] = model[property];
                                 self.__edited[property] = self[property];
                             }
                         }
@@ -2122,7 +2122,7 @@ var PersistableModel = /** @class */ (function () {
         var /** @type {?} */ properties = {}, /** @type {?} */ v = value == undefined ? this.getPropertyValue(property) : value;
         if (v && v.length) {
             v.forEach(function (item) {
-                if (item && item instanceof PersistableModel) {
+                if (item && item instanceof PersistableModel && typeof item.getUuid == 'function') {
                     properties[item.getUuid()] = {
                         value: item,
                         enumerable: false,
