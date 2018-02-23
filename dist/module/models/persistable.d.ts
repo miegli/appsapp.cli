@@ -374,13 +374,6 @@ export declare class PersistableModel {
      */
     private transformTypeFromMetadata(property, value);
     /**
-     * transform type from metadata to avoid non matching data types
-     * @param property
-     * @param value
-     * @returns {any}
-     */
-    private transformTypeFromMetadataExecute(property, value);
-    /**
      * Transform all properties
      * @returns {PersistableModel}
      */

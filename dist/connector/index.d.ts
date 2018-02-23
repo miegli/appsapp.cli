@@ -19,3 +19,7 @@ export interface Request {
     };
     eventId: string;
 }
+export interface Executor {
+    resolve: (value?: any) => void;
+    reject: (reason?: any) => void;
+}

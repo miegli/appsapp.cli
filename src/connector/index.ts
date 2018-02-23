@@ -8,10 +8,15 @@ export interface Request {
     objectId: string,
     project: string,
     action: {
-        data: { name: string, identifier: string,  interval?: number, maxExecutions?: number, currentExecutions?: number},
+        data: { name: string, identifier: string, interval?: number, maxExecutions?: number, currentExecutions?: number },
         name: 'custom',
         state: string
     },
     eventId: string
+}
+
+export interface Executor {
+    resolve: (value?: any) => void,
+    reject: (reason?: any) => void
 }
 

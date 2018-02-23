@@ -919,7 +919,7 @@ export class PersistableModel {
                 }
 
                 var n = null;
-                if (self.__appsAppModuleProvider === undefined) {
+                if (self.isInBackendMode()) {
 
                     // backend mode
                     var constructor = self.getMetadataValue(property, 'isList');
@@ -976,17 +976,13 @@ export class PersistableModel {
 
             });
 
-            var t = this.getPropertyValue(property);
-            if (!t || typeof t == 'undefined') {
-                t = this.createListArray(property);
-            }
+            this.transformTypeFromMetadata(property, this.getPropertyValue(property));
 
             toAddModels.forEach((d) => {
-                t.push(d);
+                this.getPropertyValue(property).push(d);
             });
 
-            this.refreshListArray(property, t);
-            return this.transformTypeFromMetadata(property, t);
+            return this;
 
         } else {
             return this;
@@ -1034,7 +1030,7 @@ export class PersistableModel {
                 }
             });
 
-            this.transformTypeFromMetadata(property, afterRemovedValue);
+            this.setProperty(property, afterRemovedValue);
 
         }
 
@@ -1357,6 +1353,8 @@ export class PersistableModel {
 
     }
 
+
+
     /**
      * transform type from metadata to avoid non matching data types
      * @param property
@@ -1364,20 +1362,6 @@ export class PersistableModel {
      * @returns {any}
      */
     private transformTypeFromMetadata(property, value) {
-
-        return this.setProperty(property, this.transformTypeFromMetadataExecute(property, value));
-
-
-    }
-
-
-    /**
-     * transform type from metadata to avoid non matching data types
-     * @param property
-     * @param value
-     * @returns {any}
-     */
-    private transformTypeFromMetadataExecute(property, value) {
 
         let self = this;
 
