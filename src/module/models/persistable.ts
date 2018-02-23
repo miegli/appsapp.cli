@@ -1361,6 +1361,9 @@ export class PersistableModel {
                     }
                 });
 
+                self.transformAllProperties();
+                self.refreshAllListArrays();
+
                 resolve(self);
 
             } else {

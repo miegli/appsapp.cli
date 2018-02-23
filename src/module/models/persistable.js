@@ -602,7 +602,6 @@ var PersistableModel = /** @class */ (function () {
      * @param stringify
      */
     PersistableModel.prototype.convertListPropertiesFromArrayToObject = function () {
-        var _this = this;
         var self = this;
         Object.keys(self).forEach(function (property) {
             if (property.substr(0, 1) !== '_' && self.getMetadataValue(property, 'isList', null, 'usePropertyAsUuid')) {
@@ -615,6 +614,19 @@ var PersistableModel = /** @class */ (function () {
                     });
                     self[property] = tmp_1;
                 }
+            }
+        });
+        return this;
+    };
+    /**
+     * get properties
+     * @param stringify
+     */
+    PersistableModel.prototype.refreshAllListArrays = function () {
+        var _this = this;
+        var self = this;
+        Object.keys(self).forEach(function (property) {
+            if (property.substr(0, 1) !== '_' && self.getMetadataValue(property, 'isList', null, 'usePropertyAsUuid')) {
                 _this.refreshListArray(property);
             }
         });
