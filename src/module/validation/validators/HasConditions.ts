@@ -122,6 +122,8 @@ export function HasConditions(options: [{
                             }
 
                         });
+                    } else {
+                        state = false;
                     }
 
                     /**

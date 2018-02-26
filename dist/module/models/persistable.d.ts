@@ -78,6 +78,7 @@ export declare class PersistableModel {
     private __notificationProvider;
     private __parent;
     private tmp__hashedValues;
+    private __propertySymbols;
     private __listArrays;
     /**
      * PersistanceManager as an optional argument when changes were persisted to stable database

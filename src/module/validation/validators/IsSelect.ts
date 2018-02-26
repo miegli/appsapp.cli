@@ -40,8 +40,6 @@ export function IsSelect(options?: {
                             source: args.constraints[0].value.source,
                             getOptions: () => {
                                 return new Promise(function (resolveOptions, rejectOptions) {
-
-
                                     if (optionValidator.source) {
 
 

@@ -37,6 +37,9 @@ function IsSelect(options) {
                                                 }
                                             });
                                         }
+                                        else if (optionValidator.source.url.substr(0, 1) == '/') {
+                                            resolveOptions([]);
+                                        }
                                         else {
                                             resolveOptions([]);
                                         }

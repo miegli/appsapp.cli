@@ -97,12 +97,15 @@ export class PersistableModel {
     private __notificationProvider: any;
     private __parent: any;
     private tmp__hashedValues: object = {};
+    private __propertySymbols: object = {};
     private __listArrays: object = {};
 
     /**
      * PersistanceManager as an optional argument when changes were persisted to stable database
      */
     constructor() {
+
+        let self = this;
 
         this.__metadata = getFromContainer(MetadataStorage).getTargetValidationMetadatas(this.constructor, '');
 
@@ -115,8 +118,6 @@ export class PersistableModel {
         });
 
         this.transformAllProperties();
-
-
         this.__init();
 
     }
@@ -180,6 +181,8 @@ export class PersistableModel {
 
 
         });
+
+
 
 
     }
@@ -860,7 +863,6 @@ export class PersistableModel {
     }
 
 
-
     /**
      * get properties
      * @param stringify
@@ -979,17 +981,17 @@ export class PersistableModel {
                 // force conditions to be calculated initially
                 if (!n.isInBackendMode()) {
 
-                        Object.keys(n.__conditionActionIfMatchesAction).forEach((property) => {
-                            n.getProperty(property).subscribe((value) => {
-                                // skip
-                            });
+                    Object.keys(n.__conditionActionIfMatchesAction).forEach((property) => {
+                        n.getProperty(property).subscribe((value) => {
+                            // skip
                         });
-                        Object.keys(n.__conditionActionIfMatchesRemovedProperties).forEach((property) => {
-                            n.getProperty(property).subscribe((value) => {
-                                // skip
-                            });
+                    });
+                    Object.keys(n.__conditionActionIfMatchesRemovedProperties).forEach((property) => {
+                        n.getProperty(property).subscribe((value) => {
+                            // skip
+                        });
 
-                        });
+                    });
                 }
 
 
@@ -1032,7 +1034,7 @@ export class PersistableModel {
             } else {
 
                 if (uuidOrObject instanceof PersistableModel) {
-                      toRemoveUuids[uuidOrObject.getUuid()] = true;
+                    toRemoveUuids[uuidOrObject.getUuid()] = true;
                 } else {
                     uuidOrObject.forEach((o) => {
                         if (uuidOrObject instanceof PersistableModel) {
@@ -1042,7 +1044,6 @@ export class PersistableModel {
                         }
                     })
                 }
-
 
 
             }
@@ -1506,7 +1507,7 @@ export class PersistableModel {
         let self = this;
 
         self.getPropertiesKeys().forEach((property) => {
-          self.transformTypeFromMetadata(property, self[property]);
+            self.transformTypeFromMetadata(property, self[property]);
         });
 
         return this;
@@ -2041,7 +2042,6 @@ export class PersistableModel {
 
         return this;
     }
-
 
 
     /**

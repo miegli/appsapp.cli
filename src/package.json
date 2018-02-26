@@ -1,6 +1,6 @@
 {
   "name": "appsapp-cli",
-  "version": "1.6.200",
+  "version": "1.6.201",
   "license": "MIT",
   "dependencies": {
     "angularfire2": "=5.0.0-rc.6",

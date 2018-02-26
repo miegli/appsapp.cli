@@ -57,6 +57,7 @@ var PersistableModel = /** @class */ (function () {
         this.__conditionContraintsPropertiesValue = {};
         this.__conditionContraintsAffectedProperties = {};
         this.tmp__hashedValues = {};
+        this.__propertySymbols = {};
         this.__listArrays = {};
         this.__metadata = classValidator.getFromContainer(classValidator.MetadataStorage).getTargetValidationMetadatas(this.constructor, '');
         // check if all loaded metadata has corresponding properties
@@ -2390,6 +2391,9 @@ function HasConditions(options, actionIfMatches, validationOptions) {
                                 }
                             }
                         });
+                    }
+                    else {
+                        state = false;
                     }
                     /**
                                          *  if is in backend service mode, so override property value and condition validator state
