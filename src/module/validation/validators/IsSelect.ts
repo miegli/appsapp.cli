@@ -24,7 +24,7 @@ export function IsSelect(options?: {
             group?: string
         }]
 }) {
-    return function (object: Object, propertyName: string) {
+    return function (object: any, propertyName: string) {
         registerDecorator({
             name: "isSelect",
             target: object.constructor,
@@ -40,10 +40,12 @@ export function IsSelect(options?: {
                             source: args.constraints[0].value.source,
                             getOptions: () => {
                                 return new Promise(function (resolveOptions, rejectOptions) {
+
+
                                     if (optionValidator.source) {
 
 
-                                        if (optionValidator.source.url.substr(0,4) == 'http') {
+                                        if (optionValidator.source.url.substr(0, 4) == 'http') {
 
                                             Unirest.get(optionValidator.source.url).type('json').end(function (response) {
                                                 let options = [];
@@ -60,6 +62,10 @@ export function IsSelect(options?: {
                                                     resolveOptions(options);
                                                 }
                                             });
+
+                                        } else if (optionValidator.source.url.substr(0, 1) == '/') {
+
+                                            resolveOptions([]);
 
                                         } else {
                                             resolveOptions([]);

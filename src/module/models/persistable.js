@@ -1052,7 +1052,7 @@ var PersistableModel = /** @class */ (function () {
                                 });
                             }
                             valueAsObjects_1.push(item_1);
-                            item_1.refreshListArrays();
+                            item_1.refreshAllListArrays();
                         }
                     }
                     else {

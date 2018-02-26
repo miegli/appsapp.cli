@@ -79,7 +79,7 @@ export function HasConditions(options: [{
                     /**
                      * iterates over all rules synchronous
                      */
-                    if (options) {
+                    if (value && options) {
 
                         options.forEach((condition: any) => {
 

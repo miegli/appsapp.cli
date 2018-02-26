@@ -16,4 +16,4 @@ export declare function IsSelect(options?: {
         text: string;
         group?: string;
     }];
-}): (object: Object, propertyName: string) => void;
+}): (object: any, propertyName: string) => void;

@@ -77,7 +77,7 @@ export declare class PersistableModel {
     private __appsAppModuleProvider;
     private __notificationProvider;
     private __parent;
-    private __hashedValues;
+    private tmp__hashedValues;
     private __listArrays;
     /**
      * PersistanceManager as an optional argument when changes were persisted to stable database
@@ -281,6 +281,11 @@ export declare class PersistableModel {
      * @param stringify
      */
     getProperties(stringify?: any): {};
+    /**
+     * get properties keys
+     * @param stringify
+     */
+    getPropertiesKeys(): any[];
     /**
      * get properties
      * @param stringify

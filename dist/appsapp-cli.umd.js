@@ -56,7 +56,7 @@ var PersistableModel = /** @class */ (function () {
         this.__conditionContraintsProperties = {};
         this.__conditionContraintsPropertiesValue = {};
         this.__conditionContraintsAffectedProperties = {};
-        this.__hashedValues = {};
+        this.tmp__hashedValues = {};
         this.__listArrays = {};
         this.__metadata = classValidator.getFromContainer(classValidator.MetadataStorage).getTargetValidationMetadatas(this.constructor, '');
         // check if all loaded metadata has corresponding properties
@@ -772,7 +772,7 @@ var PersistableModel = /** @class */ (function () {
     function (stringify) {
         var /** @type {?} */ properties = {}, /** @type {?} */ self = this;
         Object.keys(self).forEach(function (property) {
-            if (property.substr(0, 1) !== '_') {
+            if (property.substr(0, 1) !== '_' && property.substr(0, 5) !== 'tmp__') {
                 if (stringify) {
                     properties[property] = self.__toString(property);
                 }
@@ -784,6 +784,23 @@ var PersistableModel = /** @class */ (function () {
         return properties;
     };
     /**
+     * get properties keys
+     * @return {?}
+     */
+    PersistableModel.prototype.getPropertiesKeys = /**
+     * get properties keys
+     * @return {?}
+     */
+    function () {
+        var /** @type {?} */ keys = [], /** @type {?} */ self = this;
+        Object.keys(self).forEach(function (property) {
+            if (property.substr(0, 1) !== '_' && property.substr(0, 5) !== 'tmp__') {
+                keys.push(property);
+            }
+        });
+        return keys;
+    };
+    /**
      * get properties
      * @return {?}
      */
@@ -793,8 +810,8 @@ var PersistableModel = /** @class */ (function () {
      */
     function () {
         var /** @type {?} */ self = this;
-        Object.keys(self).forEach(function (property) {
-            if (property.substr(0, 1) !== '_' && self.getMetadataValue(property, 'isList', null, 'usePropertyAsUuid')) {
+        self.getPropertiesKeys().forEach(function (property) {
+            if (self.getMetadataValue(property, 'isList', null, 'usePropertyAsUuid')) {
                 var /** @type {?} */ tmp_1 = {}, /** @type {?} */ usePropertyAsUuid_1 = self.getMetadataValue(property, 'isList', null, 'usePropertyAsUuid');
                 if (usePropertyAsUuid_1 && usePropertyAsUuid_1 !== undefined && usePropertyAsUuid_1 !== true) {
                     self.getPropertyValue(property).forEach(function (val) {
@@ -1355,10 +1372,8 @@ var PersistableModel = /** @class */ (function () {
      */
     function () {
         var /** @type {?} */ self = this;
-        Object.keys(self).forEach(function (property) {
-            if (property.substr(0, 1) !== '_') {
-                self.transformTypeFromMetadata(property, self[property]);
-            }
+        self.getPropertiesKeys().forEach(function (property) {
+            self.transformTypeFromMetadata(property, self[property]);
         });
         return this;
     };
@@ -1902,8 +1917,8 @@ var PersistableModel = /** @class */ (function () {
     function () {
         var /** @type {?} */ values = [];
         var /** @type {?} */ self = this;
-        Object.keys(this.__hashedValues).forEach(function (hash) {
-            values.push({ value: self.__hashedValues[hash], hash: hash });
+        Object.keys(this.tmp__hashedValues).forEach(function (hash) {
+            values.push({ value: self.tmp__hashedValues[hash], hash: hash });
         });
         return values;
     };
@@ -1922,7 +1937,7 @@ var PersistableModel = /** @class */ (function () {
      * @return {?}
      */
     function (value, hash) {
-        this.__hashedValues[hash] = value;
+        this.tmp__hashedValues[hash] = value;
         return this;
     };
     /**
@@ -1938,7 +1953,7 @@ var PersistableModel = /** @class */ (function () {
      * @return {?}
      */
     function (hash) {
-        return this.__hashedValues[hash] !== undefined ? this.__hashedValues[hash] : hash;
+        return this.tmp__hashedValues[hash] !== undefined ? this.tmp__hashedValues[hash] : hash;
     };
     /**
      * Set hashed value
@@ -1954,7 +1969,7 @@ var PersistableModel = /** @class */ (function () {
      */
     function (value) {
         var /** @type {?} */ hash = typeof value == 'object' ? objectHash.sha1(value) : value;
-        this.__hashedValues[hash] = value;
+        this.tmp__hashedValues[hash] = value;
         return hash;
     };
     /**
@@ -2176,8 +2191,8 @@ var PersistableModel = /** @class */ (function () {
     function () {
         var _this = this;
         var /** @type {?} */ self = this;
-        Object.keys(self).forEach(function (property) {
-            if (property.substr(0, 1) !== '_' && self.getMetadataValue(property, 'isList', null, 'usePropertyAsUuid')) {
+        self.getPropertiesKeys().forEach(function (property) {
+            if (self.getMetadataValue(property, 'isList', null, 'usePropertyAsUuid')) {
                 _this.refreshListArray(property);
             }
         });
@@ -2340,7 +2355,7 @@ function HasConditions(options, actionIfMatches, validationOptions) {
                     /**
                                          * iterates over all rules synchronous
                                          */
-                    if (options) {
+                    if (value && options) {
                         options.forEach(function (condition) {
                             if (condition.additionalData.propertyNestedAsNestedObject !== undefined) {
                                 valueNested = JSON.parse(JSON.stringify(args.object.__conditionContraintsPropertiesValue[condition.property]));
@@ -2805,6 +2820,9 @@ function IsSelect(options) {
                                                     resolveOptions(options);
                                                 }
                                             });
+                                        }
+                                        else if (optionValidator.source.url.substr(0, 1) == '/') {
+                                            resolveOptions([]);
                                         }
                                         else {
                                             resolveOptions([]);

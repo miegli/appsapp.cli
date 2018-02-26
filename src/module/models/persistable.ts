@@ -96,7 +96,7 @@ export class PersistableModel {
     private __appsAppModuleProvider: any;
     private __notificationProvider: any;
     private __parent: any;
-    private __hashedValues: object = {};
+    private tmp__hashedValues: object = {};
     private __listArrays: object = {};
 
     /**
@@ -828,7 +828,7 @@ export class PersistableModel {
         let properties = {}, self = this;
 
         Object.keys(self).forEach((property) => {
-            if (property.substr(0, 1) !== '_') {
+            if (property.substr(0, 1) !== '_' && property.substr(0, 5) !== 'tmp__') {
                 if (stringify) {
                     properties[property] = self.__toString(property);
                 } else {
@@ -841,6 +841,25 @@ export class PersistableModel {
 
     }
 
+    /**
+     * get properties keys
+     * @param stringify
+     */
+    public getPropertiesKeys() {
+
+        let keys = [], self = this;
+
+        Object.keys(self).forEach((property) => {
+            if (property.substr(0, 1) !== '_' && property.substr(0, 5) !== 'tmp__') {
+                keys.push(property);
+            }
+        });
+
+        return keys;
+
+    }
+
+
 
     /**
      * get properties
@@ -850,8 +869,8 @@ export class PersistableModel {
 
         let self = this;
 
-        Object.keys(self).forEach((property) => {
-            if (property.substr(0, 1) !== '_' && self.getMetadataValue(property, 'isList', null, 'usePropertyAsUuid')) {
+        self.getPropertiesKeys().forEach((property) => {
+            if (self.getMetadataValue(property, 'isList', null, 'usePropertyAsUuid')) {
                 let tmp = {}, usePropertyAsUuid = self.getMetadataValue(property, 'isList', null, 'usePropertyAsUuid');
 
                 if (usePropertyAsUuid && usePropertyAsUuid !== undefined && usePropertyAsUuid !== true) {
@@ -1486,10 +1505,8 @@ export class PersistableModel {
 
         let self = this;
 
-        Object.keys(self).forEach((property) => {
-            if (property.substr(0, 1) !== '_') {
-                self.transformTypeFromMetadata(property, self[property]);
-            }
+        self.getPropertiesKeys().forEach((property) => {
+          self.transformTypeFromMetadata(property, self[property]);
         });
 
         return this;
@@ -2092,8 +2109,8 @@ export class PersistableModel {
         let values = [];
         let self = this;
 
-        Object.keys(this.__hashedValues).forEach((hash) => {
-            values.push({value: self.__hashedValues[hash], hash: hash});
+        Object.keys(this.tmp__hashedValues).forEach((hash) => {
+            values.push({value: self.tmp__hashedValues[hash], hash: hash});
         });
 
         return values;
@@ -2106,7 +2123,7 @@ export class PersistableModel {
      */
     public addHashedValue(value, hash) {
 
-        this.__hashedValues[hash] = value;
+        this.tmp__hashedValues[hash] = value;
         return this;
 
     }
@@ -2118,7 +2135,7 @@ export class PersistableModel {
      */
     public getHashedValue(hash) {
 
-        return this.__hashedValues[hash] !== undefined ? this.__hashedValues[hash] : hash;
+        return this.tmp__hashedValues[hash] !== undefined ? this.tmp__hashedValues[hash] : hash;
     }
 
     /**
@@ -2130,7 +2147,7 @@ export class PersistableModel {
     public setHashedValue(value) {
 
         let hash = typeof value == 'object' ? objectHash.sha1(value) : value;
-        this.__hashedValues[hash] = value;
+        this.tmp__hashedValues[hash] = value;
 
         return hash;
 
@@ -2327,8 +2344,8 @@ export class PersistableModel {
 
         let self = this;
 
-        Object.keys(self).forEach((property) => {
-            if (property.substr(0, 1) !== '_' && self.getMetadataValue(property, 'isList', null, 'usePropertyAsUuid')) {
+        self.getPropertiesKeys().forEach((property) => {
+            if (self.getMetadataValue(property, 'isList', null, 'usePropertyAsUuid')) {
                 this.refreshListArray(property);
             }
         });
