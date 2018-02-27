@@ -183,8 +183,6 @@ export class PersistableModel {
         });
 
 
-
-
     }
 
     /**
@@ -219,14 +217,11 @@ export class PersistableModel {
             observer.next(value);
         }
 
-
         try {
             delete this.__bindings[property];
         } catch (e) {
             // e
         }
-
-
         return this;
 
     }
@@ -798,7 +793,7 @@ export class PersistableModel {
         this.executeConditionValidatorCircular(property);
         this.executeChangesWithCallback(event);
 
-        if (autosave) {
+        if (autosave && this.__isLoaded) {
             this.save(null);
         }
 
@@ -1337,7 +1332,7 @@ export class PersistableModel {
     public loadJson(json) {
 
         let self = this;
-        json = typeof json == 'string' ? JSON.parse(json) : json;
+        json = json == null ? {} : typeof json == 'string' ? JSON.parse(json) : json;
 
         let model = <any>plainToClass(<any>this.constructor, json, {excludePrefixes: ["__"]});
 
@@ -2147,7 +2142,10 @@ export class PersistableModel {
     public setHashedValue(value) {
 
         let hash = typeof value == 'object' ? objectHash.sha1(value) : value;
-        this.tmp__hashedValues[hash] = value;
+
+        if (hash !== value) {
+            this.tmp__hashedValues[hash] = value;
+        }
 
         return hash;
 

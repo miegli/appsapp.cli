@@ -88,6 +88,9 @@ function HasConditions(options, actionIfMatches, validationOptions) {
                             }
                         });
                     }
+                    else {
+                        state = false;
+                    }
                     /**
                      *  if is in backend service mode, so override property value and condition validator state
                      */

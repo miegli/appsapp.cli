@@ -735,7 +735,7 @@ var PersistableModel = /** @class */ (function () {
         }
         this.executeConditionValidatorCircular(property);
         this.executeChangesWithCallback(event);
-        if (autosave) {
+        if (autosave && this.__isLoaded) {
             this.save(null);
         }
         return this;
@@ -1229,7 +1229,7 @@ var PersistableModel = /** @class */ (function () {
      */
     function (json) {
         var /** @type {?} */ self = this;
-        json = typeof json == 'string' ? JSON.parse(json) : json;
+        json = json == null ? {} : typeof json == 'string' ? JSON.parse(json) : json;
         var /** @type {?} */ model = /** @type {?} */ (classTransformer.plainToClass(/** @type {?} */ (this.constructor), json, { excludePrefixes: ["__"] }));
         return new Promise(function (resolve, reject) {
             if (model) {
@@ -1970,7 +1970,9 @@ var PersistableModel = /** @class */ (function () {
      */
     function (value) {
         var /** @type {?} */ hash = typeof value == 'object' ? objectHash.sha1(value) : value;
-        this.tmp__hashedValues[hash] = value;
+        if (hash !== value) {
+            this.tmp__hashedValues[hash] = value;
+        }
         return hash;
     };
     /**
@@ -2356,7 +2358,7 @@ function HasConditions(options, actionIfMatches, validationOptions) {
                     /**
                                          * iterates over all rules synchronous
                                          */
-                    if (value && options) {
+                    if (options) {
                         options.forEach(function (condition) {
                             if (condition.additionalData.propertyNestedAsNestedObject !== undefined) {
                                 valueNested = JSON.parse(JSON.stringify(args.object.__conditionContraintsPropertiesValue[condition.property]));
@@ -2380,7 +2382,7 @@ function HasConditions(options, actionIfMatches, validationOptions) {
                             }
                             if (state) {
                                 if (condition.type == 'condition') {
-                                    if (valueNested === null && condition.validator == 'equals' && value !== undefined && value !== null && value.length !== undefined && value.length == 0) {
+                                    if (valueNested === null && condition.validator == 'equals' && value !== undefined && condition.value !== null && condition.value.length !== undefined && value.length == 0) {
                                         state = true;
                                     }
                                     else {

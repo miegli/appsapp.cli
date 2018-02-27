@@ -79,7 +79,7 @@ export function HasConditions(options: [{
                     /**
                      * iterates over all rules synchronous
                      */
-                    if (value && options) {
+                    if (options) {
 
                         options.forEach((condition: any) => {
 
@@ -108,10 +108,9 @@ export function HasConditions(options: [{
                                 }
                             }
 
-
                             if (state) {
                                 if (condition.type == 'condition') {
-                                    if (valueNested === null && condition.validator == 'equals' && value !== undefined && value !== null && value.length !== undefined && value.length == 0) {
+                                    if (valueNested === null && condition.validator == 'equals' && value !== undefined && condition.value !== null && condition.value.length !== undefined && value.length == 0) {
                                         state = true;
                                     } else {
                                         if (!validator[condition.validator](valueNested ? valueNested : (args.object.__conditionContraintsPropertiesValue[condition.property] === undefined ? args.object[condition.property] : args.object.__conditionContraintsPropertiesValue[condition.property]), condition.value, condition.validatorAdditionalArgument)) {
