@@ -562,7 +562,7 @@ var PersistableModel = /** @class */ (function () {
         }
         this.executeConditionValidatorCircular(property);
         this.executeChangesWithCallback(event);
-        if (autosave) {
+        if (autosave && this.__isLoaded) {
             this.save(null);
         }
         return this;
@@ -968,7 +968,7 @@ var PersistableModel = /** @class */ (function () {
      */
     PersistableModel.prototype.loadJson = function (json) {
         var self = this;
-        json = typeof json == 'string' ? JSON.parse(json) : json;
+        json = json == null ? {} : typeof json == 'string' ? JSON.parse(json) : json;
         var model = class_transformer_1.plainToClass(this.constructor, json, { excludePrefixes: ["__"] });
         return new Promise(function (resolve, reject) {
             if (model) {
@@ -1558,7 +1558,9 @@ var PersistableModel = /** @class */ (function () {
      */
     PersistableModel.prototype.setHashedValue = function (value) {
         var hash = typeof value == 'object' ? objectHash.sha1(value) : value;
-        this.tmp__hashedValues[hash] = value;
+        if (hash !== value) {
+            this.tmp__hashedValues[hash] = value;
+        }
         return hash;
     };
     /**

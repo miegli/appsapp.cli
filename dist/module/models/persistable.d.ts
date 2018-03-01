@@ -39,6 +39,8 @@ export interface actionCustom {
 export declare class PersistableModel {
     private __httpClient;
     private __isLoadedPromise;
+    private __isLoadedPromiseInternal;
+    private __isLoadedPromiseInternalResolver;
     private __isLoaded;
     private __isAutosave;
     private __observer;

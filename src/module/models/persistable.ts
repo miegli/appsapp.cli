@@ -58,6 +58,8 @@ export class PersistableModel {
 
     private __httpClient: HttpClient;
     private __isLoadedPromise: Promise<any>;
+    private __isLoadedPromiseInternal: Promise<any>;
+    private __isLoadedPromiseInternalResolver: any;
     private __isLoaded: boolean = false;
     private __isAutosave: boolean = false;
     private __observer: Observer<any>;
@@ -2052,6 +2054,9 @@ export class PersistableModel {
         this.__isLoadedPromise = promise;
 
         this.__isLoadedPromise.then(() => {
+            if (self.__isLoadedPromiseInternalResolver) {
+                self.__isLoadedPromiseInternalResolver(self);
+            }
             self.__isLoaded = true;
         });
 
@@ -2068,9 +2073,15 @@ export class PersistableModel {
 
         let self = this;
         if (this.__isLoadedPromise == undefined) {
-            return new Promise(function (resolve, reject) {
-                resolve(self);
-            });
+            if (this.__isLoadedPromiseInternal === undefined) {
+                this.__isLoadedPromiseInternal = new Promise(function (resolve, reject) {
+                    self.__isLoadedPromiseInternalResolver = resolve;
+                    if (self.__isLoaded) {
+                        resolve(self);
+                    }
+                });
+            }
+            return this.__isLoadedPromiseInternal;
         } else {
             return this.__isLoadedPromise;
         }

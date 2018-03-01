@@ -52,7 +52,7 @@ function HasConditions(options, actionIfMatches, validationOptions) {
                     /**
                      * iterates over all rules synchronous
                      */
-                    if (value && options) {
+                    if (options) {
                         options.forEach(function (condition) {
                             if (condition.additionalData.propertyNestedAsNestedObject !== undefined) {
                                 valueNested = JSON.parse(JSON.stringify(args.object.__conditionContraintsPropertiesValue[condition.property]));
@@ -76,7 +76,7 @@ function HasConditions(options, actionIfMatches, validationOptions) {
                             }
                             if (state) {
                                 if (condition.type == 'condition') {
-                                    if (valueNested === null && condition.validator == 'equals' && value !== undefined && value !== null && value.length !== undefined && value.length == 0) {
+                                    if (valueNested === null && condition.validator == 'equals' && value !== undefined && condition.value !== null && condition.value.length !== undefined && value.length == 0) {
                                         state = true;
                                     }
                                     else {
