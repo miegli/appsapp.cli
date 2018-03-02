@@ -1491,6 +1491,9 @@ var PersistableModel = /** @class */ (function () {
         var self = this;
         this.__isLoadedPromise = promise;
         this.__isLoadedPromise.then(function () {
+            if (self.__isLoadedPromiseInternalResolver) {
+                self.__isLoadedPromiseInternalResolver(self);
+            }
             self.__isLoaded = true;
         });
         return this;
@@ -1502,9 +1505,15 @@ var PersistableModel = /** @class */ (function () {
     PersistableModel.prototype.loaded = function () {
         var self = this;
         if (this.__isLoadedPromise == undefined) {
-            return new Promise(function (resolve, reject) {
-                resolve(self);
-            });
+            if (this.__isLoadedPromiseInternal === undefined) {
+                this.__isLoadedPromiseInternal = new Promise(function (resolve, reject) {
+                    self.__isLoadedPromiseInternalResolver = resolve;
+                    if (self.__isLoaded) {
+                        resolve(self);
+                    }
+                });
+            }
+            return this.__isLoadedPromiseInternal;
         }
         else {
             return this.__isLoadedPromise;
