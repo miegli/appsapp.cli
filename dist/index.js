@@ -2371,6 +2371,9 @@ function HasConditions(options, actionIfMatches, validationOptions) {
                         options.forEach(function (condition) {
                             if (condition.additionalData.propertyNestedAsNestedObject !== undefined) {
                                 valueNested = JSON.parse(JSON.stringify(args.object.__conditionContraintsPropertiesValue[condition.property]));
+                                if (valueNested && valueNested.length !== undefined && valueNested.length === 0) {
+                                    return false;
+                                }
                                 if (typeof valueNested == 'object' && valueNested.forEach !== undefined) {
                                     valueNested.forEach(function (v, i) {
                                         if (typeof v == 'string' && args.object.getHashedValue(v) !== v) {
@@ -2395,13 +2398,8 @@ function HasConditions(options, actionIfMatches, validationOptions) {
                                         state = true;
                                     }
                                     else {
-                                        if (valueNested.length !== undefined && valueNested.length === 0) {
-                                            state = true;
-                                        }
-                                        else {
-                                            if (!validator[condition.validator](valueNested ? valueNested : (args.object.__conditionContraintsPropertiesValue[condition.property] === undefined ? args.object[condition.property] : args.object.__conditionContraintsPropertiesValue[condition.property]), condition.value, condition.validatorAdditionalArgument)) {
-                                                state = false;
-                                            }
+                                        if (!validator[condition.validator](valueNested ? valueNested : (args.object.__conditionContraintsPropertiesValue[condition.property] === undefined ? args.object[condition.property] : args.object.__conditionContraintsPropertiesValue[condition.property]), condition.value, condition.validatorAdditionalArgument)) {
+                                            state = false;
                                         }
                                     }
                                 }
