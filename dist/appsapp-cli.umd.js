@@ -2395,8 +2395,13 @@ function HasConditions(options, actionIfMatches, validationOptions) {
                                         state = true;
                                     }
                                     else {
-                                        if (!validator[condition.validator](valueNested ? valueNested : (args.object.__conditionContraintsPropertiesValue[condition.property] === undefined ? args.object[condition.property] : args.object.__conditionContraintsPropertiesValue[condition.property]), condition.value, condition.validatorAdditionalArgument)) {
-                                            state = false;
+                                        if (valueNested.length !== undefined && valueNested.length === 0) {
+                                            state = true;
+                                        }
+                                        else {
+                                            if (!validator[condition.validator](valueNested ? valueNested : (args.object.__conditionContraintsPropertiesValue[condition.property] === undefined ? args.object[condition.property] : args.object.__conditionContraintsPropertiesValue[condition.property]), condition.value, condition.validatorAdditionalArgument)) {
+                                                state = false;
+                                            }
                                         }
                                     }
                                 }
