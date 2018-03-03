@@ -872,7 +872,7 @@ export class PersistableModel {
             if (self.getMetadataValue(property, 'isList', null, 'usePropertyAsUuid')) {
                 let tmp = {}, usePropertyAsUuid = self.getMetadataValue(property, 'isList', null, 'usePropertyAsUuid');
 
-                if (usePropertyAsUuid && usePropertyAsUuid !== undefined && usePropertyAsUuid !== true) {
+                if (usePropertyAsUuid && usePropertyAsUuid !== undefined && usePropertyAsUuid !== true && self.getPropertyValue(property) && self.getPropertyValue(property).length) {
                     self.getPropertyValue(property).forEach((val) => {
                         if (val[usePropertyAsUuid] !== undefined) {
                             tmp[val[usePropertyAsUuid]] = val;
@@ -1000,7 +1000,7 @@ export class PersistableModel {
             }
 
             toAddModels.forEach((d) => {
-                t.push(d);
+                t.push(d.transformAllProperties());
             });
 
             this.refreshListArray(property, t);
@@ -1487,6 +1487,7 @@ export class PersistableModel {
                     realValues.push(self.getHashedValue(val));
                 });
             }
+
             return realValues;
 
         }
