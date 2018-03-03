@@ -814,7 +814,7 @@ var PersistableModel = /** @class */ (function () {
         self.getPropertiesKeys().forEach(function (property) {
             if (self.getMetadataValue(property, 'isList', null, 'usePropertyAsUuid')) {
                 var /** @type {?} */ tmp_1 = {}, /** @type {?} */ usePropertyAsUuid_1 = self.getMetadataValue(property, 'isList', null, 'usePropertyAsUuid');
-                if (usePropertyAsUuid_1 && usePropertyAsUuid_1 !== undefined && usePropertyAsUuid_1 !== true) {
+                if (usePropertyAsUuid_1 && usePropertyAsUuid_1 !== undefined && usePropertyAsUuid_1 !== true && self.getPropertyValue(property) && self.getPropertyValue(property).length) {
                     self.getPropertyValue(property).forEach(function (val) {
                         if (val[usePropertyAsUuid_1] !== undefined) {
                             tmp_1[val[usePropertyAsUuid_1]] = val;
