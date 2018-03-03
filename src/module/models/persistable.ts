@@ -1000,7 +1000,11 @@ export class PersistableModel {
             }
 
             toAddModels.forEach((d) => {
-                t.push(d.transformAllProperties());
+                if (self.isInBackendMode()) {
+                    t.push(d.transformAllProperties());
+                } else {
+                    t.push(d);
+                }
             });
 
             this.refreshListArray(property, t);
