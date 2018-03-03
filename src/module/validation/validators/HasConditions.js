@@ -48,7 +48,6 @@ function HasConditions(options, actionIfMatches, validationOptions) {
                 validate: function (value, args) {
                     var validator = new class_validator_2.Validator();
                     var state = true;
-                    var stateSkipped = false;
                     var valueNested = null;
                     /**
                      * iterates over all rules synchronous
@@ -57,7 +56,8 @@ function HasConditions(options, actionIfMatches, validationOptions) {
                         options.forEach(function (condition) {
                             if (condition.additionalData.propertyNestedAsNestedObject !== undefined) {
                                 valueNested = JSON.parse(JSON.stringify(args.object.__conditionContraintsPropertiesValue[condition.property]));
-                                if (valueNested && valueNested.length !== undefined && valueNested.length === 0) {
+                                if ((valueNested && valueNested.length !== undefined && valueNested.length === 0)) {
+                                    state = false;
                                     return false;
                                 }
                                 if (typeof valueNested == 'object' && valueNested.forEach !== undefined) {

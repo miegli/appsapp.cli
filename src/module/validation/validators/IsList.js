@@ -1,13 +1,19 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var class_validator_1 = require("class-validator");
+var persistable_1 = require("../../models/persistable");
 function IsList(typeOfItems, usePropertyAsUuid, uniqueItems) {
     return function (object, propertyName) {
         class_validator_1.registerDecorator({
             name: "isList",
             target: object.constructor,
             propertyName: propertyName,
-            constraints: [{ 'type': 'isList', 'value': typeOfItems, 'usePropertyAsUuid': usePropertyAsUuid, 'uniqueItems': uniqueItems == undefined ? false : uniqueItems }],
+            constraints: [{
+                    'type': 'isList',
+                    'value': typeOfItems,
+                    'usePropertyAsUuid': usePropertyAsUuid,
+                    'uniqueItems': uniqueItems == undefined ? false : uniqueItems
+                }],
             validator: {
                 validate: function (value, args) {
                     return new Promise(function (resolve, reject) {
@@ -26,13 +32,20 @@ function IsList(typeOfItems, usePropertyAsUuid, uniqueItems) {
                         }
                         value.forEach(function (itemOriginal) {
                             var item = null;
-                            try {
-                                // hint: global is used for backend node.js services
-                                item = typeof global == 'undefined' ? new typeOfItems() : (typeof typeOfItems == 'string' && global[typeOfItems] !== undefined ? new global[typeOfItems]() : new typeOfItems());
-                                item.loadJson(itemOriginal).then().catch();
+                            if (itemOriginal instanceof persistable_1.PersistableModel) {
+                                item = itemOriginal;
                             }
-                            catch (e) {
-                                item = new itemOriginal.constructor();
+                            else {
+                                try {
+                                    // hint: global is used for backend node.js services
+                                    item = typeof global == 'undefined' ? new typeOfItems() : (typeof typeOfItems == 'string' && global[typeOfItems] !== undefined ? new global[typeOfItems]() : new typeOfItems());
+                                    item.loadJson(itemOriginal).then(function (m) {
+                                        //
+                                    }).catch();
+                                }
+                                catch (e) {
+                                    item = new itemOriginal.constructor();
+                                }
                             }
                             if (item.validate !== undefined && typeof item.validate == 'function') {
                                 item.validate().then(function (isSuccess) {

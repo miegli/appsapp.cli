@@ -2383,6 +2383,9 @@ function HasConditions(options, actionIfMatches, validationOptions) {
                  * @return {?}
                  */
                 function (value, args) {
+                    if (args.object.__isLoaded === false) {
+                        return true;
+                    }
                     var /** @type {?} */ validator = new classValidator.Validator();
                     var /** @type {?} */ state = true;
                     var /** @type {?} */ valueNested = null;
@@ -2394,8 +2397,9 @@ function HasConditions(options, actionIfMatches, validationOptions) {
                             if (condition.additionalData.propertyNestedAsNestedObject !== undefined) {
                                 valueNested = JSON.parse(JSON.stringify(args.object.__conditionContraintsPropertiesValue[condition.property]));
                                 if ((valueNested && valueNested.length !== undefined && valueNested.length === 0)) {
+                                    console.log(args.object.__isLoaded);
                                     state = false;
-                                    return false;
+                                    return state;
                                 }
                                 if (typeof valueNested == 'object' && valueNested.forEach !== undefined) {
                                     valueNested.forEach(function (v, i) {
