@@ -325,26 +325,28 @@ var PersistableModel = /** @class */ (function () {
      */
     function (action) {
         var /** @type {?} */ self = this, /** @type {?} */ observer = null;
-        if (typeof action === 'string') {
-            action = {
-                name: 'custom',
-                data: {
-                    name: action
+        self.loaded().then(function () {
+            if (typeof action === 'string') {
+                action = {
+                    name: 'custom',
+                    data: {
+                        name: action
+                    }
+                };
+            }
+            self.executeSave(action).subscribe(function (next) {
+                if (observer) {
+                    observer.next(next);
                 }
-            };
-        }
-        self.executeSave(action).subscribe(function (next) {
-            if (observer) {
-                observer.next(next);
-            }
-        }, function (error) {
-            if (observer) {
-                observer.error(error);
-            }
-        }, function () {
-            if (observer) {
-                observer.complete();
-            }
+            }, function (error) {
+                if (observer) {
+                    observer.error(error);
+                }
+            }, function () {
+                if (observer) {
+                    observer.complete();
+                }
+            });
         });
         return new rxjs.Observable(function (o) {
             observer = o;
@@ -926,15 +928,9 @@ var PersistableModel = /** @class */ (function () {
                 t = this.createListArray(property);
             }
             toAddModels.forEach(function (d) {
-                if (self.isInBackendMode()) {
-                    t.push(d.transformAllProperties());
-                }
-                else {
-                    t.push(d);
-                }
+                t.push(d);
             });
-            this.refreshListArray(property, t);
-            return this.transformTypeFromMetadata(property, t);
+            return this.refreshListArray(property, t);
         }
         else {
             return this;
@@ -1320,36 +1316,37 @@ var PersistableModel = /** @class */ (function () {
                 value.forEach(function (itemOriginal) {
                     if (itemOriginal !== undefined && itemOriginal && itemOriginal instanceof PersistableModel == false) {
                         var /** @type {?} */ uuid = itemOriginal[self.getMetadataValue(property, 'isList', null, 'usePropertyAsUuid')];
-                        var /** @type {?} */ item_1 = null;
+                        var /** @type {?} */ item = null;
                         if (!self.isInBackendMode() && self.getAppsAppModuleProvider()) {
-                            item_1 = self.getAppsAppModuleProvider().new(self.getMetadataValue(property, 'isList'), uuid);
+                            item = self.getAppsAppModuleProvider().new(self.getMetadataValue(property, 'isList'), uuid);
                         }
                         else {
                             // backend mode
                             var /** @type {?} */ constructor = self.getMetadataValue(property, 'isList');
-                            item_1 = new constructor();
+                            item = new constructor();
                             if (uuid !== undefined) {
-                                item_1.setUuid(uuid);
+                                item.setUuid(uuid);
                             }
                         }
-                        if (item_1 !== undefined) {
-                            item_1.loadJson(itemOriginal);
-                            item_1.setParent(self);
-                            if (!item_1.isInBackendMode()) {
-                                item_1.loaded().then(function (m) {
-                                    item_1.getChangesObserverable().subscribe(function (next) {
-                                        if (next.model.getParent()) {
-                                            next.model.getParent().setProperty(property, self.getPropertyValue(property, true));
-                                        }
+                        if (item !== undefined) {
+                            item.loadJson(itemOriginal).then(function (item) {
+                                if (!item.isInBackendMode()) {
+                                    item.loaded().then(function (m) {
+                                        item.getChangesObserverable().subscribe(function (next) {
+                                            if (next.model.getParent()) {
+                                                next.model.getParent().setProperty(property, self.getPropertyValue(property, true));
+                                            }
+                                        });
                                     });
-                                });
-                            }
-                            valueAsObjects_1.push(item_1);
-                            item_1.refreshAllListArrays();
+                                }
+                                valueAsObjects_1.push(item.transformAllProperties());
+                                item.refreshAllListArrays();
+                            });
+                            item.setParent(self);
                         }
                     }
                     else {
-                        valueAsObjects_1.push(itemOriginal);
+                        valueAsObjects_1.push(itemOriginal.transformAllProperties());
                     }
                 });
             }
@@ -1380,6 +1377,26 @@ var PersistableModel = /** @class */ (function () {
         var /** @type {?} */ self = this;
         self.getPropertiesKeys().forEach(function (property) {
             self.transformTypeFromMetadata(property, self[property]);
+        });
+        return this;
+    };
+    /**
+     * Transform all properties by given type
+     * @param {?} type string
+     * @return {?}
+     */
+    PersistableModel.prototype.transformAllPropertiesByType = /**
+     * Transform all properties by given type
+     * @param {?} type string
+     * @return {?}
+     */
+    function (type) {
+        var _this = this;
+        var /** @type {?} */ self = this;
+        self.getPropertiesKeys().forEach(function (property) {
+            if (_this.getMetadata(property, type).length) {
+                self.transformTypeFromMetadata(property, self[property]);
+            }
         });
         return this;
     };
@@ -2376,7 +2393,8 @@ function HasConditions(options, actionIfMatches, validationOptions) {
                         options.forEach(function (condition) {
                             if (condition.additionalData.propertyNestedAsNestedObject !== undefined) {
                                 valueNested = JSON.parse(JSON.stringify(args.object.__conditionContraintsPropertiesValue[condition.property]));
-                                if (valueNested && valueNested.length !== undefined && valueNested.length === 0) {
+                                if ((valueNested && valueNested.length !== undefined && valueNested.length === 0)) {
+                                    state = false;
                                     return false;
                                 }
                                 if (typeof valueNested == 'object' && valueNested.forEach !== undefined) {
@@ -2919,7 +2937,12 @@ function IsList(typeOfItems, usePropertyAsUuid, uniqueItems) {
             name: "isList",
             target: object.constructor,
             propertyName: propertyName,
-            constraints: [{ 'type': 'isList', 'value': typeOfItems, 'usePropertyAsUuid': usePropertyAsUuid, 'uniqueItems': uniqueItems == undefined ? false : uniqueItems }],
+            constraints: [{
+                    'type': 'isList',
+                    'value': typeOfItems,
+                    'usePropertyAsUuid': usePropertyAsUuid,
+                    'uniqueItems': uniqueItems == undefined ? false : uniqueItems
+                }],
             validator: {
                 validate: /**
                  * @param {?} value
@@ -2943,13 +2966,20 @@ function IsList(typeOfItems, usePropertyAsUuid, uniqueItems) {
                         }
                         value.forEach(function (itemOriginal) {
                             var /** @type {?} */ item = null;
-                            try {
-                                // hint: global is used for backend node.js services
-                                item = typeof global == 'undefined' ? new typeOfItems() : (typeof typeOfItems == 'string' && global[typeOfItems] !== undefined ? new global[typeOfItems]() : new typeOfItems());
-                                item.loadJson(itemOriginal).then().catch();
+                            if (itemOriginal instanceof PersistableModel) {
+                                item = itemOriginal;
                             }
-                            catch (/** @type {?} */ e) {
-                                item = new itemOriginal.constructor();
+                            else {
+                                try {
+                                    // hint: global is used for backend node.js services
+                                    item = typeof global == 'undefined' ? new typeOfItems() : (typeof typeOfItems == 'string' && global[typeOfItems] !== undefined ? new global[typeOfItems]() : new typeOfItems());
+                                    item.loadJson(itemOriginal).then(function (m) {
+                                        //
+                                    }).catch();
+                                }
+                                catch (/** @type {?} */ e) {
+                                    item = new itemOriginal.constructor();
+                                }
                             }
                             if (item.validate !== undefined && typeof item.validate == 'function') {
                                 item.validate().then(function (isSuccess) {

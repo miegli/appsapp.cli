@@ -394,6 +394,12 @@ export declare class PersistableModel {
      */
     transformAllProperties(): this;
     /**
+     * Transform all properties by given type
+     * @param type string
+     * @returns {PersistableModel}
+     */
+    private transformAllPropertiesByType(type);
+    /**
      * has model pending changes that are not synchronised yet or not
      * @returns {boolean}
      */

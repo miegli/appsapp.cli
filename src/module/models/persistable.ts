@@ -397,28 +397,34 @@ export class PersistableModel {
 
         let self = this, observer = null;
 
-        if (typeof action === 'string') {
-            action = {
-                name: 'custom',
-                data: {
-                    name: action
+
+        self.loaded().then(() => {
+
+            if (typeof action === 'string') {
+                action = {
+                    name: 'custom',
+                    data: {
+                        name: action
+                    }
                 }
             }
-        }
 
-        self.executeSave(action).subscribe((next) => {
-            if (observer) {
-                observer.next(next);
-            }
-        }, (error) => {
-            if (observer) {
-                observer.error(error);
-            }
-        }, () => {
-            if (observer) {
-                observer.complete();
-            }
+            self.executeSave(action).subscribe((next) => {
+                if (observer) {
+                    observer.next(next);
+                }
+            }, (error) => {
+                if (observer) {
+                    observer.error(error);
+                }
+            }, () => {
+                if (observer) {
+                    observer.complete();
+                }
+            });
+
         });
+
 
         return new Observable<any>((o: Observer<any>) => {
             observer = o;
@@ -792,6 +798,7 @@ export class PersistableModel {
         if (this.__editedObserver) {
             this.__editedObserver.next(event);
         }
+
         this.executeConditionValidatorCircular(property);
         this.executeChangesWithCallback(event);
 
@@ -1000,15 +1007,10 @@ export class PersistableModel {
             }
 
             toAddModels.forEach((d) => {
-                if (self.isInBackendMode()) {
-                    t.push(d.transformAllProperties());
-                } else {
-                    t.push(d);
-                }
+                t.push(d);
             });
 
-            this.refreshListArray(property, t);
-            return this.transformTypeFromMetadata(property, t);
+            return this.refreshListArray(property, t);
 
         } else {
             return this;
@@ -1453,25 +1455,31 @@ export class PersistableModel {
                         }
 
                         if (item !== undefined) {
-                            item.loadJson(itemOriginal);
+
+                            item.loadJson(itemOriginal).then((item) => {
+
+                                if (!item.isInBackendMode()) {
+                                    item.loaded().then((m) => {
+                                        item.getChangesObserverable().subscribe((next) => {
+                                            if (next.model.getParent()) {
+                                                next.model.getParent().setProperty(property, self.getPropertyValue(property, true));
+                                            }
+
+                                        })
+                                    });
+                                }
+                                valueAsObjects.push(item.transformAllProperties());
+                                item.refreshAllListArrays();
+
+                            });
+
                             item.setParent(self);
 
-                            if (!item.isInBackendMode()) {
-                                item.loaded().then((m) => {
-                                    item.getChangesObserverable().subscribe((next) => {
-                                        if (next.model.getParent()) {
-                                            next.model.getParent().setProperty(property, self.getPropertyValue(property, true));
-                                        }
 
-                                    })
-                                });
-                            }
-                            valueAsObjects.push(item);
-                            item.refreshAllListArrays();
                         }
 
                     } else {
-                        valueAsObjects.push(itemOriginal);
+                        valueAsObjects.push(itemOriginal.transformAllProperties());
                     }
                 });
             }
@@ -1510,6 +1518,25 @@ export class PersistableModel {
 
         self.getPropertiesKeys().forEach((property) => {
             self.transformTypeFromMetadata(property, self[property]);
+        });
+
+        return this;
+
+    }
+
+    /**
+     * Transform all properties by given type
+     * @param type string
+     * @returns {PersistableModel}
+     */
+    private transformAllPropertiesByType(type) {
+
+        let self = this;
+
+        self.getPropertiesKeys().forEach((property) => {
+            if (this.getMetadata(property, type).length) {
+                self.transformTypeFromMetadata(property, self[property]);
+            }
         });
 
         return this;

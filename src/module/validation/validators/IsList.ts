@@ -3,13 +3,18 @@ import {PersistableModel} from "../../models/persistable";
 
 declare var global: any;
 
-export function IsList(typeOfItems: any, usePropertyAsUuid?: string, uniqueItems?:boolean) {
+export function IsList(typeOfItems: any, usePropertyAsUuid?: string, uniqueItems?: boolean) {
     return function (object: Object, propertyName: string) {
         registerDecorator({
             name: "isList",
             target: object.constructor,
             propertyName: propertyName,
-            constraints: [{'type': 'isList', 'value': typeOfItems, 'usePropertyAsUuid': usePropertyAsUuid, 'uniqueItems': uniqueItems == undefined ? false : uniqueItems}],
+            constraints: [{
+                'type': 'isList',
+                'value': typeOfItems,
+                'usePropertyAsUuid': usePropertyAsUuid,
+                'uniqueItems': uniqueItems == undefined ? false : uniqueItems
+            }],
             validator: {
                 validate(value: any, args: ValidationArguments) {
 
@@ -36,12 +41,19 @@ export function IsList(typeOfItems: any, usePropertyAsUuid?: string, uniqueItems
                             let item = null;
 
 
-                            try {
-                                // hint: global is used for backend node.js services
-                                item = typeof global == 'undefined' ? new typeOfItems() : (typeof typeOfItems == 'string' && global[typeOfItems] !== undefined ? new global[typeOfItems]() : new typeOfItems());
-                                item.loadJson(itemOriginal).then().catch();
-                            } catch (e) {
-                                item = new itemOriginal.constructor();
+                            if (itemOriginal instanceof PersistableModel) {
+                                item = itemOriginal;
+                            } else {
+
+                                try {
+                                    // hint: global is used for backend node.js services
+                                    item = typeof global == 'undefined' ? new typeOfItems() : (typeof typeOfItems == 'string' && global[typeOfItems] !== undefined ? new global[typeOfItems]() : new typeOfItems());
+                                    item.loadJson(itemOriginal).then((m) => {
+                                        //
+                                    }).catch();
+                                } catch (e) {
+                                    item = new itemOriginal.constructor();
+                                }
                             }
 
 

@@ -73,7 +73,6 @@ export function HasConditions(options: [{
                     const validator = new Validator();
 
                     let state = true;
-                    let stateSkipped = false;
                     let valueNested = null;
 
 
@@ -88,7 +87,8 @@ export function HasConditions(options: [{
 
                                 valueNested = JSON.parse(JSON.stringify(args.object.__conditionContraintsPropertiesValue[condition.property]));
 
-                                if (valueNested && valueNested.length !== undefined && valueNested.length === 0) {
+                                if ((valueNested && valueNested.length !== undefined && valueNested.length === 0)) {
+                                    state = false;
                                     return false;
                                 }
 
