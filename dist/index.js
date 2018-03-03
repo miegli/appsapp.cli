@@ -2397,7 +2397,6 @@ function HasConditions(options, actionIfMatches, validationOptions) {
                             if (condition.additionalData.propertyNestedAsNestedObject !== undefined) {
                                 valueNested = JSON.parse(JSON.stringify(args.object.__conditionContraintsPropertiesValue[condition.property]));
                                 if ((valueNested && valueNested.length !== undefined && valueNested.length === 0)) {
-                                    console.log(args.object.__isLoaded);
                                     state = false;
                                     return state;
                                 }
