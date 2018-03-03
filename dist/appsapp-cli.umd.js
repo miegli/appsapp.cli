@@ -926,7 +926,12 @@ var PersistableModel = /** @class */ (function () {
                 t = this.createListArray(property);
             }
             toAddModels.forEach(function (d) {
-                t.push(d.transformAllProperties());
+                if (self.isInBackendMode()) {
+                    t.push(d.transformAllProperties());
+                }
+                else {
+                    t.push(d);
+                }
             });
             this.refreshListArray(property, t);
             return this.transformTypeFromMetadata(property, t);
