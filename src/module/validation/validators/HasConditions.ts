@@ -70,15 +70,10 @@ export function HasConditions(options: [{
             validator: {
                 validate(value: any, args: any) {
 
-                    if (args.object.__isLoaded === false) {
-                        return true;
-                    }
-
                     const validator = new Validator();
 
                     let state = true;
                     let valueNested = null;
-
 
                     /**
                      * iterates over all rules synchronous
@@ -90,10 +85,10 @@ export function HasConditions(options: [{
 
                                 valueNested = JSON.parse(JSON.stringify(args.object.__conditionContraintsPropertiesValue[condition.property]));
 
-                                if ((valueNested && valueNested.length !== undefined && valueNested.length === 0)) {
-                                    state = false;
-                                    return state;
-                                }
+                                // if ((valueNested && valueNested.length !== undefined && valueNested.length === 0)) {
+                                //     state = false;
+                                //     return state;
+                                // }
 
                                 if (typeof valueNested == 'object' && valueNested.forEach !== undefined) {
                                     valueNested.forEach((v, i) => {

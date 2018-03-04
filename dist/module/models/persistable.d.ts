@@ -371,9 +371,10 @@ export declare class PersistableModel {
     /**
      * load json data
      * @param {object|string} stringified or real json object
+     * @param clone boolean
      * @returns {Promise<any>}
      */
-    loadJson(json: any): Promise<{}>;
+    loadJson(json: any, clone?: any): Promise<{}>;
     /**
      * transform type from metadata to avoid non matching data types
      * @param property

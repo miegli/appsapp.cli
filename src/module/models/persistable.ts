@@ -398,8 +398,6 @@ export class PersistableModel {
         let self = this, observer = null;
 
 
-        self.loaded().then(() => {
-
             if (typeof action === 'string') {
                 action = {
                     name: 'custom',
@@ -423,7 +421,7 @@ export class PersistableModel {
                 }
             });
 
-        });
+
 
 
         return new Observable<any>((o: Observer<any>) => {
@@ -1335,9 +1333,10 @@ export class PersistableModel {
     /**
      * load json data
      * @param {object|string} stringified or real json object
+     * @param clone boolean
      * @returns {Promise<any>}
      */
-    public loadJson(json) {
+    public loadJson(json, clone?) {
 
         let self = this;
         json = json == null ? {} : typeof json == 'string' ? JSON.parse(json) : json;
@@ -1349,26 +1348,29 @@ export class PersistableModel {
 
             if (model) {
 
-                let propertiesWithValidationError = {};
-                model.validate().then((success) => {
-                }).catch((error) => {
-                    Object.keys(error).forEach((e: any) => {
-                        propertiesWithValidationError[e.property] = true;
+                if (clone == undefined || clone == false) {
+                    let propertiesWithValidationError = {};
+                    model.validate().then((success) => {
+                    }).catch((error) => {
+                        Object.keys(error).forEach((e: any) => {
+                            propertiesWithValidationError[e.property] = true;
+                        });
                     });
-                });
 
 
-                // all properties without validation error
-                Object.keys(json).forEach((property) => {
-                    if (property.substr(0, 2) !== '__' && propertiesWithValidationError[property] === undefined) {
-                        if (Object.keys(self).indexOf(property) >= 0) {
-                            self.transformTypeFromMetadata(property, model[property]);
-                            if (model.isInBackendMode()) {
-                                self.__edited[property] = self[property];
+                    // all properties without validation error
+                    Object.keys(json).forEach((property) => {
+                        if (property.substr(0, 2) !== '__' && propertiesWithValidationError[property] === undefined) {
+                            if (Object.keys(self).indexOf(property) >= 0) {
+                                self.transformTypeFromMetadata(property, model[property]);
+                                if (model.isInBackendMode()) {
+                                    self.__edited[property] = self[property];
+                                }
                             }
                         }
-                    }
-                });
+                    });
+
+                }
 
                 resolve(self);
 

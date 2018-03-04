@@ -325,28 +325,26 @@ var PersistableModel = /** @class */ (function () {
      */
     function (action) {
         var /** @type {?} */ self = this, /** @type {?} */ observer = null;
-        self.loaded().then(function () {
-            if (typeof action === 'string') {
-                action = {
-                    name: 'custom',
-                    data: {
-                        name: action
-                    }
-                };
+        if (typeof action === 'string') {
+            action = {
+                name: 'custom',
+                data: {
+                    name: action
+                }
+            };
+        }
+        self.executeSave(action).subscribe(function (next) {
+            if (observer) {
+                observer.next(next);
             }
-            self.executeSave(action).subscribe(function (next) {
-                if (observer) {
-                    observer.next(next);
-                }
-            }, function (error) {
-                if (observer) {
-                    observer.error(error);
-                }
-            }, function () {
-                if (observer) {
-                    observer.complete();
-                }
-            });
+        }, function (error) {
+            if (observer) {
+                observer.error(error);
+            }
+        }, function () {
+            if (observer) {
+                observer.complete();
+            }
         });
         return new rxjs.Observable(function (o) {
             observer = o;
@@ -1221,37 +1219,41 @@ var PersistableModel = /** @class */ (function () {
     /**
      * load json data
      * @param {?} json
+     * @param {?=} clone boolean
      * @return {?}
      */
     PersistableModel.prototype.loadJson = /**
      * load json data
      * @param {?} json
+     * @param {?=} clone boolean
      * @return {?}
      */
-    function (json) {
+    function (json, clone) {
         var /** @type {?} */ self = this;
         json = json == null ? {} : typeof json == 'string' ? JSON.parse(json) : json;
         var /** @type {?} */ model = /** @type {?} */ (classTransformer.plainToClass(/** @type {?} */ (this.constructor), json, { excludePrefixes: ["__"] }));
         return new Promise(function (resolve, reject) {
             if (model) {
-                var /** @type {?} */ propertiesWithValidationError_1 = {};
-                model.validate().then(function (success) {
-                }).catch(function (error) {
-                    Object.keys(error).forEach(function (e) {
-                        propertiesWithValidationError_1[e.property] = true;
+                if (clone == undefined || clone == false) {
+                    var /** @type {?} */ propertiesWithValidationError_1 = {};
+                    model.validate().then(function (success) {
+                    }).catch(function (error) {
+                        Object.keys(error).forEach(function (e) {
+                            propertiesWithValidationError_1[e.property] = true;
+                        });
                     });
-                });
-                // all properties without validation error
-                Object.keys(json).forEach(function (property) {
-                    if (property.substr(0, 2) !== '__' && propertiesWithValidationError_1[property] === undefined) {
-                        if (Object.keys(self).indexOf(property) >= 0) {
-                            self.transformTypeFromMetadata(property, model[property]);
-                            if (model.isInBackendMode()) {
-                                self.__edited[property] = self[property];
+                    // all properties without validation error
+                    Object.keys(json).forEach(function (property) {
+                        if (property.substr(0, 2) !== '__' && propertiesWithValidationError_1[property] === undefined) {
+                            if (Object.keys(self).indexOf(property) >= 0) {
+                                self.transformTypeFromMetadata(property, model[property]);
+                                if (model.isInBackendMode()) {
+                                    self.__edited[property] = self[property];
+                                }
                             }
                         }
-                    }
-                });
+                    });
+                }
                 resolve(self);
             }
             else {
@@ -2383,9 +2385,6 @@ function HasConditions(options, actionIfMatches, validationOptions) {
                  * @return {?}
                  */
                 function (value, args) {
-                    if (args.object.__isLoaded === false) {
-                        return true;
-                    }
                     var /** @type {?} */ validator = new classValidator.Validator();
                     var /** @type {?} */ state = true;
                     var /** @type {?} */ valueNested = null;
@@ -2396,10 +2395,10 @@ function HasConditions(options, actionIfMatches, validationOptions) {
                         options.forEach(function (condition) {
                             if (condition.additionalData.propertyNestedAsNestedObject !== undefined) {
                                 valueNested = JSON.parse(JSON.stringify(args.object.__conditionContraintsPropertiesValue[condition.property]));
-                                if ((valueNested && valueNested.length !== undefined && valueNested.length === 0)) {
-                                    state = false;
-                                    return state;
-                                }
+                                // if ((valueNested && valueNested.length !== undefined && valueNested.length === 0)) {
+                                //     state = false;
+                                //     return state;
+                                // }
                                 if (typeof valueNested == 'object' && valueNested.forEach !== undefined) {
                                     valueNested.forEach(function (v, i) {
                                         if (typeof v == 'string' && args.object.getHashedValue(v) !== v) {
