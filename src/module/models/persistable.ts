@@ -100,6 +100,7 @@ export class PersistableModel {
     private tmp__hashedValues: object = {};
     private __propertySymbols: object = {};
     private __listArrays: object = {};
+    private __isPersistableModel: boolean = true;
 
     /**
      * PersistanceManager as an optional argument when changes were persisted to stable database
@@ -117,6 +118,8 @@ export class PersistableModel {
                 this[metadata.propertyName] = null;
             }
         });
+
+        console.log(this.constructor.name);
 
         this.transformAllProperties();
         this.__init();
@@ -908,11 +911,12 @@ export class PersistableModel {
             var toAddModels = [];
             var toCreateModels = [];
 
-            if (data instanceof this.getMetadataValue(property, 'isList')) {
+
+            if (data.__isPersistableModel !== undefined) {
                 toAddModels.push(data);
             } else if (typeof data == 'object' && data.length !== undefined) {
                 data.forEach((d) => {
-                    if (d instanceof this.getMetadataValue(property, 'isList')) {
+                    if (d.__isPersistableModel !== undefined) {
                         toAddModels.push(d);
                     } else {
                         toCreateModels.push(d);
@@ -958,7 +962,7 @@ export class PersistableModel {
 
                 } else {
 
-                    n = self.__appsAppModuleProvider.new(self.getMetadataValue(property, 'isList'), uuid, d);
+                    n = self.createNewLazyLoadedPersistableModel(self.getMetadataValue(property, 'isList'), uuid, d);
 
                     var usePropertyAsUuid = self.getMetadataValue(property, 'isList', null, 'usePropertyAsUuid');
                     if (usePropertyAsUuid) {
@@ -1032,11 +1036,11 @@ export class PersistableModel {
                 toRemoveUuids[uuidOrObject] = true;
             } else {
 
-                if (uuidOrObject instanceof PersistableModel) {
+                if (uuidOrObject.__isPersistableModel) {
                     toRemoveUuids[uuidOrObject.getUuid()] = true;
                 } else {
                     uuidOrObject.forEach((o) => {
-                        if (uuidOrObject instanceof PersistableModel) {
+                        if (uuidOrObject.__isPersistableModel) {
                             toRemoveUuids[o.getUuid()] = true;
                         } else {
                             toRemoveUuids[o] = true;
@@ -1397,11 +1401,12 @@ export class PersistableModel {
 
             if (value && value.length) {
                 value.forEach((itemOriginal) => {
-                    if (itemOriginal !== undefined && itemOriginal && itemOriginal instanceof PersistableModel == false) {
+
+                    if (itemOriginal !== undefined && itemOriginal.__isPersistableModel === undefined) {
                         let uuid = itemOriginal[self.getMetadataValue(property, 'isList', null, 'usePropertyAsUuid')];
                         let item = null;
                         if (!self.isInBackendMode() && self.getAppsAppModuleProvider()) {
-                            item = self.getAppsAppModuleProvider().new(self.getMetadataValue(property, 'isList'), uuid);
+                            item = self.createNewLazyLoadedPersistableModel(self.getMetadataValue(property, 'isList'), uuid);
                         } else {
                             // backend mode
                             var constructor = self.getMetadataValue(property, 'isList');
@@ -2153,6 +2158,32 @@ export class PersistableModel {
 
     }
 
+
+    /**
+     * creates new lazy loaded persistable model
+     * @param constructor
+     * @param uuid
+     * @param data
+     */
+    private createNewLazyLoadedPersistableModel(constructor, uuid?, data?) {
+
+        let o = new constructor();
+
+        if (uuid !== undefined) {
+            o.setUuid(uuid);
+        }
+
+        if (data !== undefined) {
+            o.loadJson(data);
+        }
+
+        return o;
+
+
+    }
+
+
+
     /**
      * set appsAppModuleProvider
      * @param appsAppModuleProvider
@@ -2320,7 +2351,7 @@ export class PersistableModel {
 
         if (v && v.length) {
             v.forEach((item) => {
-                if (item && item instanceof PersistableModel && item.getUuid() && item.getUuid().length) {
+                if (item && item.__isPersistableModel && item.getUuid() && item.getUuid().length) {
                     properties[item.getUuid()] = {
                         value: item,
                         enumerable: false,

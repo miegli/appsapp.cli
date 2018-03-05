@@ -81,6 +81,7 @@ export declare class PersistableModel {
     private tmp__hashedValues;
     private __propertySymbols;
     private __listArrays;
+    private __isPersistableModel;
     /**
      * PersistanceManager as an optional argument when changes were persisted to stable database
      */
@@ -515,6 +516,13 @@ export declare class PersistableModel {
      * @Returns string hash
      */
     setHashedValue(value: any): any;
+    /**
+     * creates new lazy loaded persistable model
+     * @param constructor
+     * @param uuid
+     * @param data
+     */
+    private createNewLazyLoadedPersistableModel(constructor, uuid?, data?);
     /**
      * set appsAppModuleProvider
      * @param appsAppModuleProvider

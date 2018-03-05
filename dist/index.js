@@ -58,6 +58,7 @@ var PersistableModel = /** @class */ (function () {
         this.tmp__hashedValues = {};
         this.__propertySymbols = {};
         this.__listArrays = {};
+        this.__isPersistableModel = true;
         this.__metadata = classValidator.getFromContainer(classValidator.MetadataStorage).getTargetValidationMetadatas(this.constructor, '');
         // check if all loaded metadata has corresponding properties
         this.__metadata.forEach(function (metadata) {
@@ -65,6 +66,7 @@ var PersistableModel = /** @class */ (function () {
                 _this[metadata.propertyName] = null;
             }
         });
+        console.log(this.constructor.name);
         this.transformAllProperties();
         this.__init();
     }
@@ -830,17 +832,16 @@ var PersistableModel = /** @class */ (function () {
      * @return {?} this
      */
     function (property, data, uuid) {
-        var _this = this;
         var /** @type {?} */ self = this;
         if (this.getMetadataValue(property, 'isList')) {
             var /** @type {?} */ toAddModels = [];
             var /** @type {?} */ toCreateModels = [];
-            if (data instanceof this.getMetadataValue(property, 'isList')) {
+            if (data.__isPersistableModel !== undefined) {
                 toAddModels.push(data);
             }
             else if (typeof data == 'object' && data.length !== undefined) {
                 data.forEach(function (d) {
-                    if (d instanceof _this.getMetadataValue(property, 'isList')) {
+                    if (d.__isPersistableModel !== undefined) {
                         toAddModels.push(d);
                     }
                     else {
@@ -881,7 +882,7 @@ var PersistableModel = /** @class */ (function () {
                     }
                 }
                 else {
-                    n = self.__appsAppModuleProvider.new(self.getMetadataValue(property, 'isList'), uuid, d);
+                    n = self.createNewLazyLoadedPersistableModel(self.getMetadataValue(property, 'isList'), uuid, d);
                     var /** @type {?} */ usePropertyAsUuid = self.getMetadataValue(property, 'isList', null, 'usePropertyAsUuid');
                     if (usePropertyAsUuid) {
                         n.watch(usePropertyAsUuid, function (uuid) {
@@ -943,12 +944,12 @@ var PersistableModel = /** @class */ (function () {
                 toRemoveUuids[uuidOrObject] = true;
             }
             else {
-                if (uuidOrObject instanceof PersistableModel) {
+                if (uuidOrObject.__isPersistableModel) {
                     toRemoveUuids[uuidOrObject.getUuid()] = true;
                 }
                 else {
                     uuidOrObject.forEach(function (o) {
-                        if (uuidOrObject instanceof PersistableModel) {
+                        if (uuidOrObject.__isPersistableModel) {
                             toRemoveUuids[o.getUuid()] = true;
                         }
                         else {
@@ -1263,11 +1264,11 @@ var PersistableModel = /** @class */ (function () {
             }
             if (value && value.length) {
                 value.forEach(function (itemOriginal) {
-                    if (itemOriginal !== undefined && itemOriginal && itemOriginal instanceof PersistableModel == false) {
+                    if (itemOriginal !== undefined && itemOriginal.__isPersistableModel === undefined) {
                         var /** @type {?} */ uuid = itemOriginal[self.getMetadataValue(property, 'isList', null, 'usePropertyAsUuid')];
                         var /** @type {?} */ item = null;
                         if (!self.isInBackendMode() && self.getAppsAppModuleProvider()) {
-                            item = self.getAppsAppModuleProvider().new(self.getMetadataValue(property, 'isList'), uuid);
+                            item = self.createNewLazyLoadedPersistableModel(self.getMetadataValue(property, 'isList'), uuid);
                         }
                         else {
                             // backend mode
@@ -1964,6 +1965,30 @@ var PersistableModel = /** @class */ (function () {
         return hash;
     };
     /**
+     * creates new lazy loaded persistable model
+     * @param {?} constructor
+     * @param {?=} uuid
+     * @param {?=} data
+     * @return {?}
+     */
+    PersistableModel.prototype.createNewLazyLoadedPersistableModel = /**
+     * creates new lazy loaded persistable model
+     * @param {?} constructor
+     * @param {?=} uuid
+     * @param {?=} data
+     * @return {?}
+     */
+    function (constructor, uuid, data) {
+        var /** @type {?} */ o = new constructor();
+        if (uuid !== undefined) {
+            o.setUuid(uuid);
+        }
+        if (data !== undefined) {
+            o.loadJson(data);
+        }
+        return o;
+    };
+    /**
      * set appsAppModuleProvider
      * @param {?} appsAppModuleProvider
      * @return {?}
@@ -2163,7 +2188,7 @@ var PersistableModel = /** @class */ (function () {
         var /** @type {?} */ properties = {}, /** @type {?} */ v = value == undefined ? this.getPropertyValue(property) : value;
         if (v && v.length) {
             v.forEach(function (item) {
-                if (item && item instanceof PersistableModel && item.getUuid() && item.getUuid().length) {
+                if (item && item.__isPersistableModel && item.getUuid() && item.getUuid().length) {
                     properties[item.getUuid()] = {
                         value: item,
                         enumerable: false,
@@ -2931,7 +2956,7 @@ function IsList(typeOfItems, usePropertyAsUuid, uniqueItems) {
                         }
                         value.forEach(function (itemOriginal) {
                             var /** @type {?} */ item = null;
-                            if (itemOriginal instanceof PersistableModel) {
+                            if (itemOriginal.__isPersistableModel) {
                                 item = itemOriginal;
                             }
                             else {

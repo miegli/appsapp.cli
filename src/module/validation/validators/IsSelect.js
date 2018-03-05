@@ -64,6 +64,7 @@ function IsSelect(options) {
                         optionValidator.getOptions().then(function (options) {
                             if (options.length == 0) {
                                 resolve(true);
+                                return true;
                             }
                             var allValide = true;
                             var values = {};

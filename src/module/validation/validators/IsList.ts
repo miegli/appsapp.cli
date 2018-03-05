@@ -41,7 +41,7 @@ export function IsList(typeOfItems: any, usePropertyAsUuid?: string, uniqueItems
                             let item = null;
 
 
-                            if (itemOriginal instanceof PersistableModel) {
+                            if (itemOriginal.__isPersistableModel) {
                                 item = itemOriginal;
                             } else {
 

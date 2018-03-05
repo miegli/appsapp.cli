@@ -56,6 +56,7 @@ function HasConditions(options, actionIfMatches, validationOptions) {
                         options.forEach(function (condition) {
                             if (condition.additionalData.propertyNestedAsNestedObject !== undefined) {
                                 valueNested = JSON.parse(JSON.stringify(args.object.__conditionContraintsPropertiesValue[condition.property]));
+                                //
                                 // if ((valueNested && valueNested.length !== undefined && valueNested.length === 0)) {
                                 //     state = false;
                                 //     return state;
