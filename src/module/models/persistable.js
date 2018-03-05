@@ -256,28 +256,26 @@ var PersistableModel = /** @class */ (function () {
      */
     PersistableModel.prototype.save = function (action) {
         var self = this, observer = null;
-        self.loaded().then(function () {
-            if (typeof action === 'string') {
-                action = {
-                    name: 'custom',
-                    data: {
-                        name: action
-                    }
-                };
+        if (typeof action === 'string') {
+            action = {
+                name: 'custom',
+                data: {
+                    name: action
+                }
+            };
+        }
+        self.executeSave(action).subscribe(function (next) {
+            if (observer) {
+                observer.next(next);
             }
-            self.executeSave(action).subscribe(function (next) {
-                if (observer) {
-                    observer.next(next);
-                }
-            }, function (error) {
-                if (observer) {
-                    observer.error(error);
-                }
-            }, function () {
-                if (observer) {
-                    observer.complete();
-                }
-            });
+        }, function (error) {
+            if (observer) {
+                observer.error(error);
+            }
+        }, function () {
+            if (observer) {
+                observer.complete();
+            }
         });
         return new rxjs_1.Observable(function (o) {
             observer = o;
@@ -965,32 +963,35 @@ var PersistableModel = /** @class */ (function () {
     /**
      * load json data
      * @param {object|string} stringified or real json object
+     * @param clone boolean
      * @returns {Promise<any>}
      */
-    PersistableModel.prototype.loadJson = function (json) {
+    PersistableModel.prototype.loadJson = function (json, clone) {
         var self = this;
         json = json == null ? {} : typeof json == 'string' ? JSON.parse(json) : json;
         var model = class_transformer_1.plainToClass(this.constructor, json, { excludePrefixes: ["__"] });
         return new Promise(function (resolve, reject) {
             if (model) {
-                var propertiesWithValidationError_1 = {};
-                model.validate().then(function (success) {
-                }).catch(function (error) {
-                    Object.keys(error).forEach(function (e) {
-                        propertiesWithValidationError_1[e.property] = true;
+                if (clone == undefined || clone == false) {
+                    var propertiesWithValidationError_1 = {};
+                    model.validate().then(function (success) {
+                    }).catch(function (error) {
+                        Object.keys(error).forEach(function (e) {
+                            propertiesWithValidationError_1[e.property] = true;
+                        });
                     });
-                });
-                // all properties without validation error
-                Object.keys(json).forEach(function (property) {
-                    if (property.substr(0, 2) !== '__' && propertiesWithValidationError_1[property] === undefined) {
-                        if (Object.keys(self).indexOf(property) >= 0) {
-                            self.transformTypeFromMetadata(property, model[property]);
-                            if (model.isInBackendMode()) {
-                                self.__edited[property] = self[property];
+                    // all properties without validation error
+                    Object.keys(json).forEach(function (property) {
+                        if (property.substr(0, 2) !== '__' && propertiesWithValidationError_1[property] === undefined) {
+                            if (Object.keys(self).indexOf(property) >= 0) {
+                                self.transformTypeFromMetadata(property, model[property]);
+                                if (model.isInBackendMode()) {
+                                    self.__edited[property] = self[property];
+                                }
                             }
                         }
-                    }
-                });
+                    });
+                }
                 resolve(self);
             }
             else {

@@ -95,6 +95,7 @@ export function IsSelect(options?: {
 
                             if (options.length == 0) {
                                 resolve(true);
+                                return true;
                             }
 
                             let allValide = true;

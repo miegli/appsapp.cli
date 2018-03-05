@@ -60,7 +60,6 @@ export declare class PersistableModel {
     private __editedObservableCallbacks;
     private __editedObservableObservers;
     private __temp;
-    private __forceUpdateProperty;
     private __persistenceManager;
     private __isOnline;
     private __validationErrors;
@@ -102,12 +101,6 @@ export declare class PersistableModel {
      * @returns {PersistableModel}
      */
     private setHttpClient(http);
-    /**
-     * update property
-     * @param property
-     * @param value
-     */
-    update(property: any, value: any): this;
     /**
      * call next method on observer
      * @returns {PersistableModel}
@@ -356,18 +349,6 @@ export declare class PersistableModel {
      * @returns {boolean}
      */
     hasChanges(property?: any): number | boolean;
-    /**
-     * remove changes state
-     * @param {string} property as an optional argument
-     * @returns {boolean}
-     */
-    private setHasNoChanges(property?);
-    /**
-     * import dynamic properties
-     * @param {propertiesAsObject}
-     * @returns {Promise<any>}
-     */
-    importDynamicProperties(propertiesAsObject: any): Promise<{}>;
     /**
      * load json data
      * @param {object|string} stringified or real json object

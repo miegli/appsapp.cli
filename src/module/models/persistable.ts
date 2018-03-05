@@ -79,7 +79,6 @@ export class PersistableModel {
     private __editedObservableCallbacks: any = [];
     private __editedObservableObservers: any = [];
     private __temp = {};
-    private __forceUpdateProperty = {};
     private __persistenceManager: any;
     private __isOnline: boolean = true;
     private __validationErrors: any = {};
@@ -160,20 +159,25 @@ export class PersistableModel {
                 if (self.__bindingsObserver) {
 
                     self.__editedObservableObservers.forEach((callback: any) => {
-                        if (next[callback.property] !== undefined && callback.first === undefined) {
-                            callback.callback(next[callback.property]);
-                            callback.first = true;
+                        if (next[callback.property] !== undefined) {
+                            var lastValue = null;
+                            try {
+                                lastValue = objectHash.sha1(next[callback.property])
+                            } catch (e) {
+                                lastValue = next[callback.property];
+                            }
+                            if (lastValue !== callback.lastValue) {
+                                callback.callback(next[callback.property]);
+                                callback.lastValue = lastValue;
+                            }
                         }
                     });
 
                     Object.keys(self.__bindingsObserver).forEach((property) => {
-                        if (!self.hasChanges(property) || self.__forceUpdateProperty[property] !== undefined) {
                             if (next[property] !== undefined) {
                                 self.executeConditionValidatorCircular(property);
                                 self.__bindingsObserver[property].next(next[property]);
                             }
-                        }
-
                     });
 
                 }
@@ -207,26 +211,6 @@ export class PersistableModel {
 
     }
 
-    /**
-     * update property
-     * @param property
-     * @param value
-     */
-    public update(property, value) {
-
-        let observer = this.setProperty(property, value).setHasNoChanges(property).getPropertyObserver(property);
-        if (observer) {
-            observer.next(value);
-        }
-
-        try {
-            delete this.__bindings[property];
-        } catch (e) {
-            // e
-        }
-        return this;
-
-    }
 
     /**
      * call next method on observer
@@ -331,7 +315,7 @@ export class PersistableModel {
                 }, interval, maxExecutions);
             } else {
                 self.loaded().then((model) => {
-                    self.getPersistenceManager().trigger(model, observer, {
+                    model.getPersistenceManager().trigger(model, observer, {
                         name: 'custom',
                         data: {
                             name: action
@@ -398,30 +382,31 @@ export class PersistableModel {
         let self = this, observer = null;
 
 
-            if (typeof action === 'string') {
-                action = {
-                    name: 'custom',
-                    data: {
-                        name: action
-                    }
+        if (typeof action === 'string') {
+            action = {
+                name: 'custom',
+                data: {
+                    name: action
                 }
             }
-
-            self.executeSave(action).subscribe((next) => {
-                if (observer) {
-                    observer.next(next);
-                }
-            }, (error) => {
-                if (observer) {
-                    observer.error(error);
-                }
-            }, () => {
-                if (observer) {
-                    observer.complete();
-                }
-            });
+        }
 
 
+
+        self.executeSave(action).subscribe((next) => {
+            if (observer) {
+                observer.next(next);
+            }
+        }, (error) => {
+            if (observer) {
+                observer.error(error);
+            }
+        }, () => {
+            if (observer) {
+                observer.next();
+                observer.complete();
+            }
+        });
 
 
         return new Observable<any>((o: Observer<any>) => {
@@ -452,29 +437,26 @@ export class PersistableModel {
             self.setHasPendingChanges(true, action);
 
 
-            if (self.__persistenceManager) {
-                self.__persistenceManager.save(self, observer, action).then((success) => {
-                    self.__edited = {};
+            
+            self.loaded().then((model) => {
 
-                    if (action) {
-                        if (self.isOnline()) {
-                            observer.next(self.getMessage('submitted'));
-                        } else {
-                            observer.next(self.getMessage('submittedInBackground'));
-                        }
-                    } else {
+                if (model.__persistenceManager) {
+                    observer.next({message: model.getMessage('submitted'), target: model});
+                    model.__persistenceManager.save(self, observer, action).then((success) => {
+                        model.__edited = {};
                         observer.complete();
-                    }
+                    }).catch((error) => {
+                        model.__edited = {};
+                        observer.error(error);
+                    });
 
-                }).catch((error) => {
-                    self.__edited = {};
-                    observer.error(error);
-                });
+                } else {
+                    observer.error('No persistence Manger provided');
+                    model.__edited = {};
+                }
+            });
 
-            } else {
-                observer.error('No persistence Manger provided');
-                self.__edited = {};
-            }
+
 
 
         });
@@ -492,7 +474,7 @@ export class PersistableModel {
         let self = this;
 
         Object.keys(self.getProperties()).forEach((property) => {
-            self.transformTypeFromMetadata(property, '');
+            self[property] = self.transformTypeFromMetadata(property, '');
         });
 
         self.__edited = {};
@@ -648,7 +630,13 @@ export class PersistableModel {
             i++;
         });
 
-        return this.__firebaseDatabaseRoot + '/' + this.getFirebaseDatabasePath().substr(this.__firebaseDatabaseRoot.length + 1).split("/")[0] + '/' + this.getFirebaseDatabasePath().substr(this.__firebaseDatabaseRoot.length + 1).split("/")[1] + path.substr(1);
+        if (this.getFirebaseDatabasePath() !== undefined) {
+            return this.__firebaseDatabaseRoot + '/' + this.getFirebaseDatabasePath().substr(this.__firebaseDatabaseRoot.length + 1).split("/")[0] + '/' + this.getFirebaseDatabasePath().substr(this.__firebaseDatabaseRoot.length + 1).split("/")[1] + path.substr(1);
+        } else {
+            return null;
+        }
+
+
 
     }
 
@@ -785,8 +773,18 @@ export class PersistableModel {
 
         self.__editedObservableObservers.forEach((callback: any) => {
             if (callback.property == property && this[property] !== value) {
-                callback.callback(value);
-                callback.first = true;
+
+                var lastValue = null;
+                try {
+                    lastValue = objectHash.sha1(value)
+                } catch (e) {
+                    lastValue = value;
+                }
+
+                if (lastValue !== callback.lastValue) {
+                    callback.callback(value);
+                    callback.lastValue = lastValue;
+                }
             }
         });
 
@@ -1055,7 +1053,7 @@ export class PersistableModel {
                 }
             });
 
-            this.transformTypeFromMetadata(property, afterRemovedValue);
+            this[property] = this.transformTypeFromMetadata(property, afterRemovedValue);
 
         }
 
@@ -1072,7 +1070,7 @@ export class PersistableModel {
 
 
         if (this.getMetadataValue(property, 'isList')) {
-            this.transformTypeFromMetadata(property, []);
+            this[property] = this.transformTypeFromMetadata(property, []);
         }
 
         return this;
@@ -1281,53 +1279,6 @@ export class PersistableModel {
 
     }
 
-    /**
-     * remove changes state
-     * @param {string} property as an optional argument
-     * @returns {boolean}
-     */
-    private setHasNoChanges(property?) {
-
-        if (property) {
-            this.__forceUpdateProperty[property] = true;
-
-            if (this.__edited[property]) {
-                try {
-                    delete this.__edited[property];
-                } catch (e) {
-                    //
-                }
-            }
-        } else {
-            this.__edited = {};
-        }
-
-        return this;
-
-
-    }
-
-    /**
-     * import dynamic properties
-     * @param {propertiesAsObject}
-     * @returns {Promise<any>}
-     */
-    public importDynamicProperties(propertiesAsObject) {
-
-        let self = this;
-
-        return new Promise(function (resolve, reject) {
-
-            Object.keys(propertiesAsObject).forEach((property) => {
-                self.transformTypeFromMetadata(property, propertiesAsObject[property]);
-            });
-
-            resolve(self);
-
-        });
-
-
-    }
 
 
     /**
@@ -1339,7 +1290,7 @@ export class PersistableModel {
     public loadJson(json, clone?) {
 
         let self = this;
-        json = json == null ? {} : typeof json == 'string' ? JSON.parse(json) : json;
+        json = typeof json == 'string' ? JSON.parse(json) : json;
 
         let model = <any>plainToClass(<any>this.constructor, json, {excludePrefixes: ["__"]});
 
@@ -1348,31 +1299,35 @@ export class PersistableModel {
 
             if (model) {
 
-                if (clone == undefined || clone == false) {
-                    let propertiesWithValidationError = {};
-                    model.validate().then((success) => {
-                    }).catch((error) => {
-                        Object.keys(error).forEach((e: any) => {
-                            propertiesWithValidationError[e.property] = true;
-                        });
-                    });
+                if (clone == true || json == null) {
+                    resolve(model);
+                } else {
 
 
-                    // all properties without validation error
                     Object.keys(json).forEach((property) => {
-                        if (property.substr(0, 2) !== '__' && propertiesWithValidationError[property] === undefined) {
-                            if (Object.keys(self).indexOf(property) >= 0) {
-                                self.transformTypeFromMetadata(property, model[property]);
-                                if (model.isInBackendMode()) {
-                                    self.__edited[property] = self[property];
+                        if (property.substr(0, 2) !== '__' || property.substr(0, 5) == 'tmp__' ) {
+                            if (Object.keys(self).indexOf(property) >= 0 && (self.__edited[property] === undefined || self.__edited[property] === null)) {
+                                self.setProperty(property,self.transformTypeFromMetadata(property, model[property]));
+                                if (self.isInBackendMode()) {
+                                    self.__edited[property] = model[property];
+                                    self[property] = model[property];
                                 }
                             }
                         }
                     });
 
+
+                    self.validate().then((success) => {
+                        model.emit();
+                        resolve(self);
+                    }).catch((error) => {
+                        Object.keys(error).forEach((e: any) => {
+                            self['__validationErrors'][e.property] = true;
+                        });
+                        resolve(self);
+                    });
                 }
 
-                resolve(self);
 
             } else {
                 resolve(self);
@@ -1390,7 +1345,7 @@ export class PersistableModel {
      */
     private transformTypeFromMetadata(property, value) {
 
-        return this.setProperty(property, this.transformTypeFromMetadataExecute(property, value));
+        return this.transformTypeFromMetadataExecute(property, value);
 
 
     }
@@ -1470,7 +1425,8 @@ export class PersistableModel {
                                         })
                                     });
                                 }
-                                valueAsObjects.push(item.transformAllProperties());
+                                //valueAsObjects.push(item.transformAllProperties());
+                                valueAsObjects.push(item);
                                 item.refreshAllListArrays();
 
                             });
@@ -1481,7 +1437,8 @@ export class PersistableModel {
                         }
 
                     } else {
-                        valueAsObjects.push(itemOriginal.transformAllProperties());
+                        //valueAsObjects.push(itemOriginal.transformAllProperties());
+                        valueAsObjects.push(itemOriginal);
                     }
                 });
             }
@@ -1491,20 +1448,20 @@ export class PersistableModel {
             return valueAsObjects;
         }
 
-        if (this.getMetadata(property, 'isSelect').length) {
-
-            let values = typeof value == 'object' ? value : [];
-            let realValues = [];
-
-            if (values && values.length) {
-                values.forEach((val) => {
-                    realValues.push(self.getHashedValue(val));
-                });
-            }
-
-            return realValues;
-
-        }
+        // if (this.getMetadata(property, 'isSelect').length) {
+        //
+        //     let values = typeof value == 'object' ? value : [];
+        //     let realValues = [];
+        //
+        //     if (values && values.length) {
+        //         values.forEach((val) => {
+        //             realValues.push(self.getHashedValue(val));
+        //         });
+        //     }
+        //
+        //     return realValues;
+        //
+        // }
 
         return value;
 
@@ -1519,7 +1476,7 @@ export class PersistableModel {
         let self = this;
 
         self.getPropertiesKeys().forEach((property) => {
-            self.transformTypeFromMetadata(property, self[property]);
+            self[property] = self.transformTypeFromMetadata(property, self[property]);
         });
 
         return this;
@@ -1537,7 +1494,7 @@ export class PersistableModel {
 
         self.getPropertiesKeys().forEach((property) => {
             if (this.getMetadata(property, type).length) {
-                self.transformTypeFromMetadata(property, self[property]);
+                self[property] = self.transformTypeFromMetadata(property, self[property]);
             }
         });
 
@@ -2265,13 +2222,15 @@ export class PersistableModel {
     public watch(property, callback) {
 
 
-        this.__editedObservableObservers.push({callback: callback, property: property});
-        callback(this.getPropertyValue(property));
+        var lastValue = null;
+        try {
+            lastValue = objectHash.sha1(this[property])
+        } catch (e) {
+            lastValue = this[property];
+        }
 
-        this.loaded().then((model) => {
-            callback(model.getPropertyValue(property));
-        });
-
+        this.__editedObservableObservers.push({callback: callback, property: property, lastValue: lastValue});
+        callback(this[property]);
 
         return this;
 
@@ -2372,8 +2331,10 @@ export class PersistableModel {
             });
         }
 
+        if (Object.keys(properties).length && this.__listArrays[property]) {
+            Object.defineProperties(this.__listArrays[property], properties);
+        }
 
-        Object.defineProperties(this.__listArrays[property], properties);
 
         return this;
 

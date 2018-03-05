@@ -84,7 +84,7 @@ export function HasConditions(options: [{
                             if (condition.additionalData.propertyNestedAsNestedObject !== undefined) {
 
                                 valueNested = JSON.parse(JSON.stringify(args.object.__conditionContraintsPropertiesValue[condition.property]));
-
+                                //
                                 // if ((valueNested && valueNested.length !== undefined && valueNested.length === 0)) {
                                 //     state = false;
                                 //     return state;
@@ -113,6 +113,7 @@ export function HasConditions(options: [{
 
 
                             if (state) {
+
                                 if (condition.type == 'condition') {
                                     if (valueNested === null && condition.validator == 'equals' && value !== undefined && condition.value !== null && condition.value.length !== undefined && value.length == 0) {
                                         state = true;

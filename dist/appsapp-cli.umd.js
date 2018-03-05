@@ -42,7 +42,6 @@ var PersistableModel = /** @class */ (function () {
         this.__editedObservableCallbacks = [];
         this.__editedObservableObservers = [];
         this.__temp = {};
-        this.__forceUpdateProperty = {};
         this.__isOnline = true;
         this.__validationErrors = {};
         this.__metadata = [];
@@ -100,17 +99,24 @@ var PersistableModel = /** @class */ (function () {
             if (!self.hasPendingChanges() || self.getFirebaseDatabase() === undefined) {
                 if (self.__bindingsObserver) {
                     self.__editedObservableObservers.forEach(function (callback) {
-                        if (next[callback.property] !== undefined && callback.first === undefined) {
-                            callback.callback(next[callback.property]);
-                            callback.first = true;
+                        if (next[callback.property] !== undefined) {
+                            var /** @type {?} */ lastValue = null;
+                            try {
+                                lastValue = objectHash.sha1(next[callback.property]);
+                            }
+                            catch (/** @type {?} */ e) {
+                                lastValue = next[callback.property];
+                            }
+                            if (lastValue !== callback.lastValue) {
+                                callback.callback(next[callback.property]);
+                                callback.lastValue = lastValue;
+                            }
                         }
                     });
                     Object.keys(self.__bindingsObserver).forEach(function (property) {
-                        if (!self.hasChanges(property) || self.__forceUpdateProperty[property] !== undefined) {
-                            if (next[property] !== undefined) {
-                                self.executeConditionValidatorCircular(property);
-                                self.__bindingsObserver[property].next(next[property]);
-                            }
+                        if (next[property] !== undefined) {
+                            self.executeConditionValidatorCircular(property);
+                            self.__bindingsObserver[property].next(next[property]);
                         }
                     });
                 }
@@ -140,31 +146,6 @@ var PersistableModel = /** @class */ (function () {
      */
     function (http) {
         this.__httpClient = http;
-        return this;
-    };
-    /**
-     * update property
-     * @param {?} property
-     * @param {?} value
-     * @return {?}
-     */
-    PersistableModel.prototype.update = /**
-     * update property
-     * @param {?} property
-     * @param {?} value
-     * @return {?}
-     */
-    function (property, value) {
-        var /** @type {?} */ observer = this.setProperty(property, value).setHasNoChanges(property).getPropertyObserver(property);
-        if (observer) {
-            observer.next(value);
-        }
-        try {
-            delete this.__bindings[property];
-        }
-        catch (/** @type {?} */ e) {
-            // e
-        }
         return this;
     };
     /**
@@ -262,7 +243,7 @@ var PersistableModel = /** @class */ (function () {
             }
             else {
                 self.loaded().then(function (model) {
-                    self.getPersistenceManager().trigger(model, observer, {
+                    model.getPersistenceManager().trigger(model, observer, {
                         name: 'custom',
                         data: {
                             name: action
@@ -343,6 +324,7 @@ var PersistableModel = /** @class */ (function () {
             }
         }, function () {
             if (observer) {
+                observer.next();
                 observer.complete();
             }
         });
@@ -367,29 +349,22 @@ var PersistableModel = /** @class */ (function () {
         });
         return new rxjs.Observable(function (observer) {
             self.setHasPendingChanges(true, action);
-            if (self.__persistenceManager) {
-                self.__persistenceManager.save(self, observer, action).then(function (success) {
-                    self.__edited = {};
-                    if (action) {
-                        if (self.isOnline()) {
-                            observer.next(self.getMessage('submitted'));
-                        }
-                        else {
-                            observer.next(self.getMessage('submittedInBackground'));
-                        }
-                    }
-                    else {
+            self.loaded().then(function (model) {
+                if (model.__persistenceManager) {
+                    observer.next({ message: model.getMessage('submitted'), target: model });
+                    model.__persistenceManager.save(self, observer, action).then(function (success) {
+                        model.__edited = {};
                         observer.complete();
-                    }
-                }).catch(function (error) {
-                    self.__edited = {};
-                    observer.error(error);
-                });
-            }
-            else {
-                observer.error('No persistence Manger provided');
-                self.__edited = {};
-            }
+                    }).catch(function (error) {
+                        model.__edited = {};
+                        observer.error(error);
+                    });
+                }
+                else {
+                    observer.error('No persistence Manger provided');
+                    model.__edited = {};
+                }
+            });
         });
     };
     /**
@@ -403,7 +378,7 @@ var PersistableModel = /** @class */ (function () {
     function () {
         var /** @type {?} */ self = this;
         Object.keys(self.getProperties()).forEach(function (property) {
-            self.transformTypeFromMetadata(property, '');
+            self[property] = self.transformTypeFromMetadata(property, '');
         });
         self.__edited = {};
         return this;
@@ -576,7 +551,12 @@ var PersistableModel = /** @class */ (function () {
             path = path + '/' + segment;
             i++;
         });
-        return this.__firebaseDatabaseRoot + '/' + this.getFirebaseDatabasePath().substr(this.__firebaseDatabaseRoot.length + 1).split("/")[0] + '/' + this.getFirebaseDatabasePath().substr(this.__firebaseDatabaseRoot.length + 1).split("/")[1] + path.substr(1);
+        if (this.getFirebaseDatabasePath() !== undefined) {
+            return this.__firebaseDatabaseRoot + '/' + this.getFirebaseDatabasePath().substr(this.__firebaseDatabaseRoot.length + 1).split("/")[0] + '/' + this.getFirebaseDatabasePath().substr(this.__firebaseDatabaseRoot.length + 1).split("/")[1] + path.substr(1);
+        }
+        else {
+            return null;
+        }
     };
     /**
      * set firebaseDatabaseObject
@@ -723,8 +703,17 @@ var PersistableModel = /** @class */ (function () {
         }
         self.__editedObservableObservers.forEach(function (callback) {
             if (callback.property == property && _this[property] !== value) {
-                callback.callback(value);
-                callback.first = true;
+                var /** @type {?} */ lastValue = null;
+                try {
+                    lastValue = objectHash.sha1(value);
+                }
+                catch (/** @type {?} */ e) {
+                    lastValue = value;
+                }
+                if (lastValue !== callback.lastValue) {
+                    callback.callback(value);
+                    callback.lastValue = lastValue;
+                }
             }
         });
         this[property] = value;
@@ -973,7 +962,7 @@ var PersistableModel = /** @class */ (function () {
                     afterRemovedValue.push(m);
                 }
             });
-            this.transformTypeFromMetadata(property, afterRemovedValue);
+            this[property] = this.transformTypeFromMetadata(property, afterRemovedValue);
         }
         return this;
     };
@@ -989,7 +978,7 @@ var PersistableModel = /** @class */ (function () {
      */
     function (property) {
         if (this.getMetadataValue(property, 'isList')) {
-            this.transformTypeFromMetadata(property, []);
+            this[property] = this.transformTypeFromMetadata(property, []);
         }
         return this;
     };
@@ -1171,52 +1160,6 @@ var PersistableModel = /** @class */ (function () {
         }
     };
     /**
-     * remove changes state
-     * @param {?=} property
-     * @return {?}
-     */
-    PersistableModel.prototype.setHasNoChanges = /**
-     * remove changes state
-     * @param {?=} property
-     * @return {?}
-     */
-    function (property) {
-        if (property) {
-            this.__forceUpdateProperty[property] = true;
-            if (this.__edited[property]) {
-                try {
-                    delete this.__edited[property];
-                }
-                catch (/** @type {?} */ e) {
-                    //
-                }
-            }
-        }
-        else {
-            this.__edited = {};
-        }
-        return this;
-    };
-    /**
-     * import dynamic properties
-     * @param {?} propertiesAsObject
-     * @return {?}
-     */
-    PersistableModel.prototype.importDynamicProperties = /**
-     * import dynamic properties
-     * @param {?} propertiesAsObject
-     * @return {?}
-     */
-    function (propertiesAsObject) {
-        var /** @type {?} */ self = this;
-        return new Promise(function (resolve, reject) {
-            Object.keys(propertiesAsObject).forEach(function (property) {
-                self.transformTypeFromMetadata(property, propertiesAsObject[property]);
-            });
-            resolve(self);
-        });
-    };
-    /**
      * load json data
      * @param {?} json
      * @param {?=} clone boolean
@@ -1230,31 +1173,35 @@ var PersistableModel = /** @class */ (function () {
      */
     function (json, clone) {
         var /** @type {?} */ self = this;
-        json = json == null ? {} : typeof json == 'string' ? JSON.parse(json) : json;
+        json = typeof json == 'string' ? JSON.parse(json) : json;
         var /** @type {?} */ model = /** @type {?} */ (classTransformer.plainToClass(/** @type {?} */ (this.constructor), json, { excludePrefixes: ["__"] }));
         return new Promise(function (resolve, reject) {
             if (model) {
-                if (clone == undefined || clone == false) {
-                    var /** @type {?} */ propertiesWithValidationError_1 = {};
-                    model.validate().then(function (success) {
-                    }).catch(function (error) {
-                        Object.keys(error).forEach(function (e) {
-                            propertiesWithValidationError_1[e.property] = true;
-                        });
-                    });
-                    // all properties without validation error
+                if (clone == true || json == null) {
+                    resolve(model);
+                }
+                else {
                     Object.keys(json).forEach(function (property) {
-                        if (property.substr(0, 2) !== '__' && propertiesWithValidationError_1[property] === undefined) {
-                            if (Object.keys(self).indexOf(property) >= 0) {
-                                self.transformTypeFromMetadata(property, model[property]);
-                                if (model.isInBackendMode()) {
-                                    self.__edited[property] = self[property];
+                        if (property.substr(0, 2) !== '__' || property.substr(0, 5) == 'tmp__') {
+                            if (Object.keys(self).indexOf(property) >= 0 && (self.__edited[property] === undefined || self.__edited[property] === null)) {
+                                self.setProperty(property, self.transformTypeFromMetadata(property, model[property]));
+                                if (self.isInBackendMode()) {
+                                    self.__edited[property] = model[property];
+                                    self[property] = model[property];
                                 }
                             }
                         }
                     });
+                    self.validate().then(function (success) {
+                        model.emit();
+                        resolve(self);
+                    }).catch(function (error) {
+                        Object.keys(error).forEach(function (e) {
+                            self['__validationErrors'][e.property] = true;
+                        });
+                        resolve(self);
+                    });
                 }
-                resolve(self);
             }
             else {
                 resolve(self);
@@ -1274,7 +1221,7 @@ var PersistableModel = /** @class */ (function () {
      * @return {?}
      */
     function (property, value) {
-        return this.setProperty(property, this.transformTypeFromMetadataExecute(property, value));
+        return this.transformTypeFromMetadataExecute(property, value);
     };
     /**
      * transform type from metadata to avoid non matching data types
@@ -1341,30 +1288,38 @@ var PersistableModel = /** @class */ (function () {
                                         });
                                     });
                                 }
-                                valueAsObjects_1.push(item.transformAllProperties());
+                                //valueAsObjects.push(item.transformAllProperties());
+                                //valueAsObjects.push(item.transformAllProperties());
+                                valueAsObjects_1.push(item);
                                 item.refreshAllListArrays();
                             });
                             item.setParent(self);
                         }
                     }
                     else {
-                        valueAsObjects_1.push(itemOriginal.transformAllProperties());
+                        //valueAsObjects.push(itemOriginal.transformAllProperties());
+                        //valueAsObjects.push(itemOriginal.transformAllProperties());
+                        valueAsObjects_1.push(itemOriginal);
                     }
                 });
             }
             this.refreshListArray(property);
             return valueAsObjects_1;
         }
-        if (this.getMetadata(property, 'isSelect').length) {
-            var /** @type {?} */ values = typeof value == 'object' ? value : [];
-            var /** @type {?} */ realValues_1 = [];
-            if (values && values.length) {
-                values.forEach(function (val) {
-                    realValues_1.push(self.getHashedValue(val));
-                });
-            }
-            return realValues_1;
-        }
+        // if (this.getMetadata(property, 'isSelect').length) {
+        //
+        //     let values = typeof value == 'object' ? value : [];
+        //     let realValues = [];
+        //
+        //     if (values && values.length) {
+        //         values.forEach((val) => {
+        //             realValues.push(self.getHashedValue(val));
+        //         });
+        //     }
+        //
+        //     return realValues;
+        //
+        // }
         return value;
     };
     /**
@@ -1378,7 +1333,7 @@ var PersistableModel = /** @class */ (function () {
     function () {
         var /** @type {?} */ self = this;
         self.getPropertiesKeys().forEach(function (property) {
-            self.transformTypeFromMetadata(property, self[property]);
+            self[property] = self.transformTypeFromMetadata(property, self[property]);
         });
         return this;
     };
@@ -1397,7 +1352,7 @@ var PersistableModel = /** @class */ (function () {
         var /** @type {?} */ self = this;
         self.getPropertiesKeys().forEach(function (property) {
             if (_this.getMetadata(property, type).length) {
-                self.transformTypeFromMetadata(property, self[property]);
+                self[property] = self.transformTypeFromMetadata(property, self[property]);
             }
         });
         return this;
@@ -2098,11 +2053,15 @@ var PersistableModel = /** @class */ (function () {
      * @return {?}
      */
     function (property, callback) {
-        this.__editedObservableObservers.push({ callback: callback, property: property });
-        callback(this.getPropertyValue(property));
-        this.loaded().then(function (model) {
-            callback(model.getPropertyValue(property));
-        });
+        var /** @type {?} */ lastValue = null;
+        try {
+            lastValue = objectHash.sha1(this[property]);
+        }
+        catch (/** @type {?} */ e) {
+            lastValue = this[property];
+        }
+        this.__editedObservableObservers.push({ callback: callback, property: property, lastValue: lastValue });
+        callback(this[property]);
         return this;
     };
     /**
@@ -2213,7 +2172,9 @@ var PersistableModel = /** @class */ (function () {
                 }
             });
         }
-        Object.defineProperties(this.__listArrays[property], properties);
+        if (Object.keys(properties).length && this.__listArrays[property]) {
+            Object.defineProperties(this.__listArrays[property], properties);
+        }
         return this;
     };
     /**
@@ -2395,6 +2356,7 @@ function HasConditions(options, actionIfMatches, validationOptions) {
                         options.forEach(function (condition) {
                             if (condition.additionalData.propertyNestedAsNestedObject !== undefined) {
                                 valueNested = JSON.parse(JSON.stringify(args.object.__conditionContraintsPropertiesValue[condition.property]));
+                                //
                                 // if ((valueNested && valueNested.length !== undefined && valueNested.length === 0)) {
                                 //     state = false;
                                 //     return state;
@@ -2891,6 +2853,7 @@ function IsSelect(options) {
                         optionValidator.getOptions().then(function (options) {
                             if (options.length == 0) {
                                 resolve(true);
+                                return true;
                             }
                             var /** @type {?} */ allValide = true;
                             var /** @type {?} */ values = {};
