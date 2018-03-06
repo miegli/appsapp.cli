@@ -341,7 +341,7 @@ gulp.task('watch', function () {
 gulp.task('clean', ['clean:dist', 'clean:tmp', 'clean:build']);
 gulp.task('build', ['clean', 'compile']);
 gulp.task('build:once', ['compile']);
-gulp.task('default', ['build:watch']);
+gulp.task('default', ['watch']);
 gulp.task('test', ['version:manifest']);
 
 

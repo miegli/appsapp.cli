@@ -63,6 +63,7 @@ export declare class PersistableModel {
     private __persistenceManager;
     private __isOnline;
     private __validationErrors;
+    private __loadedProperty;
     private __metadata;
     private __metadataCache;
     private _hasPendingChanges;
@@ -482,6 +483,11 @@ export declare class PersistableModel {
      */
     private setIsLoadedPromise(promise);
     /**
+     * get is loaded promise
+     * @returns {Promise<any>}
+     */
+    private getIsLoadedPromise();
+    /**
      * Is loaded promise
      * @returns {Promise}
      */
@@ -518,11 +524,12 @@ export declare class PersistableModel {
     setHashedValue(value: any): any;
     /**
      * creates new lazy loaded persistable model
+     * @param appsAppModuleProvider
      * @param constructor
      * @param uuid
      * @param data
      */
-    private createNewLazyLoadedPersistableModel(constructor, uuid?, data?);
+    private createNewLazyLoadedPersistableModel(appsAppModuleProvider, constructor, uuid?, data?);
     /**
      * set appsAppModuleProvider
      * @param appsAppModuleProvider
@@ -583,6 +590,12 @@ export declare class PersistableModel {
      * @returns {boolean}
      */
     isValid(): boolean;
+    /**
+     * get property with optional identifier for list elements
+     * @param property
+     * @param identifier
+     */
+    get(property: any, identifier?: any): any;
     /**
      * create list array
      * @param property

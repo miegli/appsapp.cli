@@ -82,6 +82,7 @@ export class PersistableModel {
     private __persistenceManager: any;
     private __isOnline: boolean = true;
     private __validationErrors: any = {};
+    private __loadedProperty: any = {};
     private __metadata = [];
     private __metadataCache = {};
     private _hasPendingChanges: boolean = false;
@@ -119,10 +120,20 @@ export class PersistableModel {
             }
         });
 
-        console.log(this.constructor.name);
 
-        this.transformAllProperties();
-        this.__init();
+        /**
+         * create observerable and observer for handling the models data changes
+         */
+        this.__editedObservable = new Observable<any>((observer: Observer<any>) => {
+            self.__editedObserver = observer;
+        });
+
+
+        this.loaded().then(() => {
+            self.transformAllProperties();
+            self.__init();
+        })
+
 
     }
 
@@ -135,13 +146,6 @@ export class PersistableModel {
 
         let self = this;
 
-
-        /**
-         * create observerable and observer for handling the models data changes
-         */
-        this.__editedObservable = new Observable<any>((observer: Observer<any>) => {
-            self.__editedObserver = observer;
-        });
 
         /**
          * create observerable and observer for handling the models data changes
@@ -177,10 +181,10 @@ export class PersistableModel {
                     });
 
                     Object.keys(self.__bindingsObserver).forEach((property) => {
-                            if (next[property] !== undefined) {
-                                self.executeConditionValidatorCircular(property);
-                                self.__bindingsObserver[property].next(next[property]);
-                            }
+                        if (next[property] !== undefined) {
+                            self.executeConditionValidatorCircular(property);
+                            self.__bindingsObserver[property].next(next[property]);
+                        }
                     });
 
                 }
@@ -308,16 +312,8 @@ export class PersistableModel {
 
         return new Observable<any>((observer: Observer<any>) => {
 
-
-            if (self.__isLoaded) {
-                self.getPersistenceManager().trigger(self, observer, {
-                    name: 'custom',
-                    data: {
-                        name: action
-                    }
-                }, interval, maxExecutions);
-            } else {
-                self.loaded().then((model) => {
+            self.loaded().then((model) => {
+                model.loaded().then((model) => {
                     model.getPersistenceManager().trigger(model, observer, {
                         name: 'custom',
                         data: {
@@ -325,8 +321,8 @@ export class PersistableModel {
                         }
                     }, interval, maxExecutions);
                 });
-            }
 
+            });
 
         });
 
@@ -346,9 +342,8 @@ export class PersistableModel {
 
         return new Observable<any>((observer: Observer<any>) => {
 
-
-            if (self.__isLoaded) {
-                self.getPersistenceManager().trigger(self, observer, {
+            self.loaded().then((model) => {
+                model.getPersistenceManager().trigger(model, observer, {
                     name: 'webhook',
                     data: {
                         url: url,
@@ -356,19 +351,7 @@ export class PersistableModel {
                         type: type
                     }
                 });
-            } else {
-                self.loaded().then((model) => {
-                    self.getPersistenceManager().trigger(model, observer, {
-                        name: 'webhook',
-                        data: {
-                            url: url,
-                            method: method,
-                            type: type
-                        }
-                    });
-                });
-            }
-
+            });
 
         });
 
@@ -382,38 +365,42 @@ export class PersistableModel {
      */
     public save(action?: actionEmail | actionWebhook | actionGoogleSheets | actionCustom | string) {
 
-        let self = this, observer = null;
+        let self = this;
 
 
-        if (typeof action === 'string') {
-            action = {
-                name: 'custom',
-                data: {
-                    name: action
+        return new Observable<any>((observer: Observer<any>) => {
+
+
+            if (typeof action === 'string') {
+                action = {
+                    name: 'custom',
+                    data: {
+                        name: action
+                    }
                 }
             }
-        }
 
 
+            self.loaded().then((model) => {
 
-        self.executeSave(action).subscribe((next) => {
-            if (observer) {
-                observer.next(next);
-            }
-        }, (error) => {
-            if (observer) {
-                observer.error(error);
-            }
-        }, () => {
-            if (observer) {
-                observer.next();
-                observer.complete();
-            }
-        });
+                model.executeSave(action).subscribe((next) => {
+                    if (observer) {
+                        observer.next(next);
+                    }
+                }, (error) => {
+                    if (observer) {
+                        observer.error(error);
+                    }
+                }, () => {
+                    if (observer) {
+                        observer.next(model);
+                        observer.complete();
+                    }
+                });
+
+            });
 
 
-        return new Observable<any>((o: Observer<any>) => {
-            observer = o;
         });
 
 
@@ -440,7 +427,6 @@ export class PersistableModel {
             self.setHasPendingChanges(true, action);
 
 
-            
             self.loaded().then((model) => {
 
                 if (model.__persistenceManager) {
@@ -458,8 +444,6 @@ export class PersistableModel {
                     model.__edited = {};
                 }
             });
-
-
 
 
         });
@@ -640,7 +624,6 @@ export class PersistableModel {
         }
 
 
-
     }
 
 
@@ -771,6 +754,7 @@ export class PersistableModel {
         var self = this, autosave = false;
 
         if (this.__isAutosave && this[property] !== value) {
+
             autosave = true;
         }
 
@@ -802,7 +786,13 @@ export class PersistableModel {
         this.executeChangesWithCallback(event);
 
         if (autosave && this.__isLoaded) {
-            this.save(null);
+            this.save(null).subscribe((next) => {
+                //
+            }, (error) => {
+                //
+            }, () => {
+                //
+            });
         }
 
         return this;
@@ -818,7 +808,7 @@ export class PersistableModel {
     public getPropertyValue(property, editing?) {
 
         if (editing) {
-            return this.__edited[property] ? this.__edited[property] : this[property];
+            return this.__edited[property] !== undefined ? this.__edited[property] : this[property];
         } else {
             return this[property];
         }
@@ -962,7 +952,7 @@ export class PersistableModel {
 
                 } else {
 
-                    n = self.createNewLazyLoadedPersistableModel(self.getMetadataValue(property, 'isList'), uuid, d);
+                    n = self.createNewLazyLoadedPersistableModel(self.getAppsAppModuleProvider(), self.getMetadataValue(property, 'isList'), uuid, d);
 
                     var usePropertyAsUuid = self.getMetadataValue(property, 'isList', null, 'usePropertyAsUuid');
                     if (usePropertyAsUuid) {
@@ -1284,7 +1274,6 @@ export class PersistableModel {
     }
 
 
-
     /**
      * load json data
      * @param {object|string} stringified or real json object
@@ -1309,9 +1298,10 @@ export class PersistableModel {
 
 
                     Object.keys(json).forEach((property) => {
-                        if (property.substr(0, 2) !== '__' || property.substr(0, 5) == 'tmp__' ) {
+                        if (property.substr(0, 2) !== '__' || property.substr(0, 5) == 'tmp__') {
                             if (Object.keys(self).indexOf(property) >= 0 && (self.__edited[property] === undefined || self.__edited[property] === null)) {
-                                self.setProperty(property,self.transformTypeFromMetadata(property, model[property]));
+                                self.setProperty(property, self.transformTypeFromMetadata(property, model[property]));
+                                //self.setProperty(property, model[property]);
                                 if (self.isInBackendMode()) {
                                     self.__edited[property] = model[property];
                                     self[property] = model[property];
@@ -1406,7 +1396,7 @@ export class PersistableModel {
                         let uuid = itemOriginal[self.getMetadataValue(property, 'isList', null, 'usePropertyAsUuid')];
                         let item = null;
                         if (!self.isInBackendMode() && self.getAppsAppModuleProvider()) {
-                            item = self.createNewLazyLoadedPersistableModel(self.getMetadataValue(property, 'isList'), uuid);
+                            item = self.createNewLazyLoadedPersistableModel(self.getAppsAppModuleProvider(), self.getMetadataValue(property, 'isList'), uuid);
                         } else {
                             // backend mode
                             var constructor = self.getMetadataValue(property, 'isList');
@@ -1421,15 +1411,25 @@ export class PersistableModel {
                             item.loadJson(itemOriginal).then((item) => {
 
                                 if (!item.isInBackendMode()) {
-                                    item.loaded().then((m) => {
-                                        item.getChangesObserverable().subscribe((next) => {
-                                            if (next.model.getParent()) {
-                                                next.model.getParent().setProperty(property, self.getPropertyValue(property, true));
-                                            }
 
-                                        })
+                                    item.getChangesObserverable().subscribe((next) => {
+                                        if (next.model.getParent()) {
+                                            next.model.getParent().setProperty(property, self.getPropertyValue(property, true));
+                                        }
                                     });
+
+                                    // TOdO refactore
+
+                                    //     item.loaded().then((m) => {
+                                    //         item.getChangesObserverable().subscribe((next) => {
+                                    //             if (next.model.getParent()) {
+                                    //                 next.model.getParent().setProperty(property, self.getPropertyValue(property, true));
+                                    //             }
+                                    //
+                                    //         })
+                                    //     });
                                 }
+
                                 //valueAsObjects.push(item.transformAllProperties());
                                 valueAsObjects.push(item);
                                 item.refreshAllListArrays();
@@ -1442,7 +1442,6 @@ export class PersistableModel {
                         }
 
                     } else {
-                        //valueAsObjects.push(itemOriginal.transformAllProperties());
                         valueAsObjects.push(itemOriginal);
                     }
                 });
@@ -2046,7 +2045,6 @@ export class PersistableModel {
 
         let self = this;
 
-
         this.__isLoadedPromise = promise;
 
         this.__isLoadedPromise.then(() => {
@@ -2062,26 +2060,49 @@ export class PersistableModel {
     }
 
     /**
+     * get is loaded promise
+     * @returns {Promise<any>}
+     */
+    private getIsLoadedPromise() {
+
+        return this.__isLoadedPromise;
+
+    }
+
+    /**
      * Is loaded promise
      * @returns {Promise}
      */
     public loaded() {
 
         let self = this;
-        if (this.__isLoadedPromise == undefined) {
-            if (this.__isLoadedPromiseInternal === undefined) {
-                this.__isLoadedPromiseInternal = new Promise(function (resolve, reject) {
-                    self.__isLoadedPromiseInternalResolver = resolve;
-                    if (self.__isLoaded) {
-                        resolve(self);
-                    }
-                });
-            }
-            return this.__isLoadedPromiseInternal;
-        } else {
-            return this.__isLoadedPromise;
-        }
 
+
+        if (self.__isLoaded) {
+            return new Promise(function (resolve, reject) {
+                resolve(self);
+            });
+        } else {
+
+            if (this.getAppsAppModuleProvider() !== undefined && this.__isLoadedPromise == undefined) {
+                self.getAppsAppModuleProvider().lazyLoad(self);
+            }
+
+            if (this.__isLoadedPromise == undefined) {
+                if (this.__isLoadedPromiseInternal === undefined) {
+                    this.__isLoadedPromiseInternal = new Promise(function (resolve, reject) {
+                        self.__isLoadedPromiseInternalResolver = resolve;
+                        if (self.__isLoaded) {
+                            resolve(self);
+                        }
+                    });
+                }
+                return this.__isLoadedPromiseInternal;
+            } else {
+                return this.__isLoadedPromise;
+            }
+
+        }
 
     }
 
@@ -2161,11 +2182,13 @@ export class PersistableModel {
 
     /**
      * creates new lazy loaded persistable model
+     * @param appsAppModuleProvider
      * @param constructor
      * @param uuid
      * @param data
      */
-    private createNewLazyLoadedPersistableModel(constructor, uuid?, data?) {
+    private createNewLazyLoadedPersistableModel(appsAppModuleProvider, constructor, uuid?, data?) {
+
 
         let o = new constructor();
 
@@ -2177,11 +2200,12 @@ export class PersistableModel {
             o.loadJson(data);
         }
 
+        o.setAppsAppModuleProvider(appsAppModuleProvider);
+
         return o;
 
 
     }
-
 
 
     /**
@@ -2255,13 +2279,13 @@ export class PersistableModel {
 
         var lastValue = null;
         try {
-            lastValue = objectHash.sha1(this[property])
+            lastValue = objectHash.sha1(this[property]);
         } catch (e) {
             lastValue = this[property];
         }
 
+        callback(this.get(property));
         this.__editedObservableObservers.push({callback: callback, property: property, lastValue: lastValue});
-        callback(this[property]);
 
         return this;
 
@@ -2302,6 +2326,27 @@ export class PersistableModel {
         return Object.keys(this.__validationErrors).length ? false : true;
 
     }
+
+    /**
+     * get property with optional identifier for list elements
+     * @param property
+     * @param identifier
+     */
+    public get(property, identifier?) {
+
+        if (this.__loadedProperty[property] === undefined) {
+            this.__loadedProperty[property] = this.getPropertyValue(property);
+            this.transformTypeFromMetadata(property, this[property]);
+        }
+
+        if (identifier !== undefined && this.__loadedProperty[property][identifier] !== undefined) {
+            return this.__loadedProperty[property][identifier];
+        }
+
+        return this.getPropertyValue(property);
+
+    }
+
 
     /**
      * create list array

@@ -44,6 +44,7 @@ var PersistableModel = /** @class */ (function () {
         this.__temp = {};
         this.__isOnline = true;
         this.__validationErrors = {};
+        this.__loadedProperty = {};
         this.__metadata = [];
         this.__metadataCache = {};
         this._hasPendingChanges = false;
@@ -59,6 +60,7 @@ var PersistableModel = /** @class */ (function () {
         this.__propertySymbols = {};
         this.__listArrays = {};
         this.__isPersistableModel = true;
+        var /** @type {?} */ self = this;
         this.__metadata = classValidator.getFromContainer(classValidator.MetadataStorage).getTargetValidationMetadatas(this.constructor, '');
         // check if all loaded metadata has corresponding properties
         this.__metadata.forEach(function (metadata) {
@@ -66,9 +68,16 @@ var PersistableModel = /** @class */ (function () {
                 _this[metadata.propertyName] = null;
             }
         });
-        console.log(this.constructor.name);
-        this.transformAllProperties();
-        this.__init();
+        /**
+                 * create observerable and observer for handling the models data changes
+                 */
+        this.__editedObservable = new rxjs.Observable(function (observer) {
+            self.__editedObserver = observer;
+        });
+        this.loaded().then(function () {
+            self.transformAllProperties();
+            self.__init();
+        });
     }
     /**
      *
@@ -81,12 +90,6 @@ var PersistableModel = /** @class */ (function () {
     function () {
         var _this = this;
         var /** @type {?} */ self = this;
-        /**
-                 * create observerable and observer for handling the models data changes
-                 */
-        this.__editedObservable = new rxjs.Observable(function (observer) {
-            self.__editedObserver = observer;
-        });
         /**
                  * create observerable and observer for handling the models data changes
                  */
@@ -235,16 +238,8 @@ var PersistableModel = /** @class */ (function () {
     function (action, interval, maxExecutions) {
         var /** @type {?} */ self = this;
         return new rxjs.Observable(function (observer) {
-            if (self.__isLoaded) {
-                self.getPersistenceManager().trigger(self, observer, {
-                    name: 'custom',
-                    data: {
-                        name: action
-                    }
-                }, interval, maxExecutions);
-            }
-            else {
-                self.loaded().then(function (model) {
+            self.loaded().then(function (model) {
+                model.loaded().then(function (model) {
                     model.getPersistenceManager().trigger(model, observer, {
                         name: 'custom',
                         data: {
@@ -252,7 +247,7 @@ var PersistableModel = /** @class */ (function () {
                         }
                     }, interval, maxExecutions);
                 });
-            }
+            });
         });
     };
     /**
@@ -272,8 +267,8 @@ var PersistableModel = /** @class */ (function () {
     function (url, method, type) {
         var /** @type {?} */ self = this;
         return new rxjs.Observable(function (observer) {
-            if (self.__isLoaded) {
-                self.getPersistenceManager().trigger(self, observer, {
+            self.loaded().then(function (model) {
+                model.getPersistenceManager().trigger(model, observer, {
                     name: 'webhook',
                     data: {
                         url: url,
@@ -281,19 +276,7 @@ var PersistableModel = /** @class */ (function () {
                         type: type
                     }
                 });
-            }
-            else {
-                self.loaded().then(function (model) {
-                    self.getPersistenceManager().trigger(model, observer, {
-                        name: 'webhook',
-                        data: {
-                            url: url,
-                            method: method,
-                            type: type
-                        }
-                    });
-                });
-            }
+            });
         });
     };
     /**
@@ -307,31 +290,32 @@ var PersistableModel = /** @class */ (function () {
      * @return {?}
      */
     function (action) {
-        var /** @type {?} */ self = this, /** @type {?} */ observer = null;
-        if (typeof action === 'string') {
-            action = {
-                name: 'custom',
-                data: {
-                    name: action
-                }
-            };
-        }
-        self.executeSave(action).subscribe(function (next) {
-            if (observer) {
-                observer.next(next);
+        var /** @type {?} */ self = this;
+        return new rxjs.Observable(function (observer) {
+            if (typeof action === 'string') {
+                action = {
+                    name: 'custom',
+                    data: {
+                        name: action
+                    }
+                };
             }
-        }, function (error) {
-            if (observer) {
-                observer.error(error);
-            }
-        }, function () {
-            if (observer) {
-                observer.next();
-                observer.complete();
-            }
-        });
-        return new rxjs.Observable(function (o) {
-            observer = o;
+            self.loaded().then(function (model) {
+                model.executeSave(action).subscribe(function (next) {
+                    if (observer) {
+                        observer.next(next);
+                    }
+                }, function (error) {
+                    if (observer) {
+                        observer.error(error);
+                    }
+                }, function () {
+                    if (observer) {
+                        observer.next(model);
+                        observer.complete();
+                    }
+                });
+            });
         });
     };
     /**
@@ -727,7 +711,13 @@ var PersistableModel = /** @class */ (function () {
         this.executeConditionValidatorCircular(property);
         this.executeChangesWithCallback(event);
         if (autosave && this.__isLoaded) {
-            this.save(null);
+            this.save(null).subscribe(function (next) {
+                //
+            }, function (error) {
+                //
+            }, function () {
+                //
+            });
         }
         return this;
     };
@@ -745,7 +735,7 @@ var PersistableModel = /** @class */ (function () {
      */
     function (property, editing) {
         if (editing) {
-            return this.__edited[property] ? this.__edited[property] : this[property];
+            return this.__edited[property] !== undefined ? this.__edited[property] : this[property];
         }
         else {
             return this[property];
@@ -882,7 +872,7 @@ var PersistableModel = /** @class */ (function () {
                     }
                 }
                 else {
-                    n = self.createNewLazyLoadedPersistableModel(self.getMetadataValue(property, 'isList'), uuid, d);
+                    n = self.createNewLazyLoadedPersistableModel(self.getAppsAppModuleProvider(), self.getMetadataValue(property, 'isList'), uuid, d);
                     var /** @type {?} */ usePropertyAsUuid = self.getMetadataValue(property, 'isList', null, 'usePropertyAsUuid');
                     if (usePropertyAsUuid) {
                         n.watch(usePropertyAsUuid, function (uuid) {
@@ -1186,6 +1176,7 @@ var PersistableModel = /** @class */ (function () {
                         if (property.substr(0, 2) !== '__' || property.substr(0, 5) == 'tmp__') {
                             if (Object.keys(self).indexOf(property) >= 0 && (self.__edited[property] === undefined || self.__edited[property] === null)) {
                                 self.setProperty(property, self.transformTypeFromMetadata(property, model[property]));
+                                //self.setProperty(property, model[property]);
                                 if (self.isInBackendMode()) {
                                     self.__edited[property] = model[property];
                                     self[property] = model[property];
@@ -1268,7 +1259,7 @@ var PersistableModel = /** @class */ (function () {
                         var /** @type {?} */ uuid = itemOriginal[self.getMetadataValue(property, 'isList', null, 'usePropertyAsUuid')];
                         var /** @type {?} */ item = null;
                         if (!self.isInBackendMode() && self.getAppsAppModuleProvider()) {
-                            item = self.createNewLazyLoadedPersistableModel(self.getMetadataValue(property, 'isList'), uuid);
+                            item = self.createNewLazyLoadedPersistableModel(self.getAppsAppModuleProvider(), self.getMetadataValue(property, 'isList'), uuid);
                         }
                         else {
                             // backend mode
@@ -1281,13 +1272,20 @@ var PersistableModel = /** @class */ (function () {
                         if (item !== undefined) {
                             item.loadJson(itemOriginal).then(function (item) {
                                 if (!item.isInBackendMode()) {
-                                    item.loaded().then(function (m) {
-                                        item.getChangesObserverable().subscribe(function (next) {
-                                            if (next.model.getParent()) {
-                                                next.model.getParent().setProperty(property, self.getPropertyValue(property, true));
-                                            }
-                                        });
+                                    item.getChangesObserverable().subscribe(function (next) {
+                                        if (next.model.getParent()) {
+                                            next.model.getParent().setProperty(property, self.getPropertyValue(property, true));
+                                        }
                                     });
+                                    // TOdO refactore
+                                    //     item.loaded().then((m) => {
+                                    //         item.getChangesObserverable().subscribe((next) => {
+                                    //             if (next.model.getParent()) {
+                                    //                 next.model.getParent().setProperty(property, self.getPropertyValue(property, true));
+                                    //             }
+                                    //
+                                    //         })
+                                    //     });
                                 }
                                 //valueAsObjects.push(item.transformAllProperties());
                                 //valueAsObjects.push(item.transformAllProperties());
@@ -1298,8 +1296,6 @@ var PersistableModel = /** @class */ (function () {
                         }
                     }
                     else {
-                        //valueAsObjects.push(itemOriginal.transformAllProperties());
-                        //valueAsObjects.push(itemOriginal.transformAllProperties());
                         valueAsObjects_1.push(itemOriginal);
                     }
                 });
@@ -1852,6 +1848,17 @@ var PersistableModel = /** @class */ (function () {
         return this;
     };
     /**
+     * get is loaded promise
+     * @return {?}
+     */
+    PersistableModel.prototype.getIsLoadedPromise = /**
+     * get is loaded promise
+     * @return {?}
+     */
+    function () {
+        return this.__isLoadedPromise;
+    };
+    /**
      * Is loaded promise
      * @return {?}
      */
@@ -1861,19 +1868,29 @@ var PersistableModel = /** @class */ (function () {
      */
     function () {
         var /** @type {?} */ self = this;
-        if (this.__isLoadedPromise == undefined) {
-            if (this.__isLoadedPromiseInternal === undefined) {
-                this.__isLoadedPromiseInternal = new Promise(function (resolve, reject) {
-                    self.__isLoadedPromiseInternalResolver = resolve;
-                    if (self.__isLoaded) {
-                        resolve(self);
-                    }
-                });
-            }
-            return this.__isLoadedPromiseInternal;
+        if (self.__isLoaded) {
+            return new Promise(function (resolve, reject) {
+                resolve(self);
+            });
         }
         else {
-            return this.__isLoadedPromise;
+            if (this.getAppsAppModuleProvider() !== undefined && this.__isLoadedPromise == undefined) {
+                self.getAppsAppModuleProvider().lazyLoad(self);
+            }
+            if (this.__isLoadedPromise == undefined) {
+                if (this.__isLoadedPromiseInternal === undefined) {
+                    this.__isLoadedPromiseInternal = new Promise(function (resolve, reject) {
+                        self.__isLoadedPromiseInternalResolver = resolve;
+                        if (self.__isLoaded) {
+                            resolve(self);
+                        }
+                    });
+                }
+                return this.__isLoadedPromiseInternal;
+            }
+            else {
+                return this.__isLoadedPromise;
+            }
         }
     };
     /**
@@ -1966,6 +1983,7 @@ var PersistableModel = /** @class */ (function () {
     };
     /**
      * creates new lazy loaded persistable model
+     * @param {?} appsAppModuleProvider
      * @param {?} constructor
      * @param {?=} uuid
      * @param {?=} data
@@ -1973,12 +1991,13 @@ var PersistableModel = /** @class */ (function () {
      */
     PersistableModel.prototype.createNewLazyLoadedPersistableModel = /**
      * creates new lazy loaded persistable model
+     * @param {?} appsAppModuleProvider
      * @param {?} constructor
      * @param {?=} uuid
      * @param {?=} data
      * @return {?}
      */
-    function (constructor, uuid, data) {
+    function (appsAppModuleProvider, constructor, uuid, data) {
         var /** @type {?} */ o = new constructor();
         if (uuid !== undefined) {
             o.setUuid(uuid);
@@ -1986,6 +2005,7 @@ var PersistableModel = /** @class */ (function () {
         if (data !== undefined) {
             o.loadJson(data);
         }
+        o.setAppsAppModuleProvider(appsAppModuleProvider);
         return o;
     };
     /**
@@ -2085,8 +2105,8 @@ var PersistableModel = /** @class */ (function () {
         catch (/** @type {?} */ e) {
             lastValue = this[property];
         }
+        callback(this.get(property));
         this.__editedObservableObservers.push({ callback: callback, property: property, lastValue: lastValue });
-        callback(this[property]);
         return this;
     };
     /**
@@ -2136,6 +2156,28 @@ var PersistableModel = /** @class */ (function () {
      */
     function () {
         return Object.keys(this.__validationErrors).length ? false : true;
+    };
+    /**
+     * get property with optional identifier for list elements
+     * @param {?} property
+     * @param {?=} identifier
+     * @return {?}
+     */
+    PersistableModel.prototype.get = /**
+     * get property with optional identifier for list elements
+     * @param {?} property
+     * @param {?=} identifier
+     * @return {?}
+     */
+    function (property, identifier) {
+        if (this.__loadedProperty[property] === undefined) {
+            this.__loadedProperty[property] = this.getPropertyValue(property);
+            this.transformTypeFromMetadata(property, this[property]);
+        }
+        if (identifier !== undefined && this.__loadedProperty[property][identifier] !== undefined) {
+            return this.__loadedProperty[property][identifier];
+        }
+        return this.getPropertyValue(property);
     };
     /**
      * create list array
