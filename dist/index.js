@@ -716,7 +716,7 @@ var PersistableModel = /** @class */ (function () {
         }
         this.executeConditionValidatorCircular(property);
         this.executeChangesWithCallback(event);
-        if (autosave && this.__isLoaded) {
+        if (autosave) {
             this.save(null).subscribe(function (next) { }, function (error) { });
         }
         return this;
