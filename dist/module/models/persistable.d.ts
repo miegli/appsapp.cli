@@ -294,9 +294,9 @@ export declare class PersistableModel {
      * @param property
      * @param data (json object, persistable model or array of those
      * @param uuid string
-     * @returns this
+     * @returns Promise<any>
      */
-    add(property: any, data?: any, uuid?: string): this;
+    add(property: any, data?: any, uuid?: string): Promise<{}>;
     /**
      * remove a new list entry
      * @param property
@@ -590,12 +590,6 @@ export declare class PersistableModel {
      * @returns {boolean}
      */
     isValid(): boolean;
-    /**
-     * get property with optional identifier for list elements
-     * @param property
-     * @param identifier
-     */
-    get(property: any, identifier?: any): any;
     /**
      * create list array
      * @param property
