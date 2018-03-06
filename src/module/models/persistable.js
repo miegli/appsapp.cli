@@ -27,6 +27,7 @@ var PersistableModel = /** @class */ (function () {
         this.__temp = {};
         this.__isOnline = true;
         this.__validationErrors = {};
+        this.__loadedProperty = {};
         this.__metadata = [];
         this.__metadataCache = {};
         this._hasPendingChanges = false;
@@ -41,6 +42,7 @@ var PersistableModel = /** @class */ (function () {
         this.tmp__hashedValues = {};
         this.__propertySymbols = {};
         this.__listArrays = {};
+        this.__isPersistableModel = true;
         var self = this;
         this.__metadata = class_validator_2.getFromContainer(class_validator_3.MetadataStorage).getTargetValidationMetadatas(this.constructor, '');
         // check if all loaded metadata has corresponding properties
@@ -49,8 +51,16 @@ var PersistableModel = /** @class */ (function () {
                 _this[metadata.propertyName] = null;
             }
         });
-        this.transformAllProperties();
-        this.__init();
+        /**
+         * create observerable and observer for handling the models data changes
+         */
+        this.__editedObservable = new rxjs_1.Observable(function (observer) {
+            self.__editedObserver = observer;
+        });
+        this.loaded().then(function () {
+            self.transformAllProperties();
+            self.__init();
+        });
     }
     /**
      *
@@ -183,16 +193,8 @@ var PersistableModel = /** @class */ (function () {
     PersistableModel.prototype.trigger = function (action, interval, maxExecutions) {
         var self = this;
         return new rxjs_1.Observable(function (observer) {
-            if (self.__isLoaded) {
-                self.getPersistenceManager().trigger(self, observer, {
-                    name: 'custom',
-                    data: {
-                        name: action
-                    }
-                }, interval, maxExecutions);
-            }
-            else {
-                self.loaded().then(function (model) {
+            self.loaded().then(function (model) {
+                model.loaded().then(function (model) {
                     model.getPersistenceManager().trigger(model, observer, {
                         name: 'custom',
                         data: {
@@ -200,7 +202,7 @@ var PersistableModel = /** @class */ (function () {
                         }
                     }, interval, maxExecutions);
                 });
-            }
+            });
         });
     };
     /**
@@ -213,8 +215,8 @@ var PersistableModel = /** @class */ (function () {
     PersistableModel.prototype.webhook = function (url, method, type) {
         var self = this;
         return new rxjs_1.Observable(function (observer) {
-            if (self.__isLoaded) {
-                self.getPersistenceManager().trigger(self, observer, {
+            self.loaded().then(function (model) {
+                model.getPersistenceManager().trigger(model, observer, {
                     name: 'webhook',
                     data: {
                         url: url,
@@ -222,19 +224,7 @@ var PersistableModel = /** @class */ (function () {
                         type: type
                     }
                 });
-            }
-            else {
-                self.loaded().then(function (model) {
-                    self.getPersistenceManager().trigger(model, observer, {
-                        name: 'webhook',
-                        data: {
-                            url: url,
-                            method: method,
-                            type: type
-                        }
-                    });
-                });
-            }
+            });
         });
     };
     /**
@@ -243,31 +233,32 @@ var PersistableModel = /** @class */ (function () {
      * @returns {Observable<any>}
      */
     PersistableModel.prototype.save = function (action) {
-        var self = this, observer = null;
-        if (typeof action === 'string') {
-            action = {
-                name: 'custom',
-                data: {
-                    name: action
-                }
-            };
-        }
-        self.executeSave(action).subscribe(function (next) {
-            if (observer) {
-                observer.next(next);
+        var self = this;
+        return new rxjs_1.Observable(function (observer) {
+            if (typeof action === 'string') {
+                action = {
+                    name: 'custom',
+                    data: {
+                        name: action
+                    }
+                };
             }
-        }, function (error) {
-            if (observer) {
-                observer.error(error);
-            }
-        }, function () {
-            if (observer) {
-                observer.next();
-                observer.complete();
-            }
-        });
-        return new rxjs_1.Observable(function (o) {
-            observer = o;
+            self.loaded().then(function (model) {
+                model.executeSave(action).subscribe(function (next) {
+                    if (observer) {
+                        observer.next(next);
+                    }
+                }, function (error) {
+                    if (observer) {
+                        observer.error(error);
+                    }
+                }, function () {
+                    if (observer) {
+                        observer.next(model);
+                        observer.complete();
+                    }
+                });
+            });
         });
     };
     /**
@@ -558,8 +549,8 @@ var PersistableModel = /** @class */ (function () {
         }
         this.executeConditionValidatorCircular(property);
         this.executeChangesWithCallback(event);
-        if (autosave && this.__isLoaded) {
-            this.save(null);
+        if (autosave) {
+            this.save(null).subscribe(function (next) { }, function (error) { });
         }
         return this;
     };
@@ -571,7 +562,7 @@ var PersistableModel = /** @class */ (function () {
      */
     PersistableModel.prototype.getPropertyValue = function (property, editing) {
         if (editing) {
-            return this.__edited[property] ? this.__edited[property] : this[property];
+            return this.__edited[property] !== undefined ? this.__edited[property] : this[property];
         }
         else {
             return this[property];
@@ -634,101 +625,104 @@ var PersistableModel = /** @class */ (function () {
      * @param property
      * @param data (json object, persistable model or array of those
      * @param uuid string
-     * @returns this
+     * @returns Promise<any>
      */
     PersistableModel.prototype.add = function (property, data, uuid) {
-        var _this = this;
         var self = this;
-        if (this.getMetadataValue(property, 'isList')) {
-            var toAddModels = [];
-            var toCreateModels = [];
-            if (data instanceof this.getMetadataValue(property, 'isList')) {
-                toAddModels.push(data);
-            }
-            else if (typeof data == 'object' && data.length !== undefined) {
-                data.forEach(function (d) {
-                    if (d instanceof _this.getMetadataValue(property, 'isList')) {
-                        toAddModels.push(d);
+        return new Promise(function (resolve, reject) {
+            self.loaded().then(function (model) {
+                if (model.getMetadataValue(property, 'isList')) {
+                    var toAddModels = [];
+                    var toCreateModels = [];
+                    if (data.__isPersistableModel !== undefined) {
+                        toAddModels.push(data);
                     }
-                    else {
-                        toCreateModels.push(d);
-                    }
-                });
-            }
-            else {
-                if (typeof data == 'string') {
-                    var d = [];
-                    d.push(data);
-                    toCreateModels.push(d);
-                }
-                else {
-                    toCreateModels.push(data);
-                }
-            }
-            toCreateModels.forEach(function (d) {
-                if (uuid === undefined || uuid === null) {
-                    uuid = d !== undefined ? d[self.getMetadataValue(property, 'isList', null, 'usePropertyAsUuid')] : null;
-                }
-                if (typeof d == 'object' && d.length == 1 && d[0] !== undefined) {
-                    d = d[0];
-                }
-                var n = null;
-                if (self.isInBackendMode()) {
-                    // backend mode
-                    var constructor = self.getMetadataValue(property, 'isList');
-                    n = new constructor();
-                    if (uuid !== undefined) {
-                        n.setUuid(uuid);
-                    }
-                    else {
-                        n.setUuid(angular2_uuid_1.UUID.UUID());
-                    }
-                    if (d !== undefined) {
-                        n.loadJson(d);
-                    }
-                }
-                else {
-                    n = self.__appsAppModuleProvider.new(self.getMetadataValue(property, 'isList'), uuid, d);
-                    var usePropertyAsUuid = self.getMetadataValue(property, 'isList', null, 'usePropertyAsUuid');
-                    if (usePropertyAsUuid) {
-                        n.watch(usePropertyAsUuid, function (uuid) {
-                            if (uuid && typeof uuid == 'string' && uuid.length) {
-                                n.setUuid(uuid);
-                                self.refreshListArray(property);
+                    else if (typeof data == 'object' && data.length !== undefined) {
+                        data.forEach(function (d) {
+                            if (d.__isPersistableModel !== undefined) {
+                                toAddModels.push(d);
+                            }
+                            else {
+                                toCreateModels.push(d);
                             }
                         });
                     }
-                    if (self.__isAutosave) {
-                        n.autosave();
+                    else {
+                        if (typeof data == 'string') {
+                            var d = [];
+                            d.push(data);
+                            toCreateModels.push(d);
+                        }
+                        else {
+                            toCreateModels.push(data);
+                        }
                     }
+                    toCreateModels.forEach(function (d) {
+                        if (uuid === undefined || uuid === null) {
+                            uuid = d !== undefined ? d[model.getMetadataValue(property, 'isList', null, 'usePropertyAsUuid')] : null;
+                        }
+                        if (typeof d == 'object' && d.length == 1 && d[0] !== undefined) {
+                            d = d[0];
+                        }
+                        var n = null;
+                        if (model.isInBackendMode()) {
+                            // backend mode
+                            var constructor = model.getMetadataValue(property, 'isList');
+                            n = new constructor();
+                            if (uuid !== undefined) {
+                                n.setUuid(uuid);
+                            }
+                            else {
+                                n.setUuid(angular2_uuid_1.UUID.UUID());
+                            }
+                            if (d !== undefined) {
+                                n.loadJson(d);
+                            }
+                        }
+                        else {
+                            n = model.createNewLazyLoadedPersistableModel(model.getAppsAppModuleProvider(), model.getMetadataValue(property, 'isList'), uuid, d);
+                            var usePropertyAsUuid = model.getMetadataValue(property, 'isList', null, 'usePropertyAsUuid');
+                            if (usePropertyAsUuid) {
+                                n.watch(usePropertyAsUuid, function (uuid) {
+                                    if (uuid && typeof uuid == 'string' && uuid.length) {
+                                        n.setUuid(uuid);
+                                        model.refreshListArray(property);
+                                    }
+                                });
+                            }
+                            if (model.__isAutosave) {
+                                n.autosave();
+                            }
+                        }
+                        toAddModels.push(n);
+                        // force conditions to be calculated initially
+                        if (!n.isInBackendMode()) {
+                            Object.keys(n.__conditionActionIfMatchesAction).forEach(function (property) {
+                                n.getProperty(property).subscribe(function (value) {
+                                    // skip
+                                });
+                            });
+                            Object.keys(n.__conditionActionIfMatchesRemovedProperties).forEach(function (property) {
+                                n.getProperty(property).subscribe(function (value) {
+                                    // skip
+                                });
+                            });
+                        }
+                    });
+                    var t = model.getPropertyValue(property);
+                    if (!t || typeof t == 'undefined') {
+                        t = [];
+                    }
+                    toAddModels.forEach(function (d) {
+                        t.push(d);
+                    });
+                    resolve(model.refreshListArray(property, t));
                 }
-                toAddModels.push(n);
-                // force conditions to be calculated initially
-                if (!n.isInBackendMode()) {
-                    Object.keys(n.__conditionActionIfMatchesAction).forEach(function (property) {
-                        n.getProperty(property).subscribe(function (value) {
-                            // skip
-                        });
-                    });
-                    Object.keys(n.__conditionActionIfMatchesRemovedProperties).forEach(function (property) {
-                        n.getProperty(property).subscribe(function (value) {
-                            // skip
-                        });
-                    });
+                else {
+                    resolve(model);
                 }
             });
-            var t = this.getPropertyValue(property);
-            if (!t || typeof t == 'undefined') {
-                t = this.createListArray(property);
-            }
-            toAddModels.forEach(function (d) {
-                t.push(d);
-            });
-            return this.refreshListArray(property, t);
-        }
-        else {
-            return this;
-        }
+        });
     };
     /**
      * remove a new list entry
@@ -744,12 +738,12 @@ var PersistableModel = /** @class */ (function () {
                 toRemoveUuids[uuidOrObject] = true;
             }
             else {
-                if (uuidOrObject instanceof PersistableModel) {
+                if (uuidOrObject.__isPersistableModel) {
                     toRemoveUuids[uuidOrObject.getUuid()] = true;
                 }
                 else {
                     uuidOrObject.forEach(function (o) {
-                        if (uuidOrObject instanceof PersistableModel) {
+                        if (uuidOrObject.__isPersistableModel) {
                             toRemoveUuids[o.getUuid()] = true;
                         }
                         else {
@@ -932,13 +926,13 @@ var PersistableModel = /** @class */ (function () {
         var model = class_transformer_1.plainToClass(this.constructor, json, { excludePrefixes: ["__"] });
         return new Promise(function (resolve, reject) {
             if (model) {
-                if (clone == true || json == null) {
+                if (clone === true || json === null) {
                     resolve(model);
                 }
                 else {
                     Object.keys(json).forEach(function (property) {
                         if (property.substr(0, 2) !== '__' || property.substr(0, 5) == 'tmp__') {
-                            if (Object.keys(self).indexOf(property) >= 0 && (self.__edited[property] === undefined || self.__edited[property] === null)) {
+                            if ((self.__edited[property] === undefined || self.__edited[property] === null)) {
                                 self.setProperty(property, self.transformTypeFromMetadata(property, model[property]));
                                 if (self.isInBackendMode()) {
                                     self.__edited[property] = model[property];
@@ -947,8 +941,9 @@ var PersistableModel = /** @class */ (function () {
                             }
                         }
                     });
+                    self.refreshAllListArrays();
                     self.validate().then(function (success) {
-                        model.emit();
+                        self.emit();
                         resolve(self);
                     }).catch(function (error) {
                         Object.keys(error).forEach(function (e) {
@@ -996,7 +991,7 @@ var PersistableModel = /** @class */ (function () {
             return typeof value == 'object' ? value : [];
         }
         if (this.getMetadata(property, 'isList').length) {
-            var valueAsObjects_1 = this.createListArray(property, true);
+            var valueAsObjects_1 = [];
             if (value && typeof value.forEach !== 'function') {
                 var tmp = [];
                 Object.keys(value).forEach(function (v) {
@@ -1006,11 +1001,11 @@ var PersistableModel = /** @class */ (function () {
             }
             if (value && value.length) {
                 value.forEach(function (itemOriginal) {
-                    if (itemOriginal !== undefined && itemOriginal && itemOriginal instanceof PersistableModel == false) {
+                    if (itemOriginal !== undefined && itemOriginal.__isPersistableModel === undefined) {
                         var uuid = itemOriginal[self.getMetadataValue(property, 'isList', null, 'usePropertyAsUuid')];
                         var item = null;
                         if (!self.isInBackendMode() && self.getAppsAppModuleProvider()) {
-                            item = self.getAppsAppModuleProvider().new(self.getMetadataValue(property, 'isList'), uuid);
+                            item = self.createNewLazyLoadedPersistableModel(self.getAppsAppModuleProvider(), self.getMetadataValue(property, 'isList'), uuid);
                         }
                         else {
                             // backend mode
@@ -1023,23 +1018,20 @@ var PersistableModel = /** @class */ (function () {
                         if (item !== undefined) {
                             item.loadJson(itemOriginal).then(function (item) {
                                 if (!item.isInBackendMode()) {
-                                    item.loaded().then(function (m) {
-                                        item.getChangesObserverable().subscribe(function (next) {
-                                            if (next.model.getParent()) {
-                                                next.model.getParent().setProperty(property, self.getPropertyValue(property, true));
-                                            }
-                                        });
+                                    item.getChangesObserverable().subscribe(function (next) {
+                                        if (next.model.getParent()) {
+                                            next.model.getParent().setProperty(property, self.getPropertyValue(property, true));
+                                        }
                                     });
                                 }
-                                //valueAsObjects.push(item.transformAllProperties());
-                                valueAsObjects_1.push(item);
+                                valueAsObjects_1.push(item.transformAllProperties());
+                                //valueAsObjects.push(item);
                                 item.refreshAllListArrays();
                             });
                             item.setParent(self);
                         }
                     }
                     else {
-                        //valueAsObjects.push(itemOriginal.transformAllProperties());
                         valueAsObjects_1.push(itemOriginal);
                     }
                 });
@@ -1487,24 +1479,41 @@ var PersistableModel = /** @class */ (function () {
         return this;
     };
     /**
+     * get is loaded promise
+     * @returns {Promise<any>}
+     */
+    PersistableModel.prototype.getIsLoadedPromise = function () {
+        return this.__isLoadedPromise;
+    };
+    /**
      * Is loaded promise
      * @returns {Promise}
      */
     PersistableModel.prototype.loaded = function () {
         var self = this;
-        if (this.__isLoadedPromise == undefined) {
-            if (this.__isLoadedPromiseInternal === undefined) {
-                this.__isLoadedPromiseInternal = new Promise(function (resolve, reject) {
-                    self.__isLoadedPromiseInternalResolver = resolve;
-                    if (self.__isLoaded) {
-                        resolve(self);
-                    }
-                });
-            }
-            return this.__isLoadedPromiseInternal;
+        if (self.__isLoaded) {
+            return new Promise(function (resolve, reject) {
+                resolve(self);
+            });
         }
         else {
-            return this.__isLoadedPromise;
+            if (this.getAppsAppModuleProvider() !== undefined && this.__isLoadedPromise == undefined) {
+                self.getAppsAppModuleProvider().lazyLoad(self);
+            }
+            if (this.__isLoadedPromise == undefined) {
+                if (this.__isLoadedPromiseInternal === undefined) {
+                    this.__isLoadedPromiseInternal = new Promise(function (resolve, reject) {
+                        self.__isLoadedPromiseInternalResolver = resolve;
+                        if (self.__isLoaded) {
+                            resolve(self);
+                        }
+                    });
+                }
+                return this.__isLoadedPromiseInternal;
+            }
+            else {
+                return this.__isLoadedPromise;
+            }
         }
     };
     /**
@@ -1559,6 +1568,24 @@ var PersistableModel = /** @class */ (function () {
             this.tmp__hashedValues[hash] = value;
         }
         return hash;
+    };
+    /**
+     * creates new lazy loaded persistable model
+     * @param appsAppModuleProvider
+     * @param constructor
+     * @param uuid
+     * @param data
+     */
+    PersistableModel.prototype.createNewLazyLoadedPersistableModel = function (appsAppModuleProvider, constructor, uuid, data) {
+        var o = new constructor();
+        if (uuid !== undefined) {
+            o.setUuid(uuid);
+        }
+        if (data !== undefined) {
+            o.loadJson(data);
+        }
+        o.setAppsAppModuleProvider(appsAppModuleProvider);
+        return o;
     };
     /**
      * set appsAppModuleProvider
@@ -1624,8 +1651,8 @@ var PersistableModel = /** @class */ (function () {
         catch (e) {
             lastValue = this[property];
         }
-        this.__editedObservableObservers.push({ callback: callback, property: property, lastValue: lastValue });
         callback(this[property]);
+        this.__editedObservableObservers.push({ callback: callback, property: property, lastValue: lastValue });
         return this;
     };
     /**
@@ -1693,20 +1720,22 @@ var PersistableModel = /** @class */ (function () {
      * @returns {any}
      */
     PersistableModel.prototype.refreshListArray = function (property, value) {
-        var properties = {}, v = value == undefined ? this.getPropertyValue(property) : value;
-        if (v && v.length) {
-            v.forEach(function (item) {
-                if (item && item instanceof PersistableModel && item.getUuid() && item.getUuid().length) {
-                    properties[item.getUuid()] = {
-                        value: item,
-                        enumerable: false,
-                        configurable: true
-                    };
-                }
-            });
-        }
-        if (Object.keys(properties).length && this.__listArrays[property]) {
-            Object.defineProperties(this.__listArrays[property], properties);
+        if (this.getMetadataValue(property, 'isList')) {
+            var properties_1 = {}, v = value == undefined ? this.getPropertyValue(property) : value;
+            if (v && v.length) {
+                v.forEach(function (item) {
+                    if (item && item.__isPersistableModel && item.getUuid() && item.getUuid().length) {
+                        properties_1[item.getUuid()] = {
+                            value: item,
+                            enumerable: false,
+                            configurable: true
+                        };
+                    }
+                });
+            }
+            if (Object.keys(properties_1).length) {
+                Object.defineProperties(this[property], properties_1);
+            }
         }
         return this;
     };

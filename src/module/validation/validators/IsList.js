@@ -1,7 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var class_validator_1 = require("class-validator");
-var persistable_1 = require("../../models/persistable");
 function IsList(typeOfItems, usePropertyAsUuid, uniqueItems) {
     return function (object, propertyName) {
         class_validator_1.registerDecorator({
@@ -32,7 +31,7 @@ function IsList(typeOfItems, usePropertyAsUuid, uniqueItems) {
                         }
                         value.forEach(function (itemOriginal) {
                             var item = null;
-                            if (itemOriginal instanceof persistable_1.PersistableModel) {
+                            if (itemOriginal.__isPersistableModel) {
                                 item = itemOriginal;
                             }
                             else {
