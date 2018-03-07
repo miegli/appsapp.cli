@@ -51,13 +51,18 @@ export function HasConditions(options: [{
         });
 
 
-        var getNestedValue = (property, value) => {
+        var getNestedValue = (property, ovalue, model) => {
+
+            let value = model.getHashedValue(ovalue);
 
             if (property.indexOf(".") > 0) {
-                return value == undefined ? value : getNestedValue(property.substr(property.indexOf('.') + 1), value[property.substr(0, property.indexOf("."))]);
+                return value === undefined ? value : getNestedValue(property.substr(property.indexOf('.') + 1), value[property.substr(0, property.indexOf("."))], model);
             } else {
-                return value == undefined || value[property] == undefined ? undefined : value[property];
+                return value === undefined || value[property] === undefined ? undefined : value[property];
             }
+
+
+
 
         }
 
@@ -83,19 +88,11 @@ export function HasConditions(options: [{
 
                             if (condition.additionalData.propertyNestedAsNestedObject !== undefined) {
 
-                                valueNested = JSON.parse(JSON.stringify(args.object.__conditionContraintsPropertiesValue[condition.property]));
-                                //
-                                // if ((valueNested && valueNested.length !== undefined && valueNested.length === 0)) {
-                                //     state = false;
-                                //     return state;
-                                // }
+                                valueNested = args.object.getHashedValue(JSON.parse(JSON.stringify(args.object.__conditionContraintsPropertiesValue[condition.property])));
 
                                 if (typeof valueNested == 'object' && valueNested.forEach !== undefined) {
                                     valueNested.forEach((v, i) => {
-                                        if (typeof v == 'string' && args.object.getHashedValue(v) !== v) {
-                                            valueNested[i] = args.object.getHashedValue(v);
-                                        }
-                                        valueNested[i] = getNestedValue(condition.additionalData.propertyNestedAsNestedObject.substr(condition.additionalData.propertyNestedAsNestedObject.indexOf(".") + 1), valueNested[i]);
+                                        valueNested[i] = getNestedValue(condition.additionalData.propertyNestedAsNestedObject.substr(condition.additionalData.propertyNestedAsNestedObject.indexOf(".") + 1), valueNested[i],args.object);
                                     });
                                 }
 
@@ -103,7 +100,7 @@ export function HasConditions(options: [{
                                     if (args.object.getHashedValue(valueNested) !== valueNested) {
                                         valueNested = args.object.getHashedValue(valueNested);
                                     }
-                                    valueNested = getNestedValue(condition.additionalData.propertyNestedAsNestedObject.substr(condition.additionalData.propertyNestedAsNestedObject.indexOf(".") + 1), valueNested);
+                                    valueNested = getNestedValue(condition.additionalData.propertyNestedAsNestedObject.substr(condition.additionalData.propertyNestedAsNestedObject.indexOf(".") + 1), valueNested,args.object);
                                 }
 
                                 if (valueNested === null && condition.validator.indexOf('array') >= 0) {
@@ -114,7 +111,7 @@ export function HasConditions(options: [{
 
                             if (state) {
 
-                                if (condition.type == 'condition') {
+                                if (valueNested !== undefined && condition.type == 'condition') {
                                     if (valueNested === null && condition.validator == 'equals' && value !== undefined && condition.value !== null && condition.value.length !== undefined && value.length == 0) {
                                         state = true;
                                     } else {

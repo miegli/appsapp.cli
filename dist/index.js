@@ -1297,19 +1297,19 @@ var PersistableModel = /** @class */ (function () {
             this.refreshListArray(property);
             return valueAsObjects_1;
         }
-        // if (this.getMetadata(property, 'isSelect').length) {
+        //if (this.getMetadata(property, 'isSelect').length) {
+        // let values = typeof value == 'object' ? value : [];
+        // let realValues = [];
         //
-        //     let values = typeof value == 'object' ? value : [];
-        //     let realValues = [];
+        // if (values && values.length) {
+        //     values.forEach((val) => {
+        //         realValues.push(self.getHashedValue(val));
+        //     });
+        // }
         //
-        //     if (values && values.length) {
-        //         values.forEach((val) => {
-        //             realValues.push(self.getHashedValue(val));
-        //         });
-        //     }
+        // this.executeConditionValidatorCircular(property);
         //
-        //     return realValues;
-        //
+        // return realValues;
         // }
         return value;
     };
@@ -1954,7 +1954,20 @@ var PersistableModel = /** @class */ (function () {
      * @return {?}
      */
     function (hash) {
-        return this.tmp__hashedValues[hash] !== undefined ? this.tmp__hashedValues[hash] : hash;
+        var _this = this;
+        if (typeof hash == 'string') {
+            return this.tmp__hashedValues[hash] !== undefined ? this.tmp__hashedValues[hash] : hash;
+        }
+        else {
+            if (typeof hash == 'object' && typeof hash.length == 'function') {
+                var /** @type {?} */ values_1 = [];
+                hash.forEach(function (value) {
+                    values_1.push(_this.tmp__hashedValues[value] !== undefined ? _this.tmp__hashedValues[value] : value);
+                });
+                return values_1;
+            }
+        }
+        return hash;
     };
     /**
      * Set hashed value
@@ -2366,12 +2379,13 @@ function HasConditions(options, actionIfMatches, validationOptions) {
                 option.property = option.property.substr(0, option.property.indexOf('.'));
             }
         });
-        var /** @type {?} */ getNestedValue = function (property, value) {
+        var /** @type {?} */ getNestedValue = function (property, ovalue, model) {
+            var /** @type {?} */ value = model.getHashedValue(ovalue);
             if (property.indexOf(".") > 0) {
-                return value == undefined ? value : getNestedValue(property.substr(property.indexOf('.') + 1), value[property.substr(0, property.indexOf("."))]);
+                return value === undefined ? value : getNestedValue(property.substr(property.indexOf('.') + 1), value[property.substr(0, property.indexOf("."))], model);
             }
             else {
-                return value == undefined || value[property] == undefined ? undefined : value[property];
+                return value === undefined || value[property] === undefined ? undefined : value[property];
             }
         };
         classValidator.registerDecorator({
@@ -2396,32 +2410,24 @@ function HasConditions(options, actionIfMatches, validationOptions) {
                     if (options) {
                         options.forEach(function (condition) {
                             if (condition.additionalData.propertyNestedAsNestedObject !== undefined) {
-                                valueNested = JSON.parse(JSON.stringify(args.object.__conditionContraintsPropertiesValue[condition.property]));
-                                //
-                                // if ((valueNested && valueNested.length !== undefined && valueNested.length === 0)) {
-                                //     state = false;
-                                //     return state;
-                                // }
+                                valueNested = args.object.getHashedValue(JSON.parse(JSON.stringify(args.object.__conditionContraintsPropertiesValue[condition.property])));
                                 if (typeof valueNested == 'object' && valueNested.forEach !== undefined) {
                                     valueNested.forEach(function (v, i) {
-                                        if (typeof v == 'string' && args.object.getHashedValue(v) !== v) {
-                                            valueNested[i] = args.object.getHashedValue(v);
-                                        }
-                                        valueNested[i] = getNestedValue(condition.additionalData.propertyNestedAsNestedObject.substr(condition.additionalData.propertyNestedAsNestedObject.indexOf(".") + 1), valueNested[i]);
+                                        valueNested[i] = getNestedValue(condition.additionalData.propertyNestedAsNestedObject.substr(condition.additionalData.propertyNestedAsNestedObject.indexOf(".") + 1), valueNested[i], args.object);
                                     });
                                 }
                                 if (typeof valueNested == 'string') {
                                     if (args.object.getHashedValue(valueNested) !== valueNested) {
                                         valueNested = args.object.getHashedValue(valueNested);
                                     }
-                                    valueNested = getNestedValue(condition.additionalData.propertyNestedAsNestedObject.substr(condition.additionalData.propertyNestedAsNestedObject.indexOf(".") + 1), valueNested);
+                                    valueNested = getNestedValue(condition.additionalData.propertyNestedAsNestedObject.substr(condition.additionalData.propertyNestedAsNestedObject.indexOf(".") + 1), valueNested, args.object);
                                 }
                                 if (valueNested === null && condition.validator.indexOf('array') >= 0) {
                                     valueNested = [];
                                 }
                             }
                             if (state) {
-                                if (condition.type == 'condition') {
+                                if (valueNested !== undefined && condition.type == 'condition') {
                                     if (valueNested === null && condition.validator == 'equals' && value !== undefined && condition.value !== null && condition.value.length !== undefined && value.length == 0) {
                                         state = true;
                                     }
