@@ -33,7 +33,7 @@ const base64 = require('base-64');
 /**
  * cached configuration
  */
-const configurationCache = {};
+let configurationCache = {};
 
 /**
  * load action modules
@@ -532,7 +532,7 @@ function decrypt(data) {
  */
 function getConfiguration(constructorName) {
 
-    return self.configurationCache[constructorName] === undefined ? null :  self.configurationCache[constructorName];
+    return configurationCache[constructorName] === undefined ? null : configurationCache[constructorName];
 
 }
 
@@ -545,7 +545,7 @@ function createConfigurationCacheByConfigSnapshot(snapshot) {
     var config = snapshot.val(), self = this;
 
     Object.keys(config).forEach((constructorName) => {
-        self.configurationCache[constructorName] = constructorName[config];
+        configurationCache[constructorName] = constructorName[config];
     });
 
 }
