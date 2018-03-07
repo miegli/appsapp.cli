@@ -545,7 +545,7 @@ function createConfigurationCacheByConfigSnapshot(snapshot) {
     var config = snapshot.val(), self = this;
 
     Object.keys(config).forEach((constructorName) => {
-        configurationCache[constructorName] = constructorName[config];
+        configurationCache[constructorName] = config[constructorName];
     });
 
 }
