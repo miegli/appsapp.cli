@@ -2325,7 +2325,7 @@ export class PersistableModel {
      * @returns {boolean}
      */
     public isInBackendMode() {
-        return global[this.constructor.name] === undefined ? false : true;
+        return global[this.constructor.name] === undefined && global['appsapp-backend-mode'] === undefined  ? false : true;
     }
 
     /**
