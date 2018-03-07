@@ -132,7 +132,7 @@ exports.connectRealtimeDatabase = functions.database.ref('session/{user}/{projec
         admin.database().ref(actiondata.target + "/data").once('value', (snapshot) => {
             actiondata.snapshot = snapshot.val();
             let actiondataFinal = actiondata;
-            actiondataFinal.additionActions
+            
             admin.database().ref('_events/' + identifier).set(actiondataFinal).then();
 
             if (actiondata.action.additionActions && typeof actiondata.action.additionActions == 'object') {
