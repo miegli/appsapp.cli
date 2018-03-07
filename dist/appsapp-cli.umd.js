@@ -2128,7 +2128,7 @@ var PersistableModel = /** @class */ (function () {
      * @return {?}
      */
     function () {
-        return global[this.constructor.name] === undefined ? false : true;
+        return global[this.constructor.name] === undefined && global['appsapp-backend-mode'] === undefined ? false : true;
     };
     /**
      * Enable autosave mode

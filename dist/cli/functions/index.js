@@ -22,6 +22,11 @@
 'use strict';
 
 /**
+ * set global appsapp backend mode
+ */
+global['appsapp-backend-mode'] = true;
+
+/**
  * load core modules
  */
 const functions = require('firebase-functions');
