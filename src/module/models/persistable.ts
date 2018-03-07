@@ -2089,7 +2089,7 @@ export class PersistableModel {
         let self = this;
 
 
-        if (self.__isLoaded) {
+        if (self.__isLoaded || self.isInBackendMode()) {
             return new Promise(function (resolve, reject) {
                 resolve(self);
             });
