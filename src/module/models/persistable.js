@@ -1491,7 +1491,7 @@ var PersistableModel = /** @class */ (function () {
      */
     PersistableModel.prototype.loaded = function () {
         var self = this;
-        if (self.__isLoaded) {
+        if (self.__isLoaded || self.isInBackendMode()) {
             return new Promise(function (resolve, reject) {
                 resolve(self);
             });

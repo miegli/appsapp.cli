@@ -1461,22 +1461,22 @@ export class PersistableModel {
             return valueAsObjects;
         }
 
-        //if (this.getMetadata(property, 'isSelect').length) {
+        if (this.getMetadata(property, 'isSelect').length) {
 
-            // let values = typeof value == 'object' ? value : [];
-            // let realValues = [];
-            //
-            // if (values && values.length) {
-            //     values.forEach((val) => {
-            //         realValues.push(self.getHashedValue(val));
-            //     });
-            // }
-            //
-            // this.executeConditionValidatorCircular(property);
-            //
-            // return realValues;
+            let values = typeof value == 'object' ? value : [];
+            let realValues = [];
 
-       // }
+            if (values && values.length) {
+                values.forEach((val) => {
+                    realValues.push(self.getHashedValue(val));
+                });
+            }
+
+            this.executeConditionValidatorCircular(property);
+
+            return realValues;
+
+       }
 
         return value;
 
