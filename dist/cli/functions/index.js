@@ -31,6 +31,11 @@ const uuidV1 = require('uuid/v1');
 const base64 = require('base-64');
 
 /**
+ * cached configuration
+ */
+const configurationCache = {};
+
+/**
  * load action modules
  */
 const actions = require('./actions');
@@ -54,11 +59,10 @@ var self = this;
 
 admin.database().ref('_config').on('value', (snapshot) => {
 
-    return initModelByConstructorSnapshot(snapshot);
+    createConfigurationCacheByConfigSnapshot(snapshot);
+    initModelByConstructorSnapshot(snapshot);
 
 });
-
-
 
 
 /**
@@ -408,7 +412,7 @@ function call(action, data) {
 
                         if (!data) {
 
-                            actions[action.action.name](action, data, configAction, model).then(function (data) {
+                            actions[action.action.name](action, data, getConfiguration(action.object), model).then(function (data) {
                                 resolve(data.response);
                             }).catch(function (error) {
                                 reject(error);
@@ -419,7 +423,7 @@ function call(action, data) {
                             model.removeConditionProperties();
                             model.validate().then(() => {
 
-                                actions[action.action.name](action, data, configAction, model).then(function (data) {
+                                actions[action.action.name](action, data,  getConfiguration(action.object), model).then(function (data) {
 
                                     if (data.config) {
                                         return admin.database().ref('_config/' + action.object + "/" + action.action.name).set(data.config).then(function () {
@@ -522,9 +526,32 @@ function decrypt(data) {
 
 }
 
+/**
+ * get configuration by given constructorName
+ * @param constructorName
+ */
+function getConfiguration(constructorName) {
+
+    return self.configurationCache[constructorName] === undefined ? null :  self.configurationCache[constructorName];
+
+}
 
 /**
- * init model by constructor snapsht
+ * update configuration cache by config snapshot
+ * @param snapshot
+ */
+function createConfigurationCacheByConfigSnapshot(snapshot) {
+
+    var config = snapshot.val(), self = this;
+
+    Object.keys(config).forEach((constructorName) => {
+        self.configurationCache[constructorName] = constructorName[config];
+    });
+
+}
+
+/**
+ * init model by constructor snapshot
  * @param snapshot
  */
 function initModelByConstructorSnapshot(snapshot) {
