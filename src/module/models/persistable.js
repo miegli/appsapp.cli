@@ -1670,7 +1670,7 @@ var PersistableModel = /** @class */ (function () {
      * @returns {boolean}
      */
     PersistableModel.prototype.isInBackendMode = function () {
-        return global[this.constructor.name] === undefined ? false : true;
+        return global[this.constructor.name] === undefined && global['appsapp-backend-mode'] === undefined ? false : true;
     };
     /**
      * Enable autosave mode

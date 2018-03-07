@@ -1462,7 +1462,21 @@ export class PersistableModel {
         }
 
         if (this.getMetadata(property, 'isSelect').length) {
+
+
+            // let values = typeof value == 'object' ? value : [];
+            // let realValues = [];
+            //
+            // if (values && values.length) {
+            //     values.forEach((val) => {
+            //         realValues.push(self.getHashedValue(val));
+            //     });
+            // }
+
             this.executeConditionValidatorCircular(property);
+
+            //return realValues;
+
        }
 
         return value;
