@@ -54,42 +54,12 @@ var self = this;
 
 admin.database().ref('_config').on('value', (snapshot) => {
 
-    var config = snapshot.val();
-
-
-    /**
-     * first eval
-     */
-    Object.keys(config).forEach((model) => {
-
-
-        if (config[model].constructor !== undefined) {
-            try {
-                eval(Buffer.from(config[model].constructor, 'base64').toString());
-            }
-            catch (e) {
-                // skip
-            }
-        }
-    });
-    /**
-     * second eval, must be done two times because of self-referencing injections
-     */
-    Object.keys(config).forEach((model) => {
-
-
-        if (config[model].constructor !== undefined) {
-            try {
-                eval(Buffer.from(config[model].constructor, 'base64').toString());
-            }
-            catch (e) {
-                console.log(e);
-            }
-        }
-    });
-
+    return initModelByConstructorSnapshot(snapshot);
 
 });
+
+
+
 
 /**
  * constructor loader
@@ -430,80 +400,113 @@ function call(action, data) {
             decrypt(action).then((action) => {
 
 
-                admin.database().ref('_config/' + action.object).once('value', (snapshot) => {
+                getModel(action.object).then((model) => {
 
-                    let config = snapshot.val();
-                    let configAction = config && config[action.action.name] !== undefined ? config[action.action.name] : null;
 
-                    let model = false;
 
-                    if (config && config['constructor'] !== undefined) {
+                    model.loadJson(data).then(() => {
 
-                        try {
-                            eval(Buffer.from(config[model].constructor, 'base64').toString());
-                        }
-                        catch (e) {
-                            // skip
-                        }
+                        if (!data) {
 
-                        model = new global[action.object];
+                            actions[action.action.name](action, data, configAction, model).then(function (data) {
+                                resolve(data.response);
+                            }).catch(function (error) {
+                                reject(error);
+                            });
 
-                        model.loadJson(data).then(() => {
+                        } else {
 
-                            if (!data) {
+                            model.removeConditionProperties();
+                            model.validate().then(() => {
 
                                 actions[action.action.name](action, data, configAction, model).then(function (data) {
-                                    resolve(data.response);
+
+                                    if (data.config) {
+                                        return admin.database().ref('_config/' + action.object + "/" + action.action.name).set(data.config).then(function () {
+                                            resolve(data.response);
+                                        }).catch(function (error) {
+                                            reject(error);
+                                        });
+                                    } else {
+                                        resolve(data.response);
+                                    }
+
                                 }).catch(function (error) {
                                     reject(error);
                                 });
 
-                            } else {
+                            }).catch((err) => {
+                                console.log(err);
+                                reject(err);
+                            });
 
-                                model.removeConditionProperties();
-                                model.validate().then(() => {
+                        }
 
-                                    actions[action.action.name](action, data, configAction, model).then(function (data) {
-
-                                        if (data.config) {
-                                            return admin.database().ref('_config/' + action.object + "/" + action.action.name).set(data.config).then(function () {
-                                                resolve(data.response);
-                                            }).catch(function (error) {
-                                                reject(error);
-                                            });
-                                        } else {
-                                            resolve(data.response);
-                                        }
-
-                                    }).catch(function (error) {
-                                        reject(error);
-                                    });
-
-                                }).catch((err) => {
-                                    console.log(err);
-                                    reject(err);
-                                });
-
-                            }
-
-                        });
+                    });
 
 
-                    } else {
-                        reject('_config constructor not set for ' + action.action.name);
-                    }
-
-
+                }).catch((error) => {
+                    reject('model could not be loaded ' + action.action.name);
                 });
 
 
             });
 
-        } else {
+
+        }
+
+        else {
             reject('internal error: action unknown');
         }
 
+    })
+
+
+}
+
+
+/**
+ * create model by given constructor name
+ * @param constructorName
+ */
+function getModel(constructorName) {
+
+
+    return new Promise(function (resolve, reject) {
+
+        let model = null;
+
+        if (global[constructorName] !== undefined) {
+
+            try {
+                model = new global[constructorName];
+            }
+            catch (e) {
+                reject(model);
+            }
+            resolve(model);
+
+        } else {
+
+            admin.database().ref('_config').once('value', (snapshot) => {
+
+                initModelByConstructorSnapshot(snapshot);
+
+                try {
+                    model = new global[constructorName];
+                }
+                catch (e) {
+                    reject(model);
+                }
+                resolve(model);
+
+            });
+
+        }
+
+
     });
+
 
 }
 
@@ -520,5 +523,46 @@ function decrypt(data) {
 }
 
 
+/**
+ * init model by constructor snapsht
+ * @param snapshot
+ */
+function initModelByConstructorSnapshot(snapshot) {
 
+    var config = snapshot.val();
+
+    /**
+     * first eval
+     */
+    Object.keys(config).forEach((model) => {
+
+
+        if (config[model].constructor !== undefined) {
+            try {
+                eval(Buffer.from(config[model].constructor, 'base64').toString());
+            }
+            catch (e) {
+                // skip
+            }
+        }
+    });
+    /**
+     * second eval, must be done two times because of self-referencing injections
+     */
+    Object.keys(config).forEach((model) => {
+
+
+        if (config[model].constructor !== undefined) {
+            try {
+                eval(Buffer.from(config[model].constructor, 'base64').toString());
+            }
+            catch (e) {
+                console.log(e);
+            }
+        }
+    });
+
+    return true;
+
+}
 

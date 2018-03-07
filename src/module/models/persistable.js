@@ -1039,19 +1039,19 @@ var PersistableModel = /** @class */ (function () {
             this.refreshListArray(property);
             return valueAsObjects_1;
         }
-        // if (this.getMetadata(property, 'isSelect').length) {
+        //if (this.getMetadata(property, 'isSelect').length) {
+        // let values = typeof value == 'object' ? value : [];
+        // let realValues = [];
         //
-        //     let values = typeof value == 'object' ? value : [];
-        //     let realValues = [];
+        // if (values && values.length) {
+        //     values.forEach((val) => {
+        //         realValues.push(self.getHashedValue(val));
+        //     });
+        // }
         //
-        //     if (values && values.length) {
-        //         values.forEach((val) => {
-        //             realValues.push(self.getHashedValue(val));
-        //         });
-        //     }
+        // this.executeConditionValidatorCircular(property);
         //
-        //     return realValues;
-        //
+        // return realValues;
         // }
         return value;
     };
@@ -1554,7 +1554,20 @@ var PersistableModel = /** @class */ (function () {
      * @Returns mixed
      */
     PersistableModel.prototype.getHashedValue = function (hash) {
-        return this.tmp__hashedValues[hash] !== undefined ? this.tmp__hashedValues[hash] : hash;
+        var _this = this;
+        if (typeof hash == 'string') {
+            return this.tmp__hashedValues[hash] !== undefined ? this.tmp__hashedValues[hash] : hash;
+        }
+        else {
+            if (typeof hash == 'object' && typeof hash.length == 'function') {
+                var values_1 = [];
+                hash.forEach(function (value) {
+                    values_1.push(_this.tmp__hashedValues[value] !== undefined ? _this.tmp__hashedValues[value] : value);
+                });
+                return values_1;
+            }
+        }
+        return hash;
     };
     /**
      * Set hashed value

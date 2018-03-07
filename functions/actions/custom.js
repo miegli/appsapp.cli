@@ -9,8 +9,6 @@ const admin = require('firebase-admin');
 function custom(action, data) {
     return new Promise(function (resolve, reject) {
 
-        console.log(action);
-
         admin.database().ref('_queue/' + action.actionid).set(action).then(() => {
             resolve(true);
         }).catch((error) => {
