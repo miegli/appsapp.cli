@@ -1298,15 +1298,7 @@ var PersistableModel = /** @class */ (function () {
             return valueAsObjects_1;
         }
         if (this.getMetadata(property, 'isSelect').length) {
-            var /** @type {?} */ values = typeof value == 'object' ? value : [];
-            var /** @type {?} */ realValues_1 = [];
-            if (values && values.length) {
-                values.forEach(function (val) {
-                    realValues_1.push(self.getHashedValue(val));
-                });
-            }
             this.executeConditionValidatorCircular(property);
-            return realValues_1;
         }
         return value;
     };

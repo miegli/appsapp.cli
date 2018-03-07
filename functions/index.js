@@ -132,7 +132,7 @@ exports.connectRealtimeDatabase = functions.database.ref('session/{user}/{projec
         admin.database().ref(actiondata.target + "/data").once('value', (snapshot) => {
             actiondata.snapshot = snapshot.val();
             let actiondataFinal = actiondata;
-            
+
             admin.database().ref('_events/' + identifier).set(actiondataFinal).then();
 
             if (actiondata.action.additionActions && typeof actiondata.action.additionActions == 'object') {
@@ -355,8 +355,13 @@ function dispatchEvent(original, identifier, actiondata) {
                 admin.database().ref('_events/' + identifier).remove().then(function () {
                     if (actiondata.target !== undefined && actiondata.target) {
                         admin.database().ref(actiondata.target + "/action/" + actiondata.actionid).set(data).then(function () {
-                            admin.database().ref(actiondata.target + "/action/" + actiondata.actionid).remove().then();
-                            resolve(data);
+                            admin.database().ref(actiondata.target + "/action/" + actiondata.actionid).remove().then(() => {
+                                resolve(data);
+                            }).catch((error) => {
+                                reject(error);
+                            });
+                        }).catch((error) => {
+                            reject(error);
                         });
                     } else {
                         resolve(data);
@@ -373,6 +378,8 @@ function dispatchEvent(original, identifier, actiondata) {
                             message: 'Validation error, please try again. If this error persists, please contact the system administrator.'
                         }).then(function () {
                             console.log(error);
+                            reject(error);
+                        }).catch((error) => {
                             reject(error);
                         });
                     } else {
@@ -446,6 +453,9 @@ function call(action, data) {
 
                         }
 
+                    }).catch((error) => {
+                        console.log(error);
+                        reject('validation error ' + action.action.name);
                     });
 
 
