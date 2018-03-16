@@ -129,8 +129,10 @@ export class PersistableModel {
         });
 
 
+
+        // self.transformAllProperties();
+
         this.loaded().then(() => {
-            self.transformAllProperties();
             self.__init();
         })
 
@@ -197,12 +199,9 @@ export class PersistableModel {
 
                 }
 
-
             }
 
-
         });
-
 
     }
 
@@ -794,7 +793,9 @@ export class PersistableModel {
         this.executeChangesWithCallback(event);
 
         if (autosave) {
-            this.save(null).subscribe((next) => {}, (error) => {});
+            this.save(null).subscribe((next) => {
+            }, (error) => {
+            });
         }
 
         return this;
@@ -898,7 +899,6 @@ export class PersistableModel {
         let self = this;
 
         return new Promise(function (resolve, reject) {
-
 
             self.loaded().then((model) => {
 
@@ -1018,9 +1018,6 @@ export class PersistableModel {
         });
 
 
-
-
-
     }
 
     /**
@@ -1057,13 +1054,14 @@ export class PersistableModel {
             }
 
             this.getPropertyValue(property).forEach((m: any) => {
-                if (toRemoveUuids[m.getUuid()] === undefined) {
+                if (m.getUuid().length === 0 || toRemoveUuids[m.getUuid()] === undefined) {
                     afterRemovedValue.push(m);
                 }
             });
+            this.setProperty(property, this.transformTypeFromMetadata(property, afterRemovedValue));
 
-            this[property] = this.transformTypeFromMetadata(property, afterRemovedValue);
-
+        } else {
+            this.setProperty(property, this.transformTypeFromMetadata(property, null));
         }
 
         return this;
@@ -1369,17 +1367,25 @@ export class PersistableModel {
      * @param value
      * @returns {any}
      */
-    private transformTypeFromMetadataExecute(property, value) {
+    private transformTypeFromMetadataExecute(property, value: any) {
 
         let self = this;
 
         if (this.getMetadata(property, 'isTime').length) {
             return typeof value == 'string' ? new Date(value) : (value ? value : new Date());
-
         }
 
         if (this.getMetadata(property, 'isDate').length) {
             return value ? new Date(value) : (value ? value : new Date());
+        }
+
+        if (this.getMetadata(property, 'isInt').length) {
+            let v = typeof value == 'number' ? value : parseInt(value);
+            return isNaN(v) || typeof v !== 'number' ? 0 : v;
+        }
+
+        if (this.getMetadata(property, 'isNumber').length) {
+            return value === undefined || typeof value !== 'number' ? 0 : value;
         }
 
         if (this.getMetadata(property, 'isCalendar').length) {
@@ -1394,7 +1400,6 @@ export class PersistableModel {
             return typeof value == 'object' ? value : [];
         }
 
-
         if (this.getMetadata(property, 'isList').length) {
 
             let valueAsObjects = [];
@@ -1408,7 +1413,6 @@ export class PersistableModel {
             }
 
             if (value && value.length) {
-
 
 
                 value.forEach((itemOriginal) => {
@@ -1477,7 +1481,7 @@ export class PersistableModel {
 
             //return realValues;
 
-       }
+        }
 
         return value;
 
@@ -1492,7 +1496,7 @@ export class PersistableModel {
         let self = this;
 
         self.getPropertiesKeys().forEach((property) => {
-            self[property] = self.transformTypeFromMetadata(property, self[property]);
+            self[property] = self.transformTypeFromMetadata(property, self.getPropertyValue(property));
         });
 
         return this;
@@ -2189,8 +2193,6 @@ export class PersistableModel {
 
         return hash;
 
-
-
     }
 
     /**
@@ -2339,7 +2341,7 @@ export class PersistableModel {
      * @returns {boolean}
      */
     public isInBackendMode() {
-        return global[this.constructor.name] === undefined && global['appsapp-backend-mode'] === undefined  ? false : true;
+        return global[this.constructor.name] === undefined && global['appsapp-backend-mode'] === undefined ? false : true;
     }
 
     /**
