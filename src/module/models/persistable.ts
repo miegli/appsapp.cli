@@ -1324,25 +1324,18 @@ export class PersistableModel {
                         }
                     });
 
+                    self.refreshAllListArrays();
 
-                    if (self.isInBackendMode()) {
-
+                    self.validate().then((success) => {
+                        self.emit();
                         resolve(self);
-
-                    } else {
-
-                        self.refreshAllListArrays();
-
-                        self.validate().then((success) => {
-                            self.emit();
-                            resolve(self);
-                        }).catch((error) => {
-                            Object.keys(error).forEach((e: any) => {
-                                self['__validationErrors'][e.property] = true;
-                            });
-                            resolve(self);
+                    }).catch((error) => {
+                        Object.keys(error).forEach((e: any) => {
+                            self['__validationErrors'][e.property] = true;
                         });
-                    }
+                        resolve(self);
+                    });
+
                 }
 
 

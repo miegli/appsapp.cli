@@ -43,45 +43,36 @@ export function IsList(typeOfItems: any, usePropertyAsUuid?: string, uniqueItems
 
                             if (itemOriginal.__isPersistableModel) {
                                 item = itemOriginal;
-                            } else {
 
-                                try {
-                                    // hint: global is used for backend node.js services
-                                    item = typeof global == 'undefined' ? new typeOfItems() : (typeof typeOfItems == 'string' && global[typeOfItems] !== undefined ? new global[typeOfItems]() : new typeOfItems());
-                                    item.loadJson(itemOriginal).then((m) => {
-                                        //
-                                    }).catch();
-                                } catch (e) {
-                                    item = new itemOriginal.constructor();
-                                }
-                            }
+                                if (item.validate !== undefined && typeof item.validate == 'function') {
 
-
-                            if (item.validate !== undefined && typeof item.validate == 'function') {
-
-                                item.validate().then((isSuccess) => {
-                                    // validation sucess, so resolve true
+                                    item.validate().then((isSuccess) => {
+                                        // validation sucess, so resolve true
+                                        proceededValidations++;
+                                        if (proceededValidations >= requiredValidations) {
+                                            resolve(allValide);
+                                        }
+                                    }).catch((error) => {
+                                        console.log(error);
+                                        // validation error, so reject
+                                        allValide = false;
+                                        proceededValidations++;
+                                        if (proceededValidations >= requiredValidations) {
+                                            resolve(allValide);
+                                        }
+                                    })
+                                } else {
+                                    // can't be validated, so resolve true
                                     proceededValidations++;
                                     if (proceededValidations >= requiredValidations) {
                                         resolve(allValide);
                                     }
-                                }).catch((error) => {
-                                    console.log(error);
-                                    // validation error, so reject
-                                    allValide = false;
-                                    proceededValidations++;
-                                    if (proceededValidations >= requiredValidations) {
-                                        resolve(allValide);
-                                    }
-                                })
-                            } else {
-                                // can't be validated, so resolve true
-                                proceededValidations++;
-                                if (proceededValidations >= requiredValidations) {
-                                    resolve(allValide);
                                 }
-                            }
 
+
+                            } else {
+                                resolve(true);
+                            }
 
                         });
 
