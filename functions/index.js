@@ -415,10 +415,7 @@ function call(action, data) {
 
             decrypt(action).then((action) => {
 
-
                 getModel(action.object).then((model) => {
-
-
 
                     model.loadJson(data).then(() => {
 
@@ -469,12 +466,12 @@ function call(action, data) {
                 });
 
 
+            }).catch((error) => {
+                reject(error);
             });
 
 
-        }
-
-        else {
+        } else {
             reject('internal error: action unknown');
         }
 

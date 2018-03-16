@@ -129,7 +129,6 @@ export class PersistableModel {
         });
 
 
-
         // self.transformAllProperties();
 
         this.loaded().then(() => {
@@ -1325,17 +1324,25 @@ export class PersistableModel {
                         }
                     });
 
-                    self.refreshAllListArrays();
 
-                    self.validate().then((success) => {
-                        self.emit();
+                    if (self.isInBackendMode()) {
+
                         resolve(self);
-                    }).catch((error) => {
-                        Object.keys(error).forEach((e: any) => {
-                            self['__validationErrors'][e.property] = true;
+
+                    } else {
+
+                        self.refreshAllListArrays();
+
+                        self.validate().then((success) => {
+                            self.emit();
+                            resolve(self);
+                        }).catch((error) => {
+                            Object.keys(error).forEach((e: any) => {
+                                self['__validationErrors'][e.property] = true;
+                            });
+                            resolve(self);
                         });
-                        resolve(self);
-                    });
+                    }
                 }
 
 

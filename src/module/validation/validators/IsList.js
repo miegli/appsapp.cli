@@ -47,7 +47,6 @@ function IsList(typeOfItems, usePropertyAsUuid, uniqueItems) {
                                 }
                             }
                             if (item.validate !== undefined && typeof item.validate == 'function') {
-                                console.log(item);
                                 item.validate().then(function (isSuccess) {
                                     // validation sucess, so resolve true
                                     proceededValidations++;

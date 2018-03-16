@@ -1192,7 +1192,11 @@ var PersistableModel = /** @class */ (function () {
                             }
                         }
                     });
-                    self.refreshAllListArrays();
+                    if (self.isInBackendMode()) {
+                    }
+                    else {
+                        self.refreshAllListArrays();
+                    }
                     self.validate().then(function (success) {
                         self.emit();
                         resolve(self);
