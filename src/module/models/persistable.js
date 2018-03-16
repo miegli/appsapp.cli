@@ -57,8 +57,8 @@ var PersistableModel = /** @class */ (function () {
         this.__editedObservable = new rxjs_1.Observable(function (observer) {
             self.__editedObserver = observer;
         });
+        // self.transformAllProperties();
         this.loaded().then(function () {
-            self.transformAllProperties();
             self.__init();
         });
     }
@@ -550,7 +550,9 @@ var PersistableModel = /** @class */ (function () {
         this.executeConditionValidatorCircular(property);
         this.executeChangesWithCallback(event);
         if (autosave) {
-            this.save(null).subscribe(function (next) { }, function (error) { });
+            this.save(null).subscribe(function (next) {
+            }, function (error) {
+            });
         }
         return this;
     };
@@ -753,11 +755,14 @@ var PersistableModel = /** @class */ (function () {
                 }
             }
             this.getPropertyValue(property).forEach(function (m) {
-                if (toRemoveUuids[m.getUuid()] === undefined) {
+                if (m.getUuid().length === 0 || toRemoveUuids[m.getUuid()] === undefined) {
                     afterRemovedValue.push(m);
                 }
             });
-            this[property] = this.transformTypeFromMetadata(property, afterRemovedValue);
+            this.setProperty(property, this.transformTypeFromMetadata(property, afterRemovedValue));
+        }
+        else {
+            this.setProperty(property, this.transformTypeFromMetadata(property, null));
         }
         return this;
     };
@@ -981,6 +986,13 @@ var PersistableModel = /** @class */ (function () {
         if (this.getMetadata(property, 'isDate').length) {
             return value ? new Date(value) : (value ? value : new Date());
         }
+        if (this.getMetadata(property, 'isInt').length) {
+            var v = typeof value == 'number' ? value : parseInt(value);
+            return isNaN(v) || typeof v !== 'number' ? 0 : v;
+        }
+        if (this.getMetadata(property, 'isNumber').length) {
+            return value === undefined || typeof value !== 'number' ? 0 : value;
+        }
         if (this.getMetadata(property, 'isCalendar').length) {
             return value ? new Date(value) : (value ? value : new Date());
         }
@@ -1060,7 +1072,7 @@ var PersistableModel = /** @class */ (function () {
     PersistableModel.prototype.transformAllProperties = function () {
         var self = this;
         self.getPropertiesKeys().forEach(function (property) {
-            self[property] = self.transformTypeFromMetadata(property, self[property]);
+            self[property] = self.transformTypeFromMetadata(property, self.getPropertyValue(property));
         });
         return this;
     };
