@@ -891,7 +891,7 @@ export class PersistableModel {
      * @param property
      * @param data (json object, persistable model or array of those
      * @param uuid string
-     * @returns {PersistableModel}
+     * @returns {PersistableModel} | null
      */
     public add(property, data?: any, uuid?: string) {
 
@@ -1005,7 +1005,7 @@ export class PersistableModel {
             return t.length == 1 ? t[0] : t;
 
         } else {
-            return this;
+            return null;
         }
 
 

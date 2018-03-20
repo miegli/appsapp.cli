@@ -717,8 +717,11 @@ var PersistableModel = /** @class */ (function () {
                 t.push(d);
             });
             model.refreshListArray(property, t);
+            return t.length == 1 ? t[0] : t;
         }
-        return model;
+        else {
+            return this;
+        }
     };
     /**
      * remove a new list entry
