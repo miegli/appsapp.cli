@@ -294,9 +294,9 @@ export declare class PersistableModel {
      * @param property
      * @param data (json object, persistable model or array of those
      * @param uuid string
-     * @returns Promise<any>
+     * @returns {PersistableModel}
      */
-    add(property: any, data?: any, uuid?: string): Promise<{}>;
+    add(property: any, data?: any, uuid?: string): this;
     /**
      * remove a new list entry
      * @param property
