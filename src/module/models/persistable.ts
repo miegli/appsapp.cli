@@ -895,124 +895,117 @@ export class PersistableModel {
      */
     public add(property, data?: any, uuid?: string) {
 
-        let self = this;
+        let self = this, model = self;
 
-            self.loaded().then((model) => {
+        if (model.getMetadataValue(property, 'isList')) {
 
-                if (model.getMetadataValue(property, 'isList')) {
-
-                    var toAddModels = [];
-                    var toCreateModels = [];
+            var toAddModels = [];
+            var toCreateModels = [];
 
 
-                    if (data.__isPersistableModel !== undefined) {
-                        toAddModels.push(data);
-                    } else if (typeof data == 'object' && data.length !== undefined) {
-                        data.forEach((d) => {
-                            if (d.__isPersistableModel !== undefined) {
-                                toAddModels.push(d);
-                            } else {
-                                toCreateModels.push(d);
-                            }
-                        });
+            if (data.__isPersistableModel !== undefined) {
+                toAddModels.push(data);
+            } else if (typeof data == 'object' && data.length !== undefined) {
+                data.forEach((d) => {
+                    if (d.__isPersistableModel !== undefined) {
+                        toAddModels.push(d);
                     } else {
-                        if (typeof data == 'string') {
-                            var d = [];
-                            d.push(data);
-                            toCreateModels.push(d);
-                        } else {
-                            toCreateModels.push(data);
-                        }
+                        toCreateModels.push(d);
+                    }
+                });
+            } else {
+                if (typeof data == 'string') {
+                    var d = [];
+                    d.push(data);
+                    toCreateModels.push(d);
+                } else {
+                    toCreateModels.push(data);
+                }
 
+            }
+
+            toCreateModels.forEach((d) => {
+
+                if (uuid === undefined || uuid === null) {
+                    uuid = d !== undefined ? d[model.getMetadataValue(property, 'isList', null, 'usePropertyAsUuid')] : null;
+                }
+
+                if (typeof d == 'object' && d.length == 1 && d[0] !== undefined) {
+                    d = d[0];
+                }
+
+                var n = null;
+                if (model.isInBackendMode()) {
+
+                    // backend mode
+                    var constructor = model.getMetadataValue(property, 'isList');
+                    n = new constructor();
+                    if (uuid !== undefined) {
+                        n.setUuid(uuid);
+                    } else {
+                        n.setUuid(UUID.UUID());
                     }
 
-                    toCreateModels.forEach((d) => {
-
-                        if (uuid === undefined || uuid === null) {
-                            uuid = d !== undefined ? d[model.getMetadataValue(property, 'isList', null, 'usePropertyAsUuid')] : null;
-                        }
-
-                        if (typeof d == 'object' && d.length == 1 && d[0] !== undefined) {
-                            d = d[0];
-                        }
-
-                        var n = null;
-                        if (model.isInBackendMode()) {
-
-                            // backend mode
-                            var constructor = model.getMetadataValue(property, 'isList');
-                            n = new constructor();
-                            if (uuid !== undefined) {
-                                n.setUuid(uuid);
-                            } else {
-                                n.setUuid(UUID.UUID());
-                            }
-
-                            if (d !== undefined) {
-                                n.loadJson(d);
-                            }
-
-
-                        } else {
-
-                            n = model.createNewLazyLoadedPersistableModel(model.getAppsAppModuleProvider(), model.getMetadataValue(property, 'isList'), uuid, d);
-
-                            var usePropertyAsUuid = model.getMetadataValue(property, 'isList', null, 'usePropertyAsUuid');
-                            if (usePropertyAsUuid) {
-                                n.watch(usePropertyAsUuid, (uuid) => {
-                                    if (uuid && typeof uuid == 'string' && uuid.length) {
-                                        n.setUuid(uuid);
-                                        model.refreshListArray(property);
-                                    }
-                                });
-                            }
-
-                            if (model.__isAutosave) {
-                                n.autosave();
-                            }
-
-                        }
-
-                        toAddModels.push(n);
-
-                        // force conditions to be calculated initially
-                        if (!n.isInBackendMode()) {
-
-                            Object.keys(n.__conditionActionIfMatchesAction).forEach((property) => {
-                                n.getProperty(property).subscribe((value) => {
-                                    // skip
-                                });
-                            });
-                            Object.keys(n.__conditionActionIfMatchesRemovedProperties).forEach((property) => {
-                                n.getProperty(property).subscribe((value) => {
-                                    // skip
-                                });
-
-                            });
-                        }
-
-
-                    });
-
-                    var t = model.getPropertyValue(property);
-                    if (!t || typeof t == 'undefined') {
-                        t = [];
+                    if (d !== undefined) {
+                        n.loadJson(d);
                     }
 
-                    toAddModels.forEach((d) => {
-                        t.push(d);
-                    });
-
-                    resolve(model.refreshListArray(property, t));
 
                 } else {
-                    resolve(model);
+
+                    n = model.createNewLazyLoadedPersistableModel(model.getAppsAppModuleProvider(), model.getMetadataValue(property, 'isList'), uuid, d);
+
+                    var usePropertyAsUuid = model.getMetadataValue(property, 'isList', null, 'usePropertyAsUuid');
+                    if (usePropertyAsUuid) {
+                        n.watch(usePropertyAsUuid, (uuid) => {
+                            if (uuid && typeof uuid == 'string' && uuid.length) {
+                                n.setUuid(uuid);
+                                model.refreshListArray(property);
+                            }
+                        });
+                    }
+
+                    if (model.__isAutosave) {
+                        n.autosave();
+                    }
+
+                }
+
+                toAddModels.push(n);
+
+                // force conditions to be calculated initially
+                if (!n.isInBackendMode()) {
+
+                    Object.keys(n.__conditionActionIfMatchesAction).forEach((property) => {
+                        n.getProperty(property).subscribe((value) => {
+                            // skip
+                        });
+                    });
+                    Object.keys(n.__conditionActionIfMatchesRemovedProperties).forEach((property) => {
+                        n.getProperty(property).subscribe((value) => {
+                            // skip
+                        });
+
+                    });
                 }
 
 
+            });
 
+            var t = model.getPropertyValue(property);
+            if (!t || typeof t == 'undefined') {
+                t = [];
+            }
 
-        });
+            toAddModels.forEach((d) => {
+                t.push(d);
+            });
+
+            model.refreshListArray(property, t);
+
+        }
+
+        return model;
 
 
     }
