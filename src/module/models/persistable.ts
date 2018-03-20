@@ -891,13 +891,11 @@ export class PersistableModel {
      * @param property
      * @param data (json object, persistable model or array of those
      * @param uuid string
-     * @returns Promise<any>
+     * @returns {PersistableModel}
      */
     public add(property, data?: any, uuid?: string) {
 
         let self = this;
-
-        return new Promise(function (resolve, reject) {
 
             self.loaded().then((model) => {
 
@@ -1011,7 +1009,7 @@ export class PersistableModel {
                     resolve(model);
                 }
 
-            });
+
 
 
         });
