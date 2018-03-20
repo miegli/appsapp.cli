@@ -914,7 +914,7 @@ var PersistableModel = /** @class */ (function () {
             return t.length == 1 ? t[0] : t;
         }
         else {
-            return this;
+            return null;
         }
     };
     /**

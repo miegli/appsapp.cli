@@ -294,7 +294,7 @@ export declare class PersistableModel {
      * @param property
      * @param data (json object, persistable model or array of those
      * @param uuid string
-     * @returns {PersistableModel}
+     * @returns {PersistableModel} | null
      */
     add(property: any, data?: any, uuid?: string): any;
     /**
