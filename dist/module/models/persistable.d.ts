@@ -296,7 +296,7 @@ export declare class PersistableModel {
      * @param uuid string
      * @returns {PersistableModel}
      */
-    add(property: any, data?: any, uuid?: string): this;
+    add(property: any, data?: any, uuid?: string): any;
     /**
      * remove a new list entry
      * @param property
