@@ -630,99 +630,95 @@ var PersistableModel = /** @class */ (function () {
      * @returns {PersistableModel}
      */
     PersistableModel.prototype.add = function (property, data, uuid) {
-        var self = this;
-        self.loaded().then(function (model) {
-            if (model.getMetadataValue(property, 'isList')) {
-                var toAddModels = [];
-                var toCreateModels = [];
-                if (data.__isPersistableModel !== undefined) {
-                    toAddModels.push(data);
-                }
-                else if (typeof data == 'object' && data.length !== undefined) {
-                    data.forEach(function (d) {
-                        if (d.__isPersistableModel !== undefined) {
-                            toAddModels.push(d);
-                        }
-                        else {
-                            toCreateModels.push(d);
-                        }
-                    });
-                }
-                else {
-                    if (typeof data == 'string') {
-                        var d = [];
-                        d.push(data);
+        var self = this, model = self;
+        if (model.getMetadataValue(property, 'isList')) {
+            var toAddModels = [];
+            var toCreateModels = [];
+            if (data.__isPersistableModel !== undefined) {
+                toAddModels.push(data);
+            }
+            else if (typeof data == 'object' && data.length !== undefined) {
+                data.forEach(function (d) {
+                    if (d.__isPersistableModel !== undefined) {
+                        toAddModels.push(d);
+                    }
+                    else {
                         toCreateModels.push(d);
                     }
-                    else {
-                        toCreateModels.push(data);
-                    }
-                }
-                toCreateModels.forEach(function (d) {
-                    if (uuid === undefined || uuid === null) {
-                        uuid = d !== undefined ? d[model.getMetadataValue(property, 'isList', null, 'usePropertyAsUuid')] : null;
-                    }
-                    if (typeof d == 'object' && d.length == 1 && d[0] !== undefined) {
-                        d = d[0];
-                    }
-                    var n = null;
-                    if (model.isInBackendMode()) {
-                        // backend mode
-                        var constructor = model.getMetadataValue(property, 'isList');
-                        n = new constructor();
-                        if (uuid !== undefined) {
-                            n.setUuid(uuid);
-                        }
-                        else {
-                            n.setUuid(angular2_uuid_1.UUID.UUID());
-                        }
-                        if (d !== undefined) {
-                            n.loadJson(d);
-                        }
-                    }
-                    else {
-                        n = model.createNewLazyLoadedPersistableModel(model.getAppsAppModuleProvider(), model.getMetadataValue(property, 'isList'), uuid, d);
-                        var usePropertyAsUuid = model.getMetadataValue(property, 'isList', null, 'usePropertyAsUuid');
-                        if (usePropertyAsUuid) {
-                            n.watch(usePropertyAsUuid, function (uuid) {
-                                if (uuid && typeof uuid == 'string' && uuid.length) {
-                                    n.setUuid(uuid);
-                                    model.refreshListArray(property);
-                                }
-                            });
-                        }
-                        if (model.__isAutosave) {
-                            n.autosave();
-                        }
-                    }
-                    toAddModels.push(n);
-                    // force conditions to be calculated initially
-                    if (!n.isInBackendMode()) {
-                        Object.keys(n.__conditionActionIfMatchesAction).forEach(function (property) {
-                            n.getProperty(property).subscribe(function (value) {
-                                // skip
-                            });
-                        });
-                        Object.keys(n.__conditionActionIfMatchesRemovedProperties).forEach(function (property) {
-                            n.getProperty(property).subscribe(function (value) {
-                                // skip
-                            });
-                        });
-                    }
                 });
-                var t = model.getPropertyValue(property);
-                if (!t || typeof t == 'undefined') {
-                    t = [];
-                }
-                toAddModels.forEach(function (d) {
-                    t.push(d);
-                });
-                resolve(model.refreshListArray(property, t));
             }
             else {
-                resolve(model);
+                if (typeof data == 'string') {
+                    var d = [];
+                    d.push(data);
+                    toCreateModels.push(d);
+                }
+                else {
+                    toCreateModels.push(data);
+                }
             }
-        });
+            toCreateModels.forEach(function (d) {
+                if (uuid === undefined || uuid === null) {
+                    uuid = d !== undefined ? d[model.getMetadataValue(property, 'isList', null, 'usePropertyAsUuid')] : null;
+                }
+                if (typeof d == 'object' && d.length == 1 && d[0] !== undefined) {
+                    d = d[0];
+                }
+                var n = null;
+                if (model.isInBackendMode()) {
+                    // backend mode
+                    var constructor = model.getMetadataValue(property, 'isList');
+                    n = new constructor();
+                    if (uuid !== undefined) {
+                        n.setUuid(uuid);
+                    }
+                    else {
+                        n.setUuid(angular2_uuid_1.UUID.UUID());
+                    }
+                    if (d !== undefined) {
+                        n.loadJson(d);
+                    }
+                }
+                else {
+                    n = model.createNewLazyLoadedPersistableModel(model.getAppsAppModuleProvider(), model.getMetadataValue(property, 'isList'), uuid, d);
+                    var usePropertyAsUuid = model.getMetadataValue(property, 'isList', null, 'usePropertyAsUuid');
+                    if (usePropertyAsUuid) {
+                        n.watch(usePropertyAsUuid, function (uuid) {
+                            if (uuid && typeof uuid == 'string' && uuid.length) {
+                                n.setUuid(uuid);
+                                model.refreshListArray(property);
+                            }
+                        });
+                    }
+                    if (model.__isAutosave) {
+                        n.autosave();
+                    }
+                }
+                toAddModels.push(n);
+                // force conditions to be calculated initially
+                if (!n.isInBackendMode()) {
+                    Object.keys(n.__conditionActionIfMatchesAction).forEach(function (property) {
+                        n.getProperty(property).subscribe(function (value) {
+                            // skip
+                        });
+                    });
+                    Object.keys(n.__conditionActionIfMatchesRemovedProperties).forEach(function (property) {
+                        n.getProperty(property).subscribe(function (value) {
+                            // skip
+                        });
+                    });
+                }
+            });
+            var t = model.getPropertyValue(property);
+            if (!t || typeof t == 'undefined') {
+                t = [];
+            }
+            toAddModels.forEach(function (d) {
+                t.push(d);
+            });
+            model.refreshListArray(property, t);
+        }
+        return model;
     };
     /**
      * remove a new list entry

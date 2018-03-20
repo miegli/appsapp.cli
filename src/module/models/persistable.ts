@@ -1002,10 +1002,13 @@ export class PersistableModel {
             });
 
             model.refreshListArray(property, t);
+            return t.length == 1 ? t[0] : t;
 
+        } else {
+            return this;
         }
 
-        return model;
+
 
 
     }
