@@ -861,7 +861,7 @@ var PersistableModel = /** @class */ (function () {
                 var /** @type {?} */ n = null;
                 if (model.isInBackendMode()) {
                     // backend mode
-                    var /** @type {?} */ constructor = model.getMetadataValue(property, 'isList');
+                    var /** @type {?} */ constructor = typeof model.getMetadataValue(property, 'isList') == 'function' ? model.getMetadataValue(property, 'isList') : global[model.getMetadataValue(property, 'isList')];
                     n = new constructor();
                     if (uuid !== undefined) {
                         n.setUuid(uuid);
@@ -1290,7 +1290,7 @@ var PersistableModel = /** @class */ (function () {
                         }
                         else {
                             // backend mode
-                            var /** @type {?} */ constructor = self.getMetadataValue(property, 'isList');
+                            var /** @type {?} */ constructor = typeof self.getMetadataValue(property, 'isList') == 'function' ? self.getMetadataValue(property, 'isList') : global[self.getMetadataValue(property, 'isList')];
                             item = new constructor();
                             if (uuid !== undefined) {
                                 item.setUuid(uuid);

@@ -1,6 +1,6 @@
 {
   "name": "appsapp-cli",
-  "version": "1.6.242",
+  "version": "1.6.243",
   "license": "MIT",
   "scripts": {
     "build": "gulp build",
