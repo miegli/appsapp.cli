@@ -86,17 +86,17 @@ export function HasConditions(options: [{
                     if (options) {
                         options.forEach((condition: any) => {
 
-                            if (condition.additionalData.propertyNestedAsNestedObject !== undefined) {
+                            if (condition.additionalData.propertyNestedAsNestedObject !== undefined)
 
-                                valueNested = args.object.getHashedValue(JSON.parse(JSON.stringify(args.object.__conditionContraintsPropertiesValue[condition.property])));
+                                valueNested = args.object.__conditionContraintsPropertiesValue[condition.property] !== undefined ? args.object.getHashedValue(JSON.parse(JSON.stringify(args.object.__conditionContraintsPropertiesValue[condition.property]))) : null;
 
-                                if (typeof valueNested == 'object' && valueNested.forEach !== undefined) {
+                                if (valueNested && typeof valueNested == 'object' && valueNested.forEach !== undefined) {
                                     valueNested.forEach((v, i) => {
                                         valueNested[i] = getNestedValue(condition.additionalData.propertyNestedAsNestedObject.substr(condition.additionalData.propertyNestedAsNestedObject.indexOf(".") + 1), valueNested[i],args.object);
                                     });
                                 }
 
-                                if (typeof valueNested == 'string') {
+                                if (valueNested && typeof valueNested == 'string') {
                                     if (args.object.getHashedValue(valueNested) !== valueNested) {
                                         valueNested = args.object.getHashedValue(valueNested);
                                     }
