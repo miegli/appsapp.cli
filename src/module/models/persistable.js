@@ -627,7 +627,7 @@ var PersistableModel = /** @class */ (function () {
      * @param property
      * @param data (json object, persistable model or array of those
      * @param uuid string
-     * @returns {PersistableModel}
+     * @returns {PersistableModel} | null
      */
     PersistableModel.prototype.add = function (property, data, uuid) {
         var self = this, model = self;
@@ -720,7 +720,7 @@ var PersistableModel = /** @class */ (function () {
             return t.length == 1 ? t[0] : t;
         }
         else {
-            return this;
+            return null;
         }
     };
     /**
