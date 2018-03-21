@@ -1302,24 +1302,22 @@ export class PersistableModel {
                     resolve(model);
                 } else {
 
+                    model['tmp__hashedValues'] = {};
+                    if (self['tmp__hashedValues'] === undefined) {
+                        self['tmp__hashedValues'] = {};
+                    }
+                    Object.keys(json['tmp__hashedValues']).forEach((key) => {
+                        self['tmp__hashedValues'][key] = json['tmp__hashedValues'][key];
+                        model['tmp__hashedValues'][key] = json['tmp__hashedValues'][key];
+                    });
+
                     Object.keys(json).forEach((property) => {
                         if (property.substr(0, 2) !== '__' || property.substr(0, 5) == 'tmp__') {
                             if ((self.__edited[property] === undefined || self.__edited[property] === null)) {
 
                                 if (self.isInBackendMode()) {
-                                    if (model.getMetadata(property, 'isSelect').length && json['tmp__hashedValues'] !== undefined) {
-                                        if (self['tmp__hashedValues'] === undefined) {
-                                            self['tmp__hashedValues'] = {};
-                                        }
-                                       Object.keys(json['tmp__hashedValues']).forEach((key) => {
-                                           self['tmp__hashedValues'][key] = json['tmp__hashedValues'][key];
-                                       });
-                                        model[property] = model.transformTypeFromMetadata(property, model[property]);
-                                    }
-                                    if (model.getMetadata(property, 'isList').length) {
-                                        model[property] = model.transformTypeFromMetadata(property, model[property]);
-                                    }
 
+                                    model[property] = model.transformTypeFromMetadata(property, model[property]);
                                     self[property] = model[property];
                                     self.__edited[property] = model[property];
 
@@ -1434,9 +1432,7 @@ export class PersistableModel {
                             // backend mode
                             var constructor = typeof self.getMetadataValue(property, 'isList') == 'function' ? self.getMetadataValue(property, 'isList') : global[self.getMetadataValue(property, 'isList')];
                             item = new constructor();
-                            if (uuid !== undefined) {
-                                item.setUuid(uuid);
-                            }
+                            item.setUuid(uuid);
 
                         }
 

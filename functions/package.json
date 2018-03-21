@@ -11,7 +11,7 @@
   "dependencies": {
     "angular2-uuid": "^1.1.1",
     "angularfire2": "^5.0.0-rc.6",
-    "appsapp-cli": "^1.6.243",
+    "appsapp-cli": "^1.6.244",
     "aws-sdk": "^2.190.0",
     "base-64": "^0.1.0",
     "class-transformer": "^0.1.9",
