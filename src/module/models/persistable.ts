@@ -1307,7 +1307,13 @@ export class PersistableModel {
                             if ((self.__edited[property] === undefined || self.__edited[property] === null)) {
 
                                 if (self.isInBackendMode()) {
-                                    if (model.getMetadata(property, 'isSelect').length) {
+                                    if (model.getMetadata(property, 'isSelect').length && json['tmp__hashedValues'] !== undefined) {
+                                        if (self['tmp__hashedValues'] === undefined) {
+                                            self['tmp__hashedValues'] = {};
+                                        }
+                                       Object.keys(json['tmp__hashedValues']).forEach((key) => {
+                                           self['tmp__hashedValues'][key] = json['tmp__hashedValues'][key];
+                                       });
                                         model[property] = model.transformTypeFromMetadata(property, model[property]);
                                     }
                                     self[property] = model[property];
@@ -1474,8 +1480,11 @@ export class PersistableModel {
                      values.forEach((val) => {
                          realValues.push(self.getHashedValue(val));
                      });
+                     value = realValues;
+                 } else {
+                     value = values;
                  }
-                value = realValues;
+
                  this.setProperty(property, value);
 
             }
