@@ -935,10 +935,12 @@ var PersistableModel = /** @class */ (function () {
                     Object.keys(json).forEach(function (property) {
                         if (property.substr(0, 2) !== '__' || property.substr(0, 5) == 'tmp__') {
                             if ((self.__edited[property] === undefined || self.__edited[property] === null)) {
-                                self.setProperty(property, self.transformTypeFromMetadata(property, model[property]));
                                 if (self.isInBackendMode()) {
-                                    self.__edited[property] = model[property];
-                                    self[property] = model[property];
+                                    self.__edited[property] = self.transformTypeFromMetadata(property, model[property]);
+                                    self[property] = self.transformTypeFromMetadata(property, model[property]);
+                                }
+                                else {
+                                    self.setProperty(property, self.transformTypeFromMetadata(property, model[property]));
                                 }
                             }
                         }
@@ -1049,16 +1051,18 @@ var PersistableModel = /** @class */ (function () {
             return valueAsObjects_1;
         }
         if (this.getMetadata(property, 'isSelect').length) {
-            // let values = typeof value == 'object' ? value : [];
-            // let realValues = [];
-            //
-            // if (values && values.length) {
-            //     values.forEach((val) => {
-            //         realValues.push(self.getHashedValue(val));
-            //     });
-            // }
+            if (this.isInBackendMode()) {
+                var values = typeof value == 'object' ? value : [];
+                var realValues_1 = [];
+                if (values && values.length) {
+                    values.forEach(function (val) {
+                        realValues_1.push(self.getHashedValue(val));
+                    });
+                }
+                value = realValues_1;
+                this.setProperty(property, value);
+            }
             this.executeConditionValidatorCircular(property);
-            //return realValues;
         }
         return value;
     };
