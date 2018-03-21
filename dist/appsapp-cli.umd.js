@@ -1182,7 +1182,13 @@ var PersistableModel = /** @class */ (function () {
                         if (property.substr(0, 2) !== '__' || property.substr(0, 5) == 'tmp__') {
                             if ((self.__edited[property] === undefined || self.__edited[property] === null)) {
                                 if (self.isInBackendMode()) {
-                                    if (model.getMetadata(property, 'isSelect').length) {
+                                    if (model.getMetadata(property, 'isSelect').length && json['tmp__hashedValues'] !== undefined) {
+                                        if (self['tmp__hashedValues'] === undefined) {
+                                            self['tmp__hashedValues'] = {};
+                                        }
+                                        Object.keys(json['tmp__hashedValues']).forEach(function (key) {
+                                            self['tmp__hashedValues'][key] = json['tmp__hashedValues'][key];
+                                        });
                                         model[property] = model.transformTypeFromMetadata(property, model[property]);
                                     }
                                     self[property] = model[property];
@@ -1319,8 +1325,11 @@ var PersistableModel = /** @class */ (function () {
                     values.forEach(function (val) {
                         realValues_1.push(self.getHashedValue(val));
                     });
+                    value = realValues_1;
                 }
-                value = realValues_1;
+                else {
+                    value = values;
+                }
                 this.setProperty(property, value);
             }
             this.executeConditionValidatorCircular(property);
