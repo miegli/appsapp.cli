@@ -1307,8 +1307,8 @@ export class PersistableModel {
                             if ((self.__edited[property] === undefined || self.__edited[property] === null)) {
 
                                 if (self.isInBackendMode()) {
-                                    if (this.getMetadata(property, 'isSelect').length) {
-                                        self[property] = this.transformTypeFromMetadata(property, model[property]);
+                                    if (self.getMetadata(property, 'isSelect').length) {
+                                        self[property] = self.transformTypeFromMetadata(property, model[property]);
                                     }
                                     self[property] = model[property];
                                     self.__edited[property] = self[property];
