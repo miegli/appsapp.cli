@@ -86,7 +86,7 @@ export function HasConditions(options: [{
                     if (options) {
                         options.forEach((condition: any) => {
 
-                            if (condition.additionalData.propertyNestedAsNestedObject !== undefined)
+                            if (condition.additionalData.propertyNestedAsNestedObject !== undefined) {
 
                                 valueNested = args.object.__conditionContraintsPropertiesValue[condition.property] !== undefined ? args.object.getHashedValue(JSON.parse(JSON.stringify(args.object.__conditionContraintsPropertiesValue[condition.property]))) : null;
 
