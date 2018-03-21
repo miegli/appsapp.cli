@@ -1173,7 +1173,6 @@ var PersistableModel = /** @class */ (function () {
         json = typeof json == 'string' ? JSON.parse(json) : json;
         var /** @type {?} */ model = /** @type {?} */ (classTransformer.plainToClass(/** @type {?} */ (this.constructor), json, { excludePrefixes: ["__"] }));
         return new Promise(function (resolve, reject) {
-            var _this = this;
             if (model) {
                 if (clone === true || json === null) {
                     resolve(model);
@@ -1183,8 +1182,8 @@ var PersistableModel = /** @class */ (function () {
                         if (property.substr(0, 2) !== '__' || property.substr(0, 5) == 'tmp__') {
                             if ((self.__edited[property] === undefined || self.__edited[property] === null)) {
                                 if (self.isInBackendMode()) {
-                                    if (_this.getMetadata(property, 'isSelect').length) {
-                                        self[property] = _this.transformTypeFromMetadata(property, model[property]);
+                                    if (self.getMetadata(property, 'isSelect').length) {
+                                        self[property] = self.transformTypeFromMetadata(property, model[property]);
                                     }
                                     self[property] = model[property];
                                     self.__edited[property] = self[property];
