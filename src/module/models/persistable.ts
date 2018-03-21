@@ -1316,6 +1316,10 @@ export class PersistableModel {
                                        });
                                         model[property] = model.transformTypeFromMetadata(property, model[property]);
                                     }
+                                    if (model.getMetadata(property, 'isList').length) {
+                                        model[property] = model.transformTypeFromMetadata(property, model[property]);
+                                    }
+
                                     self[property] = model[property];
                                     self.__edited[property] = model[property];
 
