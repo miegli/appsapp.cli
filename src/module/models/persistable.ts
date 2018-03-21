@@ -938,7 +938,7 @@ export class PersistableModel {
                 if (model.isInBackendMode()) {
 
                     // backend mode
-                    var constructor = model.getMetadataValue(property, 'isList');
+                    var constructor = typeof model.getMetadataValue(property, 'isList') == 'function' ? model.getMetadataValue(property, 'isList') : global[model.getMetadataValue(property, 'isList')];
                     n = new constructor();
                     if (uuid !== undefined) {
                         n.setUuid(uuid);
@@ -1432,11 +1432,12 @@ export class PersistableModel {
                             item = self.createNewLazyLoadedPersistableModel(self.getAppsAppModuleProvider(), self.getMetadataValue(property, 'isList'), uuid);
                         } else {
                             // backend mode
-                            var constructor = self.getMetadataValue(property, 'isList');
+                            var constructor = typeof self.getMetadataValue(property, 'isList') == 'function' ? self.getMetadataValue(property, 'isList') : global[self.getMetadataValue(property, 'isList')];
                             item = new constructor();
                             if (uuid !== undefined) {
                                 item.setUuid(uuid);
                             }
+
                         }
 
                         if (item !== undefined) {
