@@ -1298,6 +1298,7 @@ export class PersistableModel {
 
             if (model) {
 
+
                 if (clone === true || json === null) {
                     resolve(model);
                 } else {
