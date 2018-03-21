@@ -1306,10 +1306,7 @@ export class PersistableModel {
                         if (property.substr(0, 2) !== '__' || property.substr(0, 5) == 'tmp__') {
                             if ((self.__edited[property] === undefined || self.__edited[property] === null)) {
 
-
-
                                 if (self.isInBackendMode()) {
-
                                     if (this.getMetadata(property, 'isSelect').length) {
                                         self[property] = this.transformTypeFromMetadata(property, model[property]);
                                     }
