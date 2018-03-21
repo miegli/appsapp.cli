@@ -1310,11 +1310,11 @@ export class PersistableModel {
                                     if (model.getMetadata(property, 'isSelect').length) {
                                         self[property] = model.transformTypeFromMetadata(property, model[property]);
                                     }
-                                    self[property] = model[property];
+                                    self[property] = self[property];
                                     self.__edited[property] = self[property];
 
                                 } else {
-                                    self.setProperty(property, self.transformTypeFromMetadata(property, model[property]));
+                                    self.setProperty(property, model.transformTypeFromMetadata(property, model[property]));
                                 }
 
                             }

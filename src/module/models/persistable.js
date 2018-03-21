@@ -936,8 +936,8 @@ var PersistableModel = /** @class */ (function () {
                         if (property.substr(0, 2) !== '__' || property.substr(0, 5) == 'tmp__') {
                             if ((self.__edited[property] === undefined || self.__edited[property] === null)) {
                                 if (self.isInBackendMode()) {
-                                    if (self.getMetadata(property, 'isSelect').length) {
-                                        self[property] = self.transformTypeFromMetadata(property, model[property]);
+                                    if (model.getMetadata(property, 'isSelect').length) {
+                                        self[property] = model.transformTypeFromMetadata(property, model[property]);
                                     }
                                     self[property] = model[property];
                                     self.__edited[property] = self[property];
