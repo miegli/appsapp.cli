@@ -1312,9 +1312,9 @@ export class PersistableModel {
 
                     Object.keys(json).forEach((property) => {
                         if (property.substr(0, 2) !== '__' || property.substr(0, 5) == 'tmp__') {
-                            if ((self.isInBackendMode() || self.__edited[property] === undefined || self.__edited[property] === null)) {
+                           // if ((self.isInBackendMode() || self.__edited[property] === undefined || self.__edited[property] === null)) {
                                 self.setProperty(property, model.transformTypeFromMetadata(property, model[property]));
-                            }
+                           // }
 
                         }
                     });
