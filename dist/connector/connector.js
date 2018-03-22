@@ -268,50 +268,46 @@ class Connector {
                     });
                 }
                 else {
-                    let model = new global[e.object];
-                    model.loadJson(e.snapshot).then((data) => {
-                        watcher.callback({
-                            user: e.user,
-                            object: e.object,
-                            objectId: e.objectid,
-                            project: e.project,
-                            action: e.action,
-                            eventId: eventId,
-                        }, data, {
-                            'resolve': function () {
-                                data.validate().then(() => {
-                                    e.action.state = 'done';
-                                    if (data.hasChanges()) {
-                                        self.db.ref('_queue/' + eventId).update({
-                                            action: e.action,
-                                            targetData: data !== undefined ? data.convertListPropertiesFromArrayToObject().serialize(true, true) : null
-                                        });
-                                    }
-                                    else {
-                                        self.db.ref('_queue/' + eventId).update({
-                                            action: e.action
-                                        });
-                                    }
-                                }).catch((error) => {
-                                    e.action.state = 'error';
+                    let model = new global[e.object], data = model.loadJson(e.snapshot);
+                    watcher.callback({
+                        user: e.user,
+                        object: e.object,
+                        objectId: e.objectid,
+                        project: e.project,
+                        action: e.action,
+                        eventId: eventId,
+                    }, data, {
+                        'resolve': function () {
+                            data.validate().then(() => {
+                                e.action.state = 'done';
+                                if (data.hasChanges()) {
                                     self.db.ref('_queue/' + eventId).update({
                                         action: e.action,
-                                        targetMessage: 'Validation error'
+                                        targetData: data !== undefined ? data.convertListPropertiesFromArrayToObject().serialize(true, true) : null
                                     });
-                                    console.log(error);
-                                });
-                            },
-                            'reject': function (error) {
+                                }
+                                else {
+                                    self.db.ref('_queue/' + eventId).update({
+                                        action: e.action
+                                    });
+                                }
+                            }).catch((error) => {
                                 e.action.state = 'error';
                                 self.db.ref('_queue/' + eventId).update({
                                     action: e.action,
-                                    targetData: null,
-                                    targetMessage: error !== undefined ? error : null
+                                    targetMessage: 'Validation error'
                                 });
-                            }
-                        });
-                    }).catch((error) => {
-                        console.log(error);
+                                console.log(error);
+                            });
+                        },
+                        'reject': function (error) {
+                            e.action.state = 'error';
+                            self.db.ref('_queue/' + eventId).update({
+                                action: e.action,
+                                targetData: null,
+                                targetMessage: error !== undefined ? error : null
+                            });
+                        }
                     });
                 }
             }
