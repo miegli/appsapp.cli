@@ -268,50 +268,46 @@ var Connector = /** @class */ (function () {
                     });
                 }
                 else {
-                    var model = new global[e.object];
-                    model.loadJson(e.snapshot).then(function (data) {
-                        watcher.callback({
-                            user: e.user,
-                            object: e.object,
-                            objectId: e.objectid,
-                            project: e.project,
-                            action: e.action,
-                            eventId: eventId,
-                        }, data, {
-                            'resolve': function () {
-                                data.validate().then(function () {
-                                    e.action.state = 'done';
-                                    if (data.hasChanges()) {
-                                        self.db.ref('_queue/' + eventId).update({
-                                            action: e.action,
-                                            targetData: data !== undefined ? data.convertListPropertiesFromArrayToObject().serialize(true, true) : null
-                                        });
-                                    }
-                                    else {
-                                        self.db.ref('_queue/' + eventId).update({
-                                            action: e.action
-                                        });
-                                    }
-                                }).catch(function (error) {
-                                    e.action.state = 'error';
+                    var model = new global[e.object], data_1 = model.loadJson(e.snapshot);
+                    watcher.callback({
+                        user: e.user,
+                        object: e.object,
+                        objectId: e.objectid,
+                        project: e.project,
+                        action: e.action,
+                        eventId: eventId,
+                    }, data_1, {
+                        'resolve': function () {
+                            data_1.validate().then(function () {
+                                e.action.state = 'done';
+                                if (data_1.hasChanges()) {
                                     self.db.ref('_queue/' + eventId).update({
                                         action: e.action,
-                                        targetMessage: 'Validation error'
+                                        targetData: data_1 !== undefined ? data_1.convertListPropertiesFromArrayToObject().serialize(true, true) : null
                                     });
-                                    console.log(error);
-                                });
-                            },
-                            'reject': function (error) {
+                                }
+                                else {
+                                    self.db.ref('_queue/' + eventId).update({
+                                        action: e.action
+                                    });
+                                }
+                            }).catch(function (error) {
                                 e.action.state = 'error';
                                 self.db.ref('_queue/' + eventId).update({
                                     action: e.action,
-                                    targetData: null,
-                                    targetMessage: error !== undefined ? error : null
+                                    targetMessage: 'Validation error'
                                 });
-                            }
-                        });
-                    }).catch(function (error) {
-                        console.log(error);
+                                console.log(error);
+                            });
+                        },
+                        'reject': function (error) {
+                            e.action.state = 'error';
+                            self.db.ref('_queue/' + eventId).update({
+                                action: e.action,
+                                targetData: null,
+                                targetMessage: error !== undefined ? error : null
+                            });
+                        }
                     });
                 }
             }

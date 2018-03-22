@@ -417,7 +417,10 @@ function call(action, data) {
 
                 getModel(action.object).then((model) => {
 
-                    model.loadJson(data).then(() => {
+                    var data = model.loadJson(data);
+
+
+                    data.validate().then(() => {
 
                         if (!data) {
 
