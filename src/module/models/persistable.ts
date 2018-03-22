@@ -1307,10 +1307,12 @@ export class PersistableModel {
                     if (self['tmp__hashedValues'] === undefined) {
                         self['tmp__hashedValues'] = {};
                     }
-                    Object.keys(json['tmp__hashedValues']).forEach((key) => {
-                        self['tmp__hashedValues'][key] = json['tmp__hashedValues'][key];
-                        model['tmp__hashedValues'][key] = json['tmp__hashedValues'][key];
-                    });
+                    if (json['tmp__hashedValues'] !== undefined) {
+                        Object.keys(json['tmp__hashedValues']).forEach((key) => {
+                            self['tmp__hashedValues'][key] = json['tmp__hashedValues'][key];
+                            model['tmp__hashedValues'][key] = json['tmp__hashedValues'][key];
+                        });
+                    }
 
                     Object.keys(json).forEach((property) => {
                         if (property.substr(0, 2) !== '__' || property.substr(0, 5) == 'tmp__') {
