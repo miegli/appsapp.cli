@@ -1284,7 +1284,7 @@ export class PersistableModel {
      * load json data
      * @param {object|string} stringified or real json object
      * @param clone boolean
-     * @returns {Promise<any>}
+     * @returns {PersistableModel}
      */
     public loadJson(json, clone?) {
 
@@ -1293,41 +1293,26 @@ export class PersistableModel {
 
         let model = <any>plainToClass(<any>this.constructor, json, {excludePrefixes: ["__"]});
 
-
-        return new Promise(function (resolve, reject) {
-
             if (model) {
 
-
                 if (clone === true || json === null) {
-                    resolve(model);
+                   return model;
                 } else {
 
                     model['tmp__hashedValues'] = {};
                     if (self['tmp__hashedValues'] === undefined) {
                         self['tmp__hashedValues'] = {};
                     }
-                    if (json['tmp__hashedValues'] !== undefined) {
-                        Object.keys(json['tmp__hashedValues']).forEach((key) => {
-                            self['tmp__hashedValues'][key] = json['tmp__hashedValues'][key];
-                            model['tmp__hashedValues'][key] = json['tmp__hashedValues'][key];
-                        });
-                    }
+                    if (json['tmp__hashedValues'] !== undefined) {}
+                    Object.keys(json['tmp__hashedValues']).forEach((key) => {
+                        self['tmp__hashedValues'][key] = json['tmp__hashedValues'][key];
+                        model['tmp__hashedValues'][key] = json['tmp__hashedValues'][key];
+                    });
 
                     Object.keys(json).forEach((property) => {
                         if (property.substr(0, 2) !== '__' || property.substr(0, 5) == 'tmp__') {
-                            if ((self.__edited[property] === undefined || self.__edited[property] === null)) {
-
-                                if (self.isInBackendMode()) {
-
-                                    model[property] = model.transformTypeFromMetadata(property, model[property]);
-                                    self[property] = model[property];
-                                    self.__edited[property] = model[property];
-
-                                } else {
-                                    self.setProperty(property, model.transformTypeFromMetadata(property, model[property]));
-                                }
-
+                            if ((self.isInBackendMode() || self.__edited[property] === undefined || self.__edited[property] === null)) {
+                                self.setProperty(property, model.transformTypeFromMetadata(property, model[property]));
                             }
 
                         }
@@ -1335,24 +1320,22 @@ export class PersistableModel {
 
                     self.refreshAllListArrays();
 
-                    self.validate().then((success) => {
-                        self.emit();
-                        resolve(self);
-                    }).catch((error) => {
-                        Object.keys(error).forEach((e: any) => {
-                            self['__validationErrors'][e.property] = true;
-                        });
-                        resolve(self);
-                    });
+                    // self.validate().then((success) => {
+                    //     self.emit();
+                    //     resolve(self);
+                    // }).catch((error) => {
+                    //     Object.keys(error).forEach((e: any) => {
+                    //         self['__validationErrors'][e.property] = true;
+                    //     });
+                    //     resolve(self);
+                    // });
 
                 }
 
 
-            } else {
-                resolve(self);
-            }
+        }
 
-        });
+        return self;
 
     }
 
@@ -1441,23 +1424,20 @@ export class PersistableModel {
 
                         if (item !== undefined) {
 
-                            item.loadJson(itemOriginal).then((item) => {
+                            let itemLoaded = item.loadJson(itemOriginal);
 
                                 if (!item.isInBackendMode()) {
-                                    item.getChangesObserverable().subscribe((next) => {
+                                    itemLoaded.getChangesObserverable().subscribe((next) => {
                                         if (next.model.getParent()) {
                                             next.model.getParent().setProperty(property, self.getPropertyValue(property, true));
                                         }
                                     });
                                 }
 
-                                valueAsObjects.push(item.transformAllProperties());
+                                valueAsObjects.push(itemLoaded.transformAllProperties());
                                 //valueAsObjects.push(item);
-                                item.refreshAllListArrays();
-
-                            });
-
-                            item.setParent(self);
+                                itemLoaded.refreshAllListArrays();
+                                itemLoaded.setParent(self);
 
 
                         }
