@@ -331,8 +331,8 @@ export class Connector {
                         // removed old queue entry
                     });
                 } else {
-                    let model = new global[e.object];
-                    model.loadJson(e.snapshot).then((data) => {
+                    let model = new global[e.object], data = model.loadJson(e.snapshot);
+
 
                         watcher.callback({
                             user: e.user,
@@ -381,9 +381,7 @@ export class Connector {
                         });
 
 
-                    }).catch((error) => {
-                        console.log(error);
-                    });
+
                 }
 
 

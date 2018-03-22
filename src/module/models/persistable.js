@@ -935,11 +935,12 @@ var PersistableModel = /** @class */ (function () {
                 if (self['tmp__hashedValues'] === undefined) {
                     self['tmp__hashedValues'] = {};
                 }
-                if (json['tmp__hashedValues'] !== undefined) { }
-                Object.keys(json['tmp__hashedValues']).forEach(function (key) {
-                    self['tmp__hashedValues'][key] = json['tmp__hashedValues'][key];
-                    model['tmp__hashedValues'][key] = json['tmp__hashedValues'][key];
-                });
+                if (json['tmp__hashedValues'] !== undefined && json['tmp__hashedValues'] !== null) {
+                    Object.keys(json['tmp__hashedValues']).forEach(function (key) {
+                        self['tmp__hashedValues'][key] = json['tmp__hashedValues'][key];
+                        model['tmp__hashedValues'][key] = json['tmp__hashedValues'][key];
+                    });
+                }
                 Object.keys(json).forEach(function (property) {
                     if (property.substr(0, 2) !== '__' || property.substr(0, 5) == 'tmp__') {
                         if ((self.isInBackendMode() || self.__edited[property] === undefined || self.__edited[property] === null)) {
