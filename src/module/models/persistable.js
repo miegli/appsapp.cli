@@ -920,58 +920,46 @@ var PersistableModel = /** @class */ (function () {
      * load json data
      * @param {object|string} stringified or real json object
      * @param clone boolean
-     * @returns {Promise<any>}
+     * @returns {PersistableModel}
      */
     PersistableModel.prototype.loadJson = function (json, clone) {
         var self = this;
         json = typeof json == 'string' ? JSON.parse(json) : json;
         var model = class_transformer_1.plainToClass(this.constructor, json, { excludePrefixes: ["__"] });
-        return new Promise(function (resolve, reject) {
-            if (model) {
-                if (clone === true || json === null) {
-                    resolve(model);
-                }
-                else {
-                    model['tmp__hashedValues'] = {};
-                    if (self['tmp__hashedValues'] === undefined) {
-                        self['tmp__hashedValues'] = {};
-                    }
-                    if (json['tmp__hashedValues'] !== undefined) {
-                        Object.keys(json['tmp__hashedValues']).forEach(function (key) {
-                            self['tmp__hashedValues'][key] = json['tmp__hashedValues'][key];
-                            model['tmp__hashedValues'][key] = json['tmp__hashedValues'][key];
-                        });
-                    }
-                    Object.keys(json).forEach(function (property) {
-                        if (property.substr(0, 2) !== '__' || property.substr(0, 5) == 'tmp__') {
-                            if ((self.__edited[property] === undefined || self.__edited[property] === null)) {
-                                if (self.isInBackendMode()) {
-                                    model[property] = model.transformTypeFromMetadata(property, model[property]);
-                                    self[property] = model[property];
-                                    self.__edited[property] = model[property];
-                                }
-                                else {
-                                    self.setProperty(property, model.transformTypeFromMetadata(property, model[property]));
-                                }
-                            }
-                        }
-                    });
-                    self.refreshAllListArrays();
-                    self.validate().then(function (success) {
-                        self.emit();
-                        resolve(self);
-                    }).catch(function (error) {
-                        Object.keys(error).forEach(function (e) {
-                            self['__validationErrors'][e.property] = true;
-                        });
-                        resolve(self);
-                    });
-                }
+        if (model) {
+            if (clone === true || json === null) {
+                return model;
             }
             else {
-                resolve(self);
+                model['tmp__hashedValues'] = {};
+                if (self['tmp__hashedValues'] === undefined) {
+                    self['tmp__hashedValues'] = {};
+                }
+                if (json['tmp__hashedValues'] !== undefined) { }
+                Object.keys(json['tmp__hashedValues']).forEach(function (key) {
+                    self['tmp__hashedValues'][key] = json['tmp__hashedValues'][key];
+                    model['tmp__hashedValues'][key] = json['tmp__hashedValues'][key];
+                });
+                Object.keys(json).forEach(function (property) {
+                    if (property.substr(0, 2) !== '__' || property.substr(0, 5) == 'tmp__') {
+                        if ((self.isInBackendMode() || self.__edited[property] === undefined || self.__edited[property] === null)) {
+                            self.setProperty(property, model.transformTypeFromMetadata(property, model[property]));
+                        }
+                    }
+                });
+                self.refreshAllListArrays();
+                // self.validate().then((success) => {
+                //     self.emit();
+                //     resolve(self);
+                // }).catch((error) => {
+                //     Object.keys(error).forEach((e: any) => {
+                //         self['__validationErrors'][e.property] = true;
+                //     });
+                //     resolve(self);
+                // });
             }
-        });
+        }
+        return self;
     };
     /**
      * transform type from metadata to avoid non matching data types
@@ -1036,19 +1024,18 @@ var PersistableModel = /** @class */ (function () {
                             item.setUuid(uuid);
                         }
                         if (item !== undefined) {
-                            item.loadJson(itemOriginal).then(function (item) {
-                                if (!item.isInBackendMode()) {
-                                    item.getChangesObserverable().subscribe(function (next) {
-                                        if (next.model.getParent()) {
-                                            next.model.getParent().setProperty(property, self.getPropertyValue(property, true));
-                                        }
-                                    });
-                                }
-                                valueAsObjects_1.push(item.transformAllProperties());
-                                //valueAsObjects.push(item);
-                                item.refreshAllListArrays();
-                            });
-                            item.setParent(self);
+                            var itemLoaded = item.loadJson(itemOriginal);
+                            if (!item.isInBackendMode()) {
+                                itemLoaded.getChangesObserverable().subscribe(function (next) {
+                                    if (next.model.getParent()) {
+                                        next.model.getParent().setProperty(property, self.getPropertyValue(property, true));
+                                    }
+                                });
+                            }
+                            valueAsObjects_1.push(itemLoaded.transformAllProperties());
+                            //valueAsObjects.push(item);
+                            itemLoaded.refreshAllListArrays();
+                            itemLoaded.setParent(self);
                         }
                     }
                     else {
