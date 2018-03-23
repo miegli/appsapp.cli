@@ -818,6 +818,17 @@ export class PersistableModel {
     }
 
     /**
+     * return current property value unhashed
+     * @param property
+     * @returns {any}
+     */
+    public get(property) {
+
+        return this.getHashedValue(this.getPropertyValue(property));
+
+    }
+
+    /**
      * get properties
      * @param stringify
      */

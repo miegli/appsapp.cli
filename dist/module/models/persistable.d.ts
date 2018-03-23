@@ -275,6 +275,12 @@ export declare class PersistableModel {
      */
     getPropertyValue(property: any, editing?: any): any;
     /**
+     * return current property value unhashed
+     * @param property
+     * @returns {any}
+     */
+    get(property: any): any;
+    /**
      * get properties
      * @param stringify
      */
