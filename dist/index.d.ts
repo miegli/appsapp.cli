@@ -7,6 +7,8 @@ export * from './module/validation/validators/HasDescription';
 export * from './module/validation/validators/HasLabel';
 export * from './module/validation/validators/HasPlaceholder';
 export * from './module/validation/validators/HasPrecision';
+export * from './module/validation/validators/HasColor';
+export * from './module/validation/validators/HasClearable';
 export * from './module/validation/validators/IsBirthDate';
 export * from './module/validation/validators/IsCalendar';
 export * from './module/validation/validators/IsDateRange';

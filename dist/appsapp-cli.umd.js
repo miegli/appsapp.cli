@@ -107,30 +107,28 @@ var PersistableModel = /** @class */ (function () {
                  * creates and update bindings for getProperty()-Method
                  */
         this.__observable.subscribe(function (next) {
-            if (!self.hasPendingChanges() || self.getFirebaseDatabase() === undefined) {
-                if (self.__bindingsObserver) {
-                    self.__editedObservableObservers.forEach(function (callback) {
-                        if (next[callback.property] !== undefined) {
-                            var /** @type {?} */ lastValue = null;
-                            try {
-                                lastValue = objectHash.sha1(next[callback.property]);
-                            }
-                            catch (/** @type {?} */ e) {
-                                lastValue = next[callback.property];
-                            }
-                            if (lastValue !== callback.lastValue) {
-                                callback.callback(next[callback.property]);
-                                callback.lastValue = lastValue;
-                            }
+            if (self.__bindingsObserver) {
+                self.__editedObservableObservers.forEach(function (callback) {
+                    if (next[callback.property] !== undefined) {
+                        var /** @type {?} */ lastValue = null;
+                        try {
+                            lastValue = objectHash.sha1(next[callback.property]);
                         }
-                    });
-                    Object.keys(self.__bindingsObserver).forEach(function (property) {
-                        if (next[property] !== undefined) {
-                            self.executeConditionValidatorCircular(property);
-                            self.__bindingsObserver[property].next(next[property]);
+                        catch (/** @type {?} */ e) {
+                            lastValue = next[callback.property];
                         }
-                    });
-                }
+                        if (lastValue !== callback.lastValue) {
+                            callback.callback(next[callback.property]);
+                            callback.lastValue = lastValue;
+                        }
+                    }
+                });
+                Object.keys(self.__bindingsObserver).forEach(function (property) {
+                    if (next[property] !== undefined) {
+                        self.executeConditionValidatorCircular(property);
+                        self.__bindingsObserver[property].next(next[property]);
+                    }
+                });
             }
         });
     };
@@ -620,6 +618,7 @@ var PersistableModel = /** @class */ (function () {
                 self.__bindings[property] = new rxjs.Observable(function (observer) {
                     self.__bindingsObserver[property] = observer;
                 });
+                self.__bindings[property].subscribe();
                 if (self.__bindingsObserver[property] !== undefined) {
                     self.__bindingsObserver[property].next(self[property]);
                 }
@@ -987,9 +986,9 @@ var PersistableModel = /** @class */ (function () {
      * @return {?} this
      */
     function (property) {
-        if (this.getMetadataValue(property, 'isList')) {
-            this[property] = this.transformTypeFromMetadata(property, []);
-        }
+        this[property] = this.transformTypeFromMetadata(property, '');
+        this.setProperty(property, this[property]);
+        this.emit();
         return this;
     };
     /**
@@ -1202,21 +1201,19 @@ var PersistableModel = /** @class */ (function () {
                 }
                 Object.keys(json).forEach(function (property) {
                     if (property.substr(0, 2) !== '__' || property.substr(0, 5) == 'tmp__') {
-                        // if ((self.isInBackendMode() || self.__edited[property] === undefined || self.__edited[property] === null)) {
-                        self.setProperty(property, model.transformTypeFromMetadata(property, model[property]));
-                        // }
+                        if ((self.isInBackendMode() || self.__edited[property] === undefined || self.__edited[property] === null)) {
+                            self[property] = model.transformTypeFromMetadata(property, model[property]);
+                        }
                     }
                 });
                 self.refreshAllListArrays();
-                // self.validate().then((success) => {
-                //     self.emit();
-                //     resolve(self);
-                // }).catch((error) => {
-                //     Object.keys(error).forEach((e: any) => {
-                //         self['__validationErrors'][e.property] = true;
-                //     });
-                //     resolve(self);
-                // });
+                self.validate().then(function (success) {
+                    self.emit();
+                }).catch(function (error) {
+                    Object.keys(error).forEach(function (e) {
+                        self['__validationErrors'][e.property] = true;
+                    });
+                });
             }
         }
         return self;
@@ -2523,16 +2520,17 @@ function HasDescription(description, validationOptions) {
  */
 /**
  * @param {?} label
+ * @param {?=} labelPosition
  * @param {?=} validationOptions
  * @return {?}
  */
-function HasLabel(label, validationOptions) {
+function HasLabel(label, labelPosition, validationOptions) {
     return function (object, propertyName) {
         classValidator.registerDecorator({
             name: "hasLabel",
             target: object.constructor,
             propertyName: propertyName,
-            constraints: [{ 'type': 'hasLabel', 'value': label }],
+            constraints: [{ 'type': 'hasLabel', 'value': { label: label, labelPosition: labelPosition ? labelPosition : 'after' } }],
             options: validationOptions,
             validator: {
                 validate: /**
@@ -2595,6 +2593,67 @@ function HasPrecision(precision, validationOptions) {
             target: object.constructor,
             propertyName: propertyName,
             constraints: [{ 'type': 'hasPrecision', 'value': precision }],
+            options: validationOptions,
+            validator: {
+                validate: /**
+                 * @param {?} value
+                 * @param {?} args
+                 * @return {?}
+                 */
+                function (value, args) {
+                    return true;
+                }
+            }
+        });
+    };
+}
+
+/**
+ * @fileoverview added by tsickle
+ * @suppress {checkTypes} checked by tsc
+ */
+/**
+ * @param {?} color
+ * @param {?=} validationOptions
+ * @return {?}
+ */
+function HasColor(color, validationOptions) {
+    return function (object, propertyName) {
+        classValidator.registerDecorator({
+            name: "hasColor",
+            target: object.constructor,
+            propertyName: propertyName,
+            constraints: [{ 'type': 'hasColor', 'value': color }],
+            options: validationOptions,
+            validator: {
+                validate: /**
+                 * @param {?} value
+                 * @param {?} args
+                 * @return {?}
+                 */
+                function (value, args) {
+                    return true;
+                }
+            }
+        });
+    };
+}
+
+/**
+ * @fileoverview added by tsickle
+ * @suppress {checkTypes} checked by tsc
+ */
+/**
+ * @param {?=} validationOptions
+ * @return {?}
+ */
+function HasClearable(validationOptions) {
+    return function (object, propertyName) {
+        classValidator.registerDecorator({
+            name: "hasClearable",
+            target: object.constructor,
+            propertyName: propertyName,
+            constraints: [{ 'type': 'hasClearable', 'value': true }],
             options: validationOptions,
             validator: {
                 validate: /**
@@ -3195,6 +3254,8 @@ exports.HasDescription = HasDescription;
 exports.HasLabel = HasLabel;
 exports.HasPlaceholder = HasPlaceholder;
 exports.HasPrecision = HasPrecision;
+exports.HasColor = HasColor;
+exports.HasClearable = HasClearable;
 exports.IsBirthDate = IsBirthDate;
 exports.IsCalendar = IsCalendar;
 exports.IsDateRange = IsDateRange;

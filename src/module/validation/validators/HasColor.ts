@@ -1,12 +1,12 @@
 import {registerDecorator, ValidationOptions, ValidationArguments} from "class-validator";
 
-export function HasLabel(label: string, labelPosition?: 'before' | 'after', validationOptions?: ValidationOptions) {
+export function HasColor(color: 'primary' | 'accent' | 'warn' | undefined, validationOptions?: ValidationOptions) {
   return function (object: Object, propertyName: string) {
     registerDecorator({
-      name: "hasLabel",
+      name: "hasColor",
       target: object.constructor,
       propertyName: propertyName,
-      constraints: [{'type': 'hasLabel', 'value': {label: label, labelPosition: labelPosition ? labelPosition : 'after'}}],
+      constraints: [{'type': 'hasColor', 'value': color}],
       options: validationOptions,
       validator: {
         validate(value: any, args: ValidationArguments) {

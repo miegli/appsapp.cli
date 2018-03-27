@@ -170,35 +170,33 @@ export class PersistableModel {
          */
         this.__observable.subscribe((next) => {
 
-            if (!self.hasPendingChanges() || self.getFirebaseDatabase() === undefined) {
 
-                if (self.__bindingsObserver) {
+            if (self.__bindingsObserver) {
 
-                    self.__editedObservableObservers.forEach((callback: any) => {
-                        if (next[callback.property] !== undefined) {
-                            var lastValue = null;
-                            try {
-                                lastValue = objectHash.sha1(next[callback.property])
-                            } catch (e) {
-                                lastValue = next[callback.property];
-                            }
-                            if (lastValue !== callback.lastValue) {
-                                callback.callback(next[callback.property]);
-                                callback.lastValue = lastValue;
-                            }
+                self.__editedObservableObservers.forEach((callback: any) => {
+                    if (next[callback.property] !== undefined) {
+                        var lastValue = null;
+                        try {
+                            lastValue = objectHash.sha1(next[callback.property])
+                        } catch (e) {
+                            lastValue = next[callback.property];
                         }
-                    });
-
-                    Object.keys(self.__bindingsObserver).forEach((property) => {
-                        if (next[property] !== undefined) {
-                            self.executeConditionValidatorCircular(property);
-                            self.__bindingsObserver[property].next(next[property]);
+                        if (lastValue !== callback.lastValue) {
+                            callback.callback(next[callback.property]);
+                            callback.lastValue = lastValue;
                         }
-                    });
+                    }
+                });
 
-                }
+                Object.keys(self.__bindingsObserver).forEach((property) => {
+                    if (next[property] !== undefined) {
+                        self.executeConditionValidatorCircular(property);
+                        self.__bindingsObserver[property].next(next[property]);
+                    }
+                });
 
             }
+
 
         });
 
@@ -693,6 +691,7 @@ export class PersistableModel {
                 self.__bindings[property] = new Observable<any>((observer: Observer<any>) => {
                     self.__bindingsObserver[property] = observer;
                 });
+                self.__bindings[property].subscribe();
 
                 if (self.__bindingsObserver[property] !== undefined) {
                     self.__bindingsObserver[property].next(self[property]);
@@ -1020,8 +1019,6 @@ export class PersistableModel {
         }
 
 
-
-
     }
 
     /**
@@ -1080,9 +1077,9 @@ export class PersistableModel {
     public clear(property) {
 
 
-        if (this.getMetadataValue(property, 'isList')) {
-            this[property] = this.transformTypeFromMetadata(property, []);
-        }
+        this[property] = this.transformTypeFromMetadata(property, '');
+        this.setProperty(property, this[property]);
+        this.emit();
 
         return this;
 
@@ -1304,45 +1301,46 @@ export class PersistableModel {
 
         let model = <any>plainToClass(<any>this.constructor, json, {excludePrefixes: ["__"]});
 
-            if (model) {
+        if (model) {
 
-                if (clone === true || json === null) {
-                   return model;
-                } else {
+            if (clone === true || json === null) {
+                return model;
+            } else {
 
-                    model['tmp__hashedValues'] = {};
-                    if (self['tmp__hashedValues'] === undefined) {
-                        self['tmp__hashedValues'] = {};
-                    }
-                    if (json['tmp__hashedValues'] !== undefined && json['tmp__hashedValues'] !== null) {
-                        Object.keys(json['tmp__hashedValues']).forEach((key) => {
-                            self['tmp__hashedValues'][key] = json['tmp__hashedValues'][key];
-                            model['tmp__hashedValues'][key] = json['tmp__hashedValues'][key];
-                        });
-                    }
+                model['tmp__hashedValues'] = {};
+                if (self['tmp__hashedValues'] === undefined) {
+                    self['tmp__hashedValues'] = {};
+                }
+                if (json['tmp__hashedValues'] !== undefined && json['tmp__hashedValues'] !== null) {
+                    Object.keys(json['tmp__hashedValues']).forEach((key) => {
+                        self['tmp__hashedValues'][key] = json['tmp__hashedValues'][key];
+                        model['tmp__hashedValues'][key] = json['tmp__hashedValues'][key];
+                    });
+                }
 
-                    Object.keys(json).forEach((property) => {
-                        if (property.substr(0, 2) !== '__' || property.substr(0, 5) == 'tmp__') {
-                           // if ((self.isInBackendMode() || self.__edited[property] === undefined || self.__edited[property] === null)) {
-                                self.setProperty(property, model.transformTypeFromMetadata(property, model[property]));
-                           // }
-
+                Object.keys(json).forEach((property) => {
+                    if (property.substr(0, 2) !== '__' || property.substr(0, 5) == 'tmp__') {
+                        if ((self.isInBackendMode() || self.__edited[property] === undefined || self.__edited[property] === null)) {
+                        self[property] = model.transformTypeFromMetadata(property, model[property]);
                         }
+
+                    }
+                });
+
+                self.refreshAllListArrays();
+
+
+                self.validate().then((success) => {
+                    self.emit();
+
+                }).catch((error) => {
+                    Object.keys(error).forEach((e: any) => {
+                        self['__validationErrors'][e.property] = true;
                     });
 
-                    self.refreshAllListArrays();
+                });
 
-                    // self.validate().then((success) => {
-                    //     self.emit();
-                    //     resolve(self);
-                    // }).catch((error) => {
-                    //     Object.keys(error).forEach((e: any) => {
-                    //         self['__validationErrors'][e.property] = true;
-                    //     });
-                    //     resolve(self);
-                    // });
-
-                }
+            }
 
 
         }
@@ -1438,18 +1436,18 @@ export class PersistableModel {
 
                             let itemLoaded = item.loadJson(itemOriginal);
 
-                                if (!item.isInBackendMode()) {
-                                    itemLoaded.getChangesObserverable().subscribe((next) => {
-                                        if (next.model.getParent()) {
-                                            next.model.getParent().setProperty(property, self.getPropertyValue(property, true));
-                                        }
-                                    });
-                                }
+                            if (!item.isInBackendMode()) {
+                                itemLoaded.getChangesObserverable().subscribe((next) => {
+                                    if (next.model.getParent()) {
+                                        next.model.getParent().setProperty(property, self.getPropertyValue(property, true));
+                                    }
+                                });
+                            }
 
-                                valueAsObjects.push(itemLoaded.transformAllProperties());
-                                //valueAsObjects.push(item);
-                                itemLoaded.refreshAllListArrays();
-                                itemLoaded.setParent(self);
+                            valueAsObjects.push(itemLoaded.transformAllProperties());
+                            //valueAsObjects.push(item);
+                            itemLoaded.refreshAllListArrays();
+                            itemLoaded.setParent(self);
 
 
                         }
@@ -1469,24 +1467,23 @@ export class PersistableModel {
 
 
             if (this.isInBackendMode()) {
-                 let values = typeof value == 'object' ? value : [];
-                 let realValues = [];
+                let values = typeof value == 'object' ? value : [];
+                let realValues = [];
 
-                 if (values && values.length) {
-                     values.forEach((val) => {
-                         realValues.push(self.getHashedValue(val));
-                     });
-                     value = realValues;
-                 } else {
-                     value = values;
-                 }
+                if (values && values.length) {
+                    values.forEach((val) => {
+                        realValues.push(self.getHashedValue(val));
+                    });
+                    value = realValues;
+                } else {
+                    value = values;
+                }
 
-                 this.setProperty(property, value);
+                this.setProperty(property, value);
 
             }
 
             this.executeConditionValidatorCircular(property);
-
 
 
         }

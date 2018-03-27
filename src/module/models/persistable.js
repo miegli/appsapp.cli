@@ -571,6 +571,14 @@ var PersistableModel = /** @class */ (function () {
         }
     };
     /**
+     * return current property value unhashed
+     * @param property
+     * @returns {any}
+     */
+    PersistableModel.prototype.get = function (property) {
+        return this.getHashedValue(this.getPropertyValue(property));
+    };
+    /**
      * get properties
      * @param stringify
      */
