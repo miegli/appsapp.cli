@@ -902,6 +902,7 @@ var PersistableModel = /** @class */ (function () {
                 }
                 toAddModels.push(n);
                 // force conditions to be calculated initially
+                // force conditions to be calculated initially
                 if (!n.isInBackendMode()) {
                     Object.keys(n.__conditionActionIfMatchesAction).forEach(function (property) {
                         n.getProperty(property).subscribe(function (value) {
@@ -2395,6 +2396,7 @@ function HasConditions(options, actionIfMatches, validationOptions) {
                 option.value = true;
             }
             // rewrite nested properties
+            // rewrite nested properties
             if (option.property.indexOf('.') > 0) {
                 option.additionalData.propertyNestedAsNestedObject = option.property;
                 option.property = option.property.substr(0, option.property.indexOf('.'));
@@ -2428,6 +2430,9 @@ function HasConditions(options, actionIfMatches, validationOptions) {
                     /**
                                          * iterates over all rules synchronous
                                          */
+                    /**
+                     * iterates over all rules synchronous
+                     */
                     if (options) {
                         options.forEach(function (condition) {
                             if (condition.additionalData.propertyNestedAsNestedObject !== undefined) {
@@ -2467,6 +2472,9 @@ function HasConditions(options, actionIfMatches, validationOptions) {
                     /**
                                          *  if is in backend service mode, so override property value and condition validator state
                                          */
+                    /**
+                     *  if is in backend service mode, so override property value and condition validator state
+                     */
                     if (!state && args.object.isInBackendMode()) {
                         try {
                             delete args.object[args.property];
@@ -3158,6 +3166,7 @@ function IsHidden(options, validationOptions) {
                     option.value = true;
                 }
                 // rewrite nested properties
+                // rewrite nested properties
                 if (option.property.indexOf('.') > 0) {
                     option.additionalData.propertyNestedAsNestedObject = option.property;
                     option.property = option.property.substr(0, option.property.indexOf('.'));
@@ -3191,6 +3200,9 @@ function IsHidden(options, validationOptions) {
                     /**
                                          * iterates over all rules synchronous
                                          */
+                    /**
+                     * iterates over all rules synchronous
+                     */
                     if (options) {
                         options.forEach(function (condition) {
                             if (condition.additionalData.propertyNestedAsNestedObject !== undefined) {
@@ -3230,10 +3242,43 @@ function IsHidden(options, validationOptions) {
                     /**
                                          *  if is in backend service mode, so override property value and condition validator state
                                          */
+                    /**
+                     *  if is in backend service mode, so override property value and condition validator state
+                     */
                     if (args.object.isInBackendMode()) {
                         return true;
                     }
                     return state;
+                }
+            }
+        });
+    };
+}
+
+/**
+ * @fileoverview added by tsickle
+ * @suppress {checkTypes} checked by tsc
+ */
+/**
+ * @param {?=} validationOptions
+ * @return {?}
+ */
+function IsRequired(validationOptions) {
+    return function (object, propertyName) {
+        classValidator.registerDecorator({
+            name: "isRequired",
+            target: object.constructor,
+            propertyName: propertyName,
+            constraints: [{ 'type': 'isRequired', 'value': true }],
+            options: validationOptions,
+            validator: {
+                validate: /**
+                 * @param {?} value
+                 * @param {?} args
+                 * @return {?}
+                 */
+                function (value, args) {
+                    return true;
                 }
             }
         });
@@ -3268,6 +3313,7 @@ exports.IsSelect = IsSelect;
 exports.IsList = IsList;
 exports.IsTime = IsTime;
 exports.IsHidden = IsHidden;
+exports.IsRequired = IsRequired;
 exports.ValidatorConstraint = decorators.ValidatorConstraint;
 exports.Validate = decorators.Validate;
 exports.ValidateNested = decorators.ValidateNested;

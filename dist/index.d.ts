@@ -21,5 +21,6 @@ export * from './module/validation/validators/IsSelect';
 export * from './module/validation/validators/IsList';
 export * from './module/validation/validators/IsTime';
 export * from './module/validation/validators/IsHidden';
+export * from './module/validation/validators/IsRequired';
 export * from './module/interfaces/messages';
 export * from 'class-validator/decorator/decorators';
