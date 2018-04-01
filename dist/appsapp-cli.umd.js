@@ -3279,7 +3279,7 @@ function IsRequired(validationOptions) {
                  * @return {?}
                  */
                 function (value, args) {
-                    return true;
+                    return value && value !== undefined ? true : false;
                 }
             }
         });
