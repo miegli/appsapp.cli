@@ -1,13 +1,13 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var class_validator_1 = require("class-validator");
-function HasLabel(label, labelPosition, validationOptions) {
+function HasColor(color, validationOptions) {
     return function (object, propertyName) {
         class_validator_1.registerDecorator({
-            name: "hasLabel",
+            name: "hasColor",
             target: object.constructor,
             propertyName: propertyName,
-            constraints: [{ 'type': 'hasLabel', 'value': { label: label, labelPosition: labelPosition ? labelPosition : 'after' } }],
+            constraints: [{ 'type': 'hasColor', 'value': color }],
             options: validationOptions,
             validator: {
                 validate: function (value, args) {
@@ -17,4 +17,4 @@ function HasLabel(label, labelPosition, validationOptions) {
         });
     };
 }
-exports.HasLabel = HasLabel;
+exports.HasColor = HasColor;

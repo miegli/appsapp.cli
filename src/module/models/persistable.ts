@@ -1746,6 +1746,7 @@ export class PersistableModel {
             'isCalendar': 'date',
             'isTime': 'time',
             'isHidden': null,
+            'isRequired': null,
             'isNumpad': 'number',
             'customValidation': (metadata) => {
 
