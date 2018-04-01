@@ -10,7 +10,7 @@ export function IsRequired(validationOptions?: ValidationOptions) {
             options: validationOptions,
             validator: {
                 validate(value: any, args: ValidationArguments) {
-                    return true;
+                    return value && value !== undefined ? true : false;
                 }
             }
         });

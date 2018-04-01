@@ -1266,6 +1266,7 @@ var PersistableModel = /** @class */ (function () {
             'isCalendar': 'date',
             'isTime': 'time',
             'isHidden': null,
+            'isRequired': null,
             'isNumpad': 'number',
             'customValidation': function (metadata) {
                 if (metadata.constraints[0].type && metadata.constraints[0].type && metadata.constraints[0].type.substr(0, 3) !== 'has') {
