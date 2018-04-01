@@ -20,10 +20,10 @@
     "postversion": "git push && git push --tags && npm publish dist"
   },
   "devDependencies": {
-    "@angular/common": "^5.2.3",
-    "@angular/compiler": "^5.2.3",
-    "@angular/compiler-cli": "^5.2.3",
-    "@angular/core": "^5.2.3",
+    "@angular/common": "^5.2.9",
+    "@angular/compiler": "^5.2.9",
+    "@angular/compiler-cli": "^5.2.9",
+    "@angular/core": "^5.2.9",
     "@compodoc/compodoc": "^1.0.5",
     "@types/jasmine": "^2.8.6",
     "@types/node": "^9.4.1",
