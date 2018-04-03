@@ -130,7 +130,7 @@ export class PersistableModel {
         });
 
 
-        // self.transformAllProperties();
+        self.transformAllProperties();
 
         this.loaded().then(() => {
             self.__init();
@@ -1163,7 +1163,7 @@ export class PersistableModel {
                 if (errors.length > 0) {
 
                     if (softcheck) {
-                        resolve();
+                        resolve(self);
                     } else {
                         reject(errors);
                     }
@@ -1174,7 +1174,7 @@ export class PersistableModel {
                     });
 
                 } else {
-                    resolve();
+                    resolve(self);
                     self.__validationErrors = {};
                 }
 
@@ -1374,36 +1374,41 @@ export class PersistableModel {
 
         let self = this;
 
-        if (this.getMetadata(property, 'isTime').length) {
+
+        if (this.hasMetadata(property, 'isBoolean')) {
+            return typeof value == 'boolean' ? value : false;
+        }
+
+        if (this.hasMetadata(property, 'isTime')) {
             return typeof value == 'string' ? new Date(value) : (value ? value : new Date());
         }
 
-        if (this.getMetadata(property, 'isDate').length) {
+        if (this.hasMetadata(property, 'isDate')) {
             return value ? new Date(value) : (value ? value : new Date());
         }
 
-        if (this.getMetadata(property, 'isInt').length) {
+        if (this.hasMetadata(property, 'isInt')) {
             let v = typeof value == 'number' ? value : parseInt(value);
             return isNaN(v) || typeof v !== 'number' ? 0 : v;
         }
 
-        if (this.getMetadata(property, 'isNumber').length) {
+        if (this.hasMetadata(property, 'isNumber')) {
             return value === undefined || typeof value !== 'number' ? 0 : value;
         }
 
-        if (this.getMetadata(property, 'isCalendar').length) {
+        if (this.hasMetadata(property, 'isCalendar')) {
             return value ? new Date(value) : (value ? value : new Date());
         }
 
-        if (this.getMetadata(property, 'isBirthDate').length) {
+        if (this.hasMetadata(property, 'isBirthDate')) {
             return value ? new Date(value) : (value ? value : new Date());
         }
 
-        if (this.getMetadata(property, 'isDateRange').length) {
+        if (this.hasMetadata(property, 'isDateRange')) {
             return typeof value == 'object' ? value : [];
         }
 
-        if (this.getMetadata(property, 'isList').length) {
+        if (this.hasMetadata(property, 'isList')) {
 
             let valueAsObjects = [];
 
@@ -1464,7 +1469,7 @@ export class PersistableModel {
             return valueAsObjects;
         }
 
-        if (this.getMetadata(property, 'isSelect').length) {
+        if (this.hasMetadata(property, 'isSelect')) {
 
 
             if (this.isInBackendMode()) {
@@ -1611,6 +1616,26 @@ export class PersistableModel {
     public setIsOnline(state) {
         this.__isOnline = state;
         return this;
+    }
+
+    /**
+     * get properties metatadata
+     * @param {string} property
+     * @param {string} type
+     * @returns boolean
+     */
+    public hasMetadata(property: string, type: string) {
+
+        let has = false;
+
+        this.__metadata.forEach((metadata) => {
+            if (!has && metadata.type == type && metadata.propertyName == property) {
+                has = true;
+            }
+        });
+
+        return has;
+
     }
 
     /**

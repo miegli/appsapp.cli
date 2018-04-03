@@ -74,7 +74,7 @@ var PersistableModel = /** @class */ (function () {
         this.__editedObservable = new rxjs.Observable(function (observer) {
             self.__editedObserver = observer;
         });
-        // self.transformAllProperties();
+        self.transformAllProperties();
         this.loaded().then(function () {
             self.__init();
         });
@@ -1061,7 +1061,7 @@ var PersistableModel = /** @class */ (function () {
                 // errors is an array of validation errors
                 if (errors.length > 0) {
                     if (softcheck) {
-                        resolve();
+                        resolve(self);
                     }
                     else {
                         reject(errors);
@@ -1072,7 +1072,7 @@ var PersistableModel = /** @class */ (function () {
                     });
                 }
                 else {
-                    resolve();
+                    resolve(self);
                     self.__validationErrors = {};
                 }
                 Object.keys(self.__validatorObserver).forEach(function (property) {
@@ -1248,29 +1248,32 @@ var PersistableModel = /** @class */ (function () {
      */
     function (property, value) {
         var /** @type {?} */ self = this;
-        if (this.getMetadata(property, 'isTime').length) {
+        if (this.hasMetadata(property, 'isBoolean')) {
+            return typeof value == 'boolean' ? value : false;
+        }
+        if (this.hasMetadata(property, 'isTime')) {
             return typeof value == 'string' ? new Date(value) : (value ? value : new Date());
         }
-        if (this.getMetadata(property, 'isDate').length) {
+        if (this.hasMetadata(property, 'isDate')) {
             return value ? new Date(value) : (value ? value : new Date());
         }
-        if (this.getMetadata(property, 'isInt').length) {
+        if (this.hasMetadata(property, 'isInt')) {
             var /** @type {?} */ v = typeof value == 'number' ? value : parseInt(value);
             return isNaN(v) || typeof v !== 'number' ? 0 : v;
         }
-        if (this.getMetadata(property, 'isNumber').length) {
+        if (this.hasMetadata(property, 'isNumber')) {
             return value === undefined || typeof value !== 'number' ? 0 : value;
         }
-        if (this.getMetadata(property, 'isCalendar').length) {
+        if (this.hasMetadata(property, 'isCalendar')) {
             return value ? new Date(value) : (value ? value : new Date());
         }
-        if (this.getMetadata(property, 'isBirthDate').length) {
+        if (this.hasMetadata(property, 'isBirthDate')) {
             return value ? new Date(value) : (value ? value : new Date());
         }
-        if (this.getMetadata(property, 'isDateRange').length) {
+        if (this.hasMetadata(property, 'isDateRange')) {
             return typeof value == 'object' ? value : [];
         }
-        if (this.getMetadata(property, 'isList').length) {
+        if (this.hasMetadata(property, 'isList')) {
             var /** @type {?} */ valueAsObjects_1 = [];
             if (value && typeof value.forEach !== 'function') {
                 var /** @type {?} */ tmp = [];
@@ -1316,7 +1319,7 @@ var PersistableModel = /** @class */ (function () {
             this.refreshListArray(property);
             return valueAsObjects_1;
         }
-        if (this.getMetadata(property, 'isSelect').length) {
+        if (this.hasMetadata(property, 'isSelect')) {
             if (this.isInBackendMode()) {
                 var /** @type {?} */ values = typeof value == 'object' ? value : [];
                 var /** @type {?} */ realValues_1 = [];
@@ -1465,6 +1468,27 @@ var PersistableModel = /** @class */ (function () {
     function (state) {
         this.__isOnline = state;
         return this;
+    };
+    /**
+     * get properties metatadata
+     * @param {?} property
+     * @param {?} type
+     * @return {?} boolean
+     */
+    PersistableModel.prototype.hasMetadata = /**
+     * get properties metatadata
+     * @param {?} property
+     * @param {?} type
+     * @return {?} boolean
+     */
+    function (property, type) {
+        var /** @type {?} */ has = false;
+        this.__metadata.forEach(function (metadata) {
+            if (!has && metadata.type == type && metadata.propertyName == property) {
+                has = true;
+            }
+        });
+        return has;
     };
     /**
      * get properties metatadata

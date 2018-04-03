@@ -427,6 +427,13 @@ export declare class PersistableModel {
      * get properties metatadata
      * @param {string} property
      * @param {string} type
+     * @returns boolean
+     */
+    hasMetadata(property: string, type: string): boolean;
+    /**
+     * get properties metatadata
+     * @param {string} property
+     * @param {string} type
      * @returns {Array}
      */
     getMetadata(property?: string, type?: string): any;

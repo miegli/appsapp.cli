@@ -11,7 +11,7 @@ function IsRequired(validationOptions) {
             options: validationOptions,
             validator: {
                 validate: function (value, args) {
-                    return true;
+                    return value && value !== undefined ? true : false;
                 }
             }
         });
