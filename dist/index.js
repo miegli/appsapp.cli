@@ -44,7 +44,7 @@ var PersistableModel = /** @class */ (function () {
         this.__temp = {};
         this.__isOnline = true;
         this.__validationErrors = {};
-        this.__loadedProperty = {};
+        this.__hasValidationErrors = true;
         this.__metadata = [];
         this.__metadataCache = {};
         this._hasPendingChanges = false;
@@ -57,7 +57,6 @@ var PersistableModel = /** @class */ (function () {
         this.__conditionContraintsPropertiesValue = {};
         this.__conditionContraintsAffectedProperties = {};
         this.tmp__hashedValues = {};
-        this.__propertySymbols = {};
         this.__listArrays = {};
         this.__isPersistableModel = true;
         var /** @type {?} */ self = this;
@@ -77,6 +76,21 @@ var PersistableModel = /** @class */ (function () {
         self.transformAllProperties();
         this.loaded().then(function () {
             self.__init();
+            // autovalidation
+            // autovalidation
+            _this.getChangesWithCallback(function () {
+                if (!_this.__isAutosave) {
+                    self.removeConditionProperties();
+                    classValidator.validate(self, { skipMissingProperties: true }).then(function (errors) {
+                        if (errors.length) {
+                            self.__hasValidationErrors = true;
+                        }
+                        else {
+                            self.__hasValidationErrors = false;
+                        }
+                    });
+                }
+            });
         });
     }
     /**
@@ -1618,6 +1632,7 @@ var PersistableModel = /** @class */ (function () {
             'isTime': 'time',
             'isHidden': null,
             'isRequired': null,
+            'isEqualTo': null,
             'isNumpad': 'number',
             'customValidation': function (metadata) {
                 if (metadata.constraints[0].type && metadata.constraints[0].type && metadata.constraints[0].type.substr(0, 3) !== 'has') {
@@ -2209,7 +2224,7 @@ var PersistableModel = /** @class */ (function () {
      * @return {?}
      */
     function () {
-        return Object.keys(this.__validationErrors).length ? false : true;
+        return Object.keys(this.__validationErrors).length || this.__hasValidationErrors ? false : true;
     };
     /**
      * create list array
@@ -3314,6 +3329,36 @@ function IsRequired(validationOptions) {
  * @fileoverview added by tsickle
  * @suppress {checkTypes} checked by tsc
  */
+/**
+ * @param {?} property
+ * @return {?}
+ */
+function IsEqualTo(property) {
+    return function (object, propertyName) {
+        classValidator.registerDecorator({
+            name: "isEqualTo",
+            target: object.constructor,
+            propertyName: propertyName,
+            constraints: [{ 'type': 'isEqualTo' }],
+            validator: {
+                validate: /**
+                 * @param {?} value
+                 * @param {?} args
+                 * @return {?}
+                 */
+                function (value, args) {
+                    var /** @type {?} */ object = args.object;
+                    return value === object[property];
+                }
+            }
+        });
+    };
+}
+
+/**
+ * @fileoverview added by tsickle
+ * @suppress {checkTypes} checked by tsc
+ */
 
 exports.PersistableModel = PersistableModel;
 exports.HasBadge = HasBadge;
@@ -3339,6 +3384,7 @@ exports.IsList = IsList;
 exports.IsTime = IsTime;
 exports.IsHidden = IsHidden;
 exports.IsRequired = IsRequired;
+exports.IsEqualTo = IsEqualTo;
 exports.ValidatorConstraint = decorators.ValidatorConstraint;
 exports.Validate = decorators.Validate;
 exports.ValidateNested = decorators.ValidateNested;

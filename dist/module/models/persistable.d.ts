@@ -63,7 +63,7 @@ export declare class PersistableModel {
     private __persistenceManager;
     private __isOnline;
     private __validationErrors;
-    private __loadedProperty;
+    private __hasValidationErrors;
     private __metadata;
     private __metadataCache;
     private _hasPendingChanges;
@@ -80,7 +80,6 @@ export declare class PersistableModel {
     private __notificationProvider;
     private __parent;
     private tmp__hashedValues;
-    private __propertySymbols;
     private __listArrays;
     private __isPersistableModel;
     /**

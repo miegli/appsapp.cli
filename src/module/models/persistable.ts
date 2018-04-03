@@ -83,7 +83,7 @@ export class PersistableModel {
     private __persistenceManager: any;
     private __isOnline: boolean = true;
     private __validationErrors: any = {};
-    private __loadedProperty: any = {};
+    private __hasValidationErrors: boolean = true;
     private __metadata = [];
     private __metadataCache = {};
     private _hasPendingChanges: boolean = false;
@@ -100,7 +100,6 @@ export class PersistableModel {
     private __notificationProvider: any;
     private __parent: any;
     private tmp__hashedValues: object = {};
-    private __propertySymbols: object = {};
     private __listArrays: object = {};
     private __isPersistableModel: boolean = true;
 
@@ -134,7 +133,27 @@ export class PersistableModel {
 
         this.loaded().then(() => {
             self.__init();
-        })
+
+
+            // autovalidation
+            this.getChangesWithCallback(() => {
+
+                if (!this.__isAutosave) {
+                    self.removeConditionProperties();
+                    validate(self, {skipMissingProperties: true}).then(errors => {
+
+                        if (errors.length) {
+                            self.__hasValidationErrors = true;
+                        } else {
+                            self.__hasValidationErrors = false;
+                        }
+                    });
+                }
+            })
+
+        });
+
+
 
 
     }
@@ -1772,6 +1791,7 @@ export class PersistableModel {
             'isTime': 'time',
             'isHidden': null,
             'isRequired': null,
+            'isEqualTo': null,
             'isNumpad': 'number',
             'customValidation': (metadata) => {
 
@@ -2390,7 +2410,7 @@ export class PersistableModel {
      * @returns {boolean}
      */
     public isValid() {
-        return Object.keys(this.__validationErrors).length ? false : true;
+        return Object.keys(this.__validationErrors).length || this.__hasValidationErrors ? false : true;
 
     }
 
