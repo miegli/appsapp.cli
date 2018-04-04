@@ -27,4 +27,5 @@ __export(require("./module/validation/validators/IsList"));
 __export(require("./module/validation/validators/IsTime"));
 __export(require("./module/validation/validators/IsHidden"));
 __export(require("./module/validation/validators/IsRequired"));
+__export(require("./module/validation/validators/IsEqualTo"));
 __export(require("class-validator/decorator/decorators"));

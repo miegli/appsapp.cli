@@ -45,7 +45,7 @@ export declare class PersistableModel {
     private __isAutosave;
     private __observer;
     private __observable;
-    private __uuid;
+    private _uuid;
     private __firebaseDatabase;
     private __firebaseDatabasePath;
     private __firebaseDatabaseRoot;
@@ -81,6 +81,7 @@ export declare class PersistableModel {
     private __parent;
     private tmp__hashedValues;
     private __listArrays;
+    private __listArraysParentWatcher;
     private __isPersistableModel;
     /**
      * PersistanceManager as an optional argument when changes were persisted to stable database

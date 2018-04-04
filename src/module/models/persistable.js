@@ -27,7 +27,7 @@ var PersistableModel = /** @class */ (function () {
         this.__temp = {};
         this.__isOnline = true;
         this.__validationErrors = {};
-        this.__loadedProperty = {};
+        this.__hasValidationErrors = true;
         this.__metadata = [];
         this.__metadataCache = {};
         this._hasPendingChanges = false;
@@ -40,7 +40,6 @@ var PersistableModel = /** @class */ (function () {
         this.__conditionContraintsPropertiesValue = {};
         this.__conditionContraintsAffectedProperties = {};
         this.tmp__hashedValues = {};
-        this.__propertySymbols = {};
         this.__listArrays = {};
         this.__isPersistableModel = true;
         var self = this;
@@ -60,6 +59,20 @@ var PersistableModel = /** @class */ (function () {
         self.transformAllProperties();
         this.loaded().then(function () {
             self.__init();
+            // autovalidation
+            _this.getChangesWithCallback(function () {
+                if (!_this.__isAutosave) {
+                    self.removeConditionProperties();
+                    class_validator_1.validate(self, { skipMissingProperties: true }).then(function (errors) {
+                        if (errors.length) {
+                            self.__hasValidationErrors = true;
+                        }
+                        else {
+                            self.__hasValidationErrors = false;
+                        }
+                    });
+                }
+            });
         });
     }
     /**
@@ -1285,6 +1298,7 @@ var PersistableModel = /** @class */ (function () {
             'isTime': 'time',
             'isHidden': null,
             'isRequired': null,
+            'isEqualTo': null,
             'isNumpad': 'number',
             'customValidation': function (metadata) {
                 if (metadata.constraints[0].type && metadata.constraints[0].type && metadata.constraints[0].type.substr(0, 3) !== 'has') {
@@ -1731,7 +1745,7 @@ var PersistableModel = /** @class */ (function () {
      * @returns {boolean}
      */
     PersistableModel.prototype.isValid = function () {
-        return Object.keys(this.__validationErrors).length ? false : true;
+        return Object.keys(this.__validationErrors).length || this.__hasValidationErrors ? false : true;
     };
     /**
      * create list array

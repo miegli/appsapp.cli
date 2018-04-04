@@ -12,7 +12,6 @@ import {Observable, Observer} from 'rxjs';
 import {after} from "selenium-webdriver/testing";
 
 
-
 declare var global: any;
 
 export interface actionEmail {
@@ -65,7 +64,7 @@ export class PersistableModel {
     private __isAutosave: boolean = false;
     private __observer: Observer<any>;
     private __observable: Observable<any>;
-    private __uuid: string = '';
+    private _uuid: string = '';
     private __firebaseDatabase: AngularFireDatabase;
     private __firebaseDatabasePath: string;
     private __firebaseDatabaseRoot: string = 'session';
@@ -101,6 +100,7 @@ export class PersistableModel {
     private __parent: any;
     private tmp__hashedValues: object = {};
     private __listArrays: object = {};
+    private __listArraysParentWatcher: object = {};
     private __isPersistableModel: boolean = true;
 
     /**
@@ -129,7 +129,7 @@ export class PersistableModel {
         });
 
 
-        self.transformAllProperties();
+        //self.transformAllProperties();
 
         this.loaded().then(() => {
             self.__init();
@@ -152,8 +152,6 @@ export class PersistableModel {
             })
 
         });
-
-
 
 
     }
@@ -531,7 +529,7 @@ export class PersistableModel {
      * @returns {PersistableModel}
      */
     public setUuid(uuid?) {
-        this.__uuid = uuid !== undefined ? uuid : UUID.UUID();
+        this._uuid = uuid !== undefined ? uuid : UUID.UUID();
         return this;
     }
 
@@ -540,7 +538,7 @@ export class PersistableModel {
      * @returns {string}
      */
     public getUuid() {
-        return this.__uuid;
+        return this._uuid;
     }
 
     /**
@@ -813,6 +811,7 @@ export class PersistableModel {
         if (autosave) {
             this.save(null).subscribe((next) => {
             }, (error) => {
+                //
             });
         }
 
@@ -927,6 +926,10 @@ export class PersistableModel {
 
         let self = this, model = self;
 
+        if (data === undefined) {
+            data = {};
+        }
+
         if (model.getMetadataValue(property, 'isList')) {
 
             var toAddModels = [];
@@ -958,6 +961,10 @@ export class PersistableModel {
 
                 if (uuid === undefined || uuid === null) {
                     uuid = d !== undefined ? d[model.getMetadataValue(property, 'isList', null, 'usePropertyAsUuid')] : null;
+                }
+
+                if (uuid === undefined || !uuid) {
+                    uuid = data['_uuid'] == undefined ? UUID.UUID() : data['_uuid'];
                 }
 
                 if (typeof d == 'object' && d.length == 1 && d[0] !== undefined) {
@@ -995,7 +1002,8 @@ export class PersistableModel {
                         });
                     }
 
-                    if (model.__isAutosave) {
+                    n.setParent(self);
+                    if (self.__isAutosave) {
                         n.autosave();
                     }
 
@@ -1085,6 +1093,11 @@ export class PersistableModel {
             this.setProperty(property, this.transformTypeFromMetadata(property, null));
         }
 
+
+        if (this.__isAutosave) {
+            this.save().subscribe();
+        }
+
         return this;
 
 
@@ -1100,6 +1113,11 @@ export class PersistableModel {
         this[property] = this.transformTypeFromMetadata(property, '');
         this.setProperty(property, this[property]);
         this.emit();
+
+        if (this.__isAutosave) {
+            this.save().subscribe();
+        }
+
 
         return this;
 
@@ -1156,8 +1174,8 @@ export class PersistableModel {
         }
 
 
-        if (this.__uuid.length == 0) {
-            this.__uuid = UUID.UUID();
+        if (this._uuid.length == 0) {
+            this._uuid = UUID.UUID();
         }
         return this;
     }
@@ -1341,7 +1359,7 @@ export class PersistableModel {
                 Object.keys(json).forEach((property) => {
                     if (property.substr(0, 2) !== '__' || property.substr(0, 5) == 'tmp__') {
                         if ((self.isInBackendMode() || self.__edited[property] === undefined || self.__edited[property] === null)) {
-                        self[property] = model.transformTypeFromMetadata(property, model[property]);
+                            self[property] = self.transformTypeFromMetadata(property, model[property]);
                         }
 
                     }
@@ -1376,6 +1394,7 @@ export class PersistableModel {
      * @returns {any}
      */
     private transformTypeFromMetadata(property, value) {
+
 
         return this.transformTypeFromMetadataExecute(property, value);
 
@@ -1429,8 +1448,6 @@ export class PersistableModel {
 
         if (this.hasMetadata(property, 'isList')) {
 
-            let valueAsObjects = [];
-
             if (value && typeof value.forEach !== 'function') {
                 var tmp = [];
                 Object.keys(value).forEach((v) => {
@@ -1441,51 +1458,18 @@ export class PersistableModel {
 
             if (value && value.length) {
 
+                this[property] = [];
 
                 value.forEach((itemOriginal) => {
-
-                    if (itemOriginal !== undefined && itemOriginal.__isPersistableModel === undefined) {
-                        let uuid = itemOriginal[self.getMetadataValue(property, 'isList', null, 'usePropertyAsUuid')];
-                        let item = null;
-                        if (!self.isInBackendMode() && self.getAppsAppModuleProvider()) {
-                            item = self.createNewLazyLoadedPersistableModel(self.getAppsAppModuleProvider(), self.getMetadataValue(property, 'isList'), uuid);
-                        } else {
-                            // backend mode
-                            var constructor = typeof self.getMetadataValue(property, 'isList') == 'function' ? self.getMetadataValue(property, 'isList') : global[self.getMetadataValue(property, 'isList')];
-                            item = new constructor();
-                            item.setUuid(uuid);
-
-                        }
-
-                        if (item !== undefined) {
-
-                            let itemLoaded = item.loadJson(itemOriginal);
-
-                            if (!item.isInBackendMode()) {
-                                itemLoaded.getChangesObserverable().subscribe((next) => {
-                                    if (next.model.getParent()) {
-                                        next.model.getParent().setProperty(property, self.getPropertyValue(property, true));
-                                    }
-                                });
-                            }
-
-                            valueAsObjects.push(itemLoaded.transformAllProperties());
-                            //valueAsObjects.push(item);
-                            itemLoaded.refreshAllListArrays();
-                            itemLoaded.setParent(self);
-
-
-                        }
-
-                    } else {
-                        valueAsObjects.push(itemOriginal);
-                    }
+                    let uuid = itemOriginal[self.getMetadataValue(property, 'isList', null, 'usePropertyAsUuid')];
+                    this.add(property, itemOriginal, uuid);
                 });
             }
 
             this.refreshListArray(property);
 
-            return valueAsObjects;
+            return this[property];
+
         }
 
         if (this.hasMetadata(property, 'isSelect')) {
@@ -1648,7 +1632,7 @@ export class PersistableModel {
         let has = false;
 
         this.__metadata.forEach((metadata) => {
-            if (!has && metadata.type == type && metadata.propertyName == property) {
+            if (!has && (metadata.type == type || metadata.constraints[0].type == type) && metadata.propertyName == property) {
                 has = true;
             }
         });
@@ -2466,6 +2450,7 @@ export class PersistableModel {
 
             if (v && v.length) {
                 v.forEach((item) => {
+
                     if (item && item.__isPersistableModel && item.getUuid() && item.getUuid().length) {
                         properties[item.getUuid()] = {
                             value: item,

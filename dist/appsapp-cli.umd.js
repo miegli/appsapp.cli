@@ -32,7 +32,7 @@ var PersistableModel = /** @class */ (function () {
         var _this = this;
         this.__isLoaded = false;
         this.__isAutosave = false;
-        this.__uuid = '';
+        this._uuid = '';
         this.__firebaseDatabaseRoot = 'session';
         this.__bindings = {};
         this.__bindingsObserver = {};
@@ -58,6 +58,7 @@ var PersistableModel = /** @class */ (function () {
         this.__conditionContraintsAffectedProperties = {};
         this.tmp__hashedValues = {};
         this.__listArrays = {};
+        this.__listArraysParentWatcher = {};
         this.__isPersistableModel = true;
         var /** @type {?} */ self = this;
         this.__metadata = classValidator.getFromContainer(classValidator.MetadataStorage).getTargetValidationMetadatas(this.constructor, '');
@@ -73,7 +74,7 @@ var PersistableModel = /** @class */ (function () {
         this.__editedObservable = new rxjs.Observable(function (observer) {
             self.__editedObserver = observer;
         });
-        self.transformAllProperties();
+        //self.transformAllProperties();
         this.loaded().then(function () {
             self.__init();
             // autovalidation
@@ -432,7 +433,7 @@ var PersistableModel = /** @class */ (function () {
      * @return {?}
      */
     function (uuid) {
-        this.__uuid = uuid !== undefined ? uuid : angular2Uuid.UUID.UUID();
+        this._uuid = uuid !== undefined ? uuid : angular2Uuid.UUID.UUID();
         return this;
     };
     /**
@@ -444,7 +445,7 @@ var PersistableModel = /** @class */ (function () {
      * @return {?}
      */
     function () {
-        return this.__uuid;
+        return this._uuid;
     };
     /**
      * get models constructors name as an object identifier
@@ -732,6 +733,7 @@ var PersistableModel = /** @class */ (function () {
         if (autosave) {
             this.save(null).subscribe(function (next) {
             }, function (error) {
+                //
             });
         }
         return this;
@@ -851,6 +853,9 @@ var PersistableModel = /** @class */ (function () {
      */
     function (property, data, uuid) {
         var /** @type {?} */ self = this, /** @type {?} */ model = self;
+        if (data === undefined) {
+            data = {};
+        }
         if (model.getMetadataValue(property, 'isList')) {
             var /** @type {?} */ toAddModels = [];
             var /** @type {?} */ toCreateModels = [];
@@ -881,6 +886,9 @@ var PersistableModel = /** @class */ (function () {
                 if (uuid === undefined || uuid === null) {
                     uuid = d !== undefined ? d[model.getMetadataValue(property, 'isList', null, 'usePropertyAsUuid')] : null;
                 }
+                if (uuid === undefined || !uuid) {
+                    uuid = data['_uuid'] == undefined ? angular2Uuid.UUID.UUID() : data['_uuid'];
+                }
                 if (typeof d == 'object' && d.length == 1 && d[0] !== undefined) {
                     d = d[0];
                 }
@@ -910,7 +918,8 @@ var PersistableModel = /** @class */ (function () {
                             }
                         });
                     }
-                    if (model.__isAutosave) {
+                    n.setParent(self);
+                    if (self.__isAutosave) {
                         n.autosave();
                     }
                 }
@@ -988,6 +997,9 @@ var PersistableModel = /** @class */ (function () {
         else {
             this.setProperty(property, this.transformTypeFromMetadata(property, null));
         }
+        if (this.__isAutosave) {
+            this.save().subscribe();
+        }
         return this;
     };
     /**
@@ -1052,8 +1064,8 @@ var PersistableModel = /** @class */ (function () {
         if (persistenceManager !== undefined) {
             this.__persistenceManager = persistenceManager;
         }
-        if (this.__uuid.length == 0) {
-            this.__uuid = angular2Uuid.UUID.UUID();
+        if (this._uuid.length == 0) {
+            this._uuid = angular2Uuid.UUID.UUID();
         }
         return this;
     };
@@ -1217,7 +1229,7 @@ var PersistableModel = /** @class */ (function () {
                 Object.keys(json).forEach(function (property) {
                     if (property.substr(0, 2) !== '__' || property.substr(0, 5) == 'tmp__') {
                         if ((self.isInBackendMode() || self.__edited[property] === undefined || self.__edited[property] === null)) {
-                            self[property] = model.transformTypeFromMetadata(property, model[property]);
+                            self[property] = self.transformTypeFromMetadata(property, model[property]);
                         }
                     }
                 });
@@ -1261,6 +1273,7 @@ var PersistableModel = /** @class */ (function () {
      * @return {?}
      */
     function (property, value) {
+        var _this = this;
         var /** @type {?} */ self = this;
         if (this.hasMetadata(property, 'isBoolean')) {
             return typeof value == 'boolean' ? value : false;
@@ -1288,7 +1301,6 @@ var PersistableModel = /** @class */ (function () {
             return typeof value == 'object' ? value : [];
         }
         if (this.hasMetadata(property, 'isList')) {
-            var /** @type {?} */ valueAsObjects_1 = [];
             if (value && typeof value.forEach !== 'function') {
                 var /** @type {?} */ tmp = [];
                 Object.keys(value).forEach(function (v) {
@@ -1297,41 +1309,14 @@ var PersistableModel = /** @class */ (function () {
                 value = tmp;
             }
             if (value && value.length) {
+                this[property] = [];
                 value.forEach(function (itemOriginal) {
-                    if (itemOriginal !== undefined && itemOriginal.__isPersistableModel === undefined) {
-                        var /** @type {?} */ uuid = itemOriginal[self.getMetadataValue(property, 'isList', null, 'usePropertyAsUuid')];
-                        var /** @type {?} */ item = null;
-                        if (!self.isInBackendMode() && self.getAppsAppModuleProvider()) {
-                            item = self.createNewLazyLoadedPersistableModel(self.getAppsAppModuleProvider(), self.getMetadataValue(property, 'isList'), uuid);
-                        }
-                        else {
-                            // backend mode
-                            var /** @type {?} */ constructor = typeof self.getMetadataValue(property, 'isList') == 'function' ? self.getMetadataValue(property, 'isList') : global[self.getMetadataValue(property, 'isList')];
-                            item = new constructor();
-                            item.setUuid(uuid);
-                        }
-                        if (item !== undefined) {
-                            var /** @type {?} */ itemLoaded = item.loadJson(itemOriginal);
-                            if (!item.isInBackendMode()) {
-                                itemLoaded.getChangesObserverable().subscribe(function (next) {
-                                    if (next.model.getParent()) {
-                                        next.model.getParent().setProperty(property, self.getPropertyValue(property, true));
-                                    }
-                                });
-                            }
-                            valueAsObjects_1.push(itemLoaded.transformAllProperties());
-                            //valueAsObjects.push(item);
-                            itemLoaded.refreshAllListArrays();
-                            itemLoaded.setParent(self);
-                        }
-                    }
-                    else {
-                        valueAsObjects_1.push(itemOriginal);
-                    }
+                    var /** @type {?} */ uuid = itemOriginal[self.getMetadataValue(property, 'isList', null, 'usePropertyAsUuid')];
+                    _this.add(property, itemOriginal, uuid);
                 });
             }
             this.refreshListArray(property);
-            return valueAsObjects_1;
+            return this[property];
         }
         if (this.hasMetadata(property, 'isSelect')) {
             if (this.isInBackendMode()) {
@@ -1498,7 +1483,7 @@ var PersistableModel = /** @class */ (function () {
     function (property, type) {
         var /** @type {?} */ has = false;
         this.__metadata.forEach(function (metadata) {
-            if (!has && metadata.type == type && metadata.propertyName == property) {
+            if (!has && (metadata.type == type || metadata.constraints[0].type == type) && metadata.propertyName == property) {
                 has = true;
             }
         });
