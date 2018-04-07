@@ -61,6 +61,7 @@ export class PersistableModel {
     private __isLoadedPromiseInternal: Promise<any>;
     private __isLoadedPromiseInternalResolver: any;
     private __isLoaded: boolean = false;
+    private __isLoadedRequested: boolean = false;
     private __isAutosave: boolean = false;
     private __observer: Observer<any>;
     private __observable: Observable<any>;
@@ -114,6 +115,7 @@ export class PersistableModel {
 
         // transform initally property values
         this.transformAllProperties(true);
+
 
         // check if all loaded metadata has corresponding properties
         this.__metadata.forEach((metadata) => {
@@ -218,7 +220,6 @@ export class PersistableModel {
 
 
         });
-
 
     }
 
@@ -846,7 +847,13 @@ export class PersistableModel {
      */
     public get(property) {
 
-        return this.getHashedValue(this.getPropertyValue(property));
+        if (this.__isLoadedRequested === false && this.getAppsAppModuleProvider()) {
+            this.__isLoadedRequested = true;
+            this.getAppsAppModuleProvider().lazyLoad(this);
+
+        }
+
+        return this.getHashedValue(this[property]);
 
     }
 
@@ -878,13 +885,23 @@ export class PersistableModel {
      */
     public getPropertiesKeys() {
 
-        let keys = [], self = this;
+        let keys = [], self = this, keysO = {};
 
         Object.keys(self).forEach((property) => {
-            if (property.substr(0, 1) !== '_' && property.substr(0, 5) !== 'tmp__') {
+            if (keysO[property] === undefined && property.substr(0, 1) !== '_' && property.substr(0, 5) !== 'tmp__') {
+                keysO[property] = true;
                 keys.push(property);
             }
         });
+
+        if (this.__metadata) {
+            this.__metadata.forEach((metadata) => {
+                if (keysO[metadata.propertyName] == undefined) {
+                    keysO[metadata.propertyName] = true;
+                    keys.push(metadata.propertyName);
+                }
+            })
+        }
 
         return keys;
 
@@ -924,9 +941,10 @@ export class PersistableModel {
      * @param property
      * @param data (json object, persistable model or array of those
      * @param uuid string
+     * @param internal boolean
      * @returns {PersistableModel}
      */
-    public add(property, data?: any, uuid?: string) {
+    public add(property, data?: any, uuid?: string, internal?: boolean) {
 
         let self = this, model = self;
 
@@ -1433,6 +1451,9 @@ export class PersistableModel {
 
         let self = this;
 
+        if (typeof value === 'function') {
+            return value;
+        }
 
         if (this.hasMetadata(property, 'isBoolean')) {
             return typeof value == 'boolean' ? value : false;
@@ -1477,12 +1498,20 @@ export class PersistableModel {
                 value = tmp;
             }
 
+            if (!value) {
+                value = [];
+            }
+
+            if (!this[property]) {
+                this[property] = [];
+            }
+
             if (self.isInBackendMode()) {
                 this[property] = [];
 
                 value.forEach((itemOriginal) => {
                     let uuid = itemOriginal[self.getMetadataValue(property, 'isList', null, 'usePropertyAsUuid')];
-                    this.add(property, itemOriginal, uuid);
+                    this.add(property, itemOriginal, uuid, true);
                 });
 
             } else {
@@ -1529,7 +1558,7 @@ export class PersistableModel {
 
 
                     } else {
-                        this.add(property, itemOriginal, uuid);
+                        this.add(property, itemOriginal, uuid, true);
                     }
                 });
                 // remove
@@ -2321,7 +2350,7 @@ export class PersistableModel {
             return this.tmp__hashedValues[hash] !== undefined ? this.tmp__hashedValues[hash] : hash;
         } else {
 
-            if (typeof hash == 'object' && typeof hash.length == 'function') {
+            if (hash && typeof hash == 'object' && typeof hash.length == 'function') {
 
                 let values = [];
                 hash.forEach((value) => {

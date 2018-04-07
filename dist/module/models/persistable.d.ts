@@ -42,6 +42,7 @@ export declare class PersistableModel {
     private __isLoadedPromiseInternal;
     private __isLoadedPromiseInternalResolver;
     private __isLoaded;
+    private __isLoadedRequested;
     private __isAutosave;
     private __observer;
     private __observable;
@@ -300,9 +301,10 @@ export declare class PersistableModel {
      * @param property
      * @param data (json object, persistable model or array of those
      * @param uuid string
+     * @param internal boolean
      * @returns {PersistableModel}
      */
-    add(property: any, data?: any, uuid?: string): this;
+    add(property: any, data?: any, uuid?: string, internal?: boolean): this;
     /**
      * remove a new list entry
      * @param property

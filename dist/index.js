@@ -31,6 +31,7 @@ var PersistableModel = /** @class */ (function () {
     function PersistableModel() {
         var _this = this;
         this.__isLoaded = false;
+        this.__isLoadedRequested = false;
         this.__isAutosave = false;
         this.uuid = '';
         this.__firebaseDatabaseRoot = 'session';
@@ -769,7 +770,11 @@ var PersistableModel = /** @class */ (function () {
      * @return {?}
      */
     function (property) {
-        return this.getHashedValue(this.getPropertyValue(property));
+        if (this.__isLoadedRequested === false && this.getAppsAppModuleProvider()) {
+            this.__isLoadedRequested = true;
+            this.getAppsAppModuleProvider().lazyLoad(this);
+        }
+        return this.getHashedValue(this[property]);
     };
     /**
      * get properties
@@ -804,12 +809,21 @@ var PersistableModel = /** @class */ (function () {
      * @return {?}
      */
     function () {
-        var /** @type {?} */ keys = [], /** @type {?} */ self = this;
+        var /** @type {?} */ keys = [], /** @type {?} */ self = this, /** @type {?} */ keysO = {};
         Object.keys(self).forEach(function (property) {
-            if (property.substr(0, 1) !== '_' && property.substr(0, 5) !== 'tmp__') {
+            if (keysO[property] === undefined && property.substr(0, 1) !== '_' && property.substr(0, 5) !== 'tmp__') {
+                keysO[property] = true;
                 keys.push(property);
             }
         });
+        if (this.__metadata) {
+            this.__metadata.forEach(function (metadata) {
+                if (keysO[metadata.propertyName] == undefined) {
+                    keysO[metadata.propertyName] = true;
+                    keys.push(metadata.propertyName);
+                }
+            });
+        }
         return keys;
     };
     /**
@@ -842,6 +856,7 @@ var PersistableModel = /** @class */ (function () {
      * @param {?} property
      * @param {?=} data (json object, persistable model or array of those
      * @param {?=} uuid string
+     * @param {?=} internal boolean
      * @return {?}
      */
     PersistableModel.prototype.add = /**
@@ -849,9 +864,10 @@ var PersistableModel = /** @class */ (function () {
      * @param {?} property
      * @param {?=} data (json object, persistable model or array of those
      * @param {?=} uuid string
+     * @param {?=} internal boolean
      * @return {?}
      */
-    function (property, data, uuid) {
+    function (property, data, uuid, internal) {
         var /** @type {?} */ self = this, /** @type {?} */ model = self;
         if (data === undefined) {
             data = {};
@@ -1284,6 +1300,9 @@ var PersistableModel = /** @class */ (function () {
     function (property, value) {
         var _this = this;
         var /** @type {?} */ self = this;
+        if (typeof value === 'function') {
+            return value;
+        }
         if (this.hasMetadata(property, 'isBoolean')) {
             return typeof value == 'boolean' ? value : false;
         }
@@ -1317,11 +1336,17 @@ var PersistableModel = /** @class */ (function () {
                 });
                 value = tmp;
             }
+            if (!value) {
+                value = [];
+            }
+            if (!this[property]) {
+                this[property] = [];
+            }
             if (self.isInBackendMode()) {
                 this[property] = [];
                 value.forEach(function (itemOriginal) {
                     var /** @type {?} */ uuid = itemOriginal[self.getMetadataValue(property, 'isList', null, 'usePropertyAsUuid')];
-                    _this.add(property, itemOriginal, uuid);
+                    _this.add(property, itemOriginal, uuid, true);
                 });
             }
             else {
@@ -1361,7 +1386,7 @@ var PersistableModel = /** @class */ (function () {
                         }
                     }
                     else {
-                        _this.add(property, itemOriginal, uuid);
+                        _this.add(property, itemOriginal, uuid, true);
                     }
                 });
                 // remove
@@ -2093,7 +2118,7 @@ var PersistableModel = /** @class */ (function () {
             return this.tmp__hashedValues[hash] !== undefined ? this.tmp__hashedValues[hash] : hash;
         }
         else {
-            if (typeof hash == 'object' && typeof hash.length == 'function') {
+            if (hash && typeof hash == 'object' && typeof hash.length == 'function') {
                 var /** @type {?} */ values_1 = [];
                 hash.forEach(function (value) {
                     values_1.push(_this.tmp__hashedValues[value] !== undefined ? _this.tmp__hashedValues[value] : value);
