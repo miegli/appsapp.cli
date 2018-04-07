@@ -9,7 +9,7 @@ import {AppsappModuleProviderMessages} from "../interfaces/messages";
 import {HttpClient} from "@angular/common/http";
 import * as objectHash from 'object-hash';
 import {Observable, Observer} from 'rxjs';
-import {after} from "selenium-webdriver/testing";
+import {ValidationMetadata} from "class-validator/metadata/ValidationMetadata";
 
 
 declare var global: any;
@@ -64,7 +64,7 @@ export class PersistableModel {
     private __isAutosave: boolean = false;
     private __observer: Observer<any>;
     private __observable: Observable<any>;
-    private _uuid: string = '';
+    private uuid: string = '';
     private __firebaseDatabase: AngularFireDatabase;
     private __firebaseDatabasePath: string;
     private __firebaseDatabaseRoot: string = 'session';
@@ -85,7 +85,7 @@ export class PersistableModel {
     private __hasValidationErrors: boolean = true;
     private __metadata = [];
     private __metadataCache = {};
-    private _hasPendingChanges: boolean = false;
+    private __hasPendingChanges: boolean = false;
     private __conditionBindings: any = {};
     private __conditionActionIfMatches: any = {};
     private __conditionActionIfMatchesAction: any = {};
@@ -112,6 +112,9 @@ export class PersistableModel {
 
         this.__metadata = getFromContainer(MetadataStorage).getTargetValidationMetadatas(this.constructor, '');
 
+        // transform initally property values
+        this.transformAllProperties(true);
+
         // check if all loaded metadata has corresponding properties
         this.__metadata.forEach((metadata) => {
 
@@ -129,29 +132,27 @@ export class PersistableModel {
         });
 
 
-        //self.transformAllProperties();
-
-        this.loaded().then(() => {
-            self.__init();
+        //this.loaded().then(() => {
+        self.__init();
 
 
-            // autovalidation
-            this.getChangesWithCallback(() => {
+        // autovalidation
+        this.getChangesWithCallback(() => {
 
-                if (!this.__isAutosave) {
-                    self.removeConditionProperties();
-                    validate(self, {skipMissingProperties: true}).then(errors => {
+            if (!this.__isAutosave) {
+                self.removeConditionProperties();
+                validate(self, {skipMissingProperties: true}).then(errors => {
 
-                        if (errors.length) {
-                            self.__hasValidationErrors = true;
-                        } else {
-                            self.__hasValidationErrors = false;
-                        }
-                    });
-                }
-            })
+                    if (errors.length) {
+                        self.__hasValidationErrors = true;
+                    } else {
+                        self.__hasValidationErrors = false;
+                    }
+                });
+            }
+        })
 
-        });
+        // });
 
 
     }
@@ -217,6 +218,7 @@ export class PersistableModel {
 
 
         });
+
 
     }
 
@@ -529,7 +531,7 @@ export class PersistableModel {
      * @returns {PersistableModel}
      */
     public setUuid(uuid?) {
-        this._uuid = uuid !== undefined ? uuid : UUID.UUID();
+        this.uuid = uuid !== undefined ? uuid : UUID.UUID();
         return this;
     }
 
@@ -538,7 +540,7 @@ export class PersistableModel {
      * @returns {string}
      */
     public getUuid() {
-        return this._uuid;
+        return this.uuid;
     }
 
     /**
@@ -767,6 +769,7 @@ export class PersistableModel {
 
     }
 
+
     /**
      * set property value for using as an binding variable
      * @param {string} property
@@ -776,6 +779,7 @@ export class PersistableModel {
     public setProperty(property, value) {
 
         var self = this, autosave = false;
+
 
         if (this.__isAutosave && this[property] !== value) {
             autosave = true;
@@ -920,7 +924,7 @@ export class PersistableModel {
      * @param property
      * @param data (json object, persistable model or array of those
      * @param uuid string
-     * @returns {PersistableModel} | null
+     * @returns {PersistableModel}
      */
     public add(property, data?: any, uuid?: string) {
 
@@ -964,7 +968,7 @@ export class PersistableModel {
                 }
 
                 if (uuid === undefined || !uuid) {
-                    uuid = data['_uuid'] == undefined ? UUID.UUID() : data['_uuid'];
+                    uuid = data['uuid'] == undefined ? UUID.UUID() : data['uuid'];
                 }
 
                 if (typeof d == 'object' && d.length == 1 && d[0] !== undefined) {
@@ -987,6 +991,8 @@ export class PersistableModel {
                         n.loadJson(d);
                     }
 
+                    toAddModels.push(n);
+
 
                 } else {
 
@@ -1003,48 +1009,52 @@ export class PersistableModel {
                     }
 
                     n.setParent(self);
+
                     if (self.__isAutosave) {
                         n.autosave();
                     }
 
-                }
 
-                toAddModels.push(n);
+                    // force conditions to be calculated initially
+                    if (!n.isInBackendMode()) {
 
-                // force conditions to be calculated initially
-                if (!n.isInBackendMode()) {
-
-                    Object.keys(n.__conditionActionIfMatchesAction).forEach((property) => {
-                        n.getProperty(property).subscribe((value) => {
-                            // skip
+                        Object.keys(n.__conditionActionIfMatchesAction).forEach((property) => {
+                            n.getProperty(property).subscribe((value) => {
+                                // skip
+                            });
                         });
-                    });
-                    Object.keys(n.__conditionActionIfMatchesRemovedProperties).forEach((property) => {
-                        n.getProperty(property).subscribe((value) => {
-                            // skip
-                        });
+                        Object.keys(n.__conditionActionIfMatchesRemovedProperties).forEach((property) => {
+                            n.getProperty(property).subscribe((value) => {
+                                // skip
+                            });
 
-                    });
+                        });
+                    }
+
+
+                    toAddModels.push(n);
+
                 }
 
 
             });
 
-            var t = model.getPropertyValue(property);
-            if (!t || typeof t == 'undefined') {
-                t = [];
-            }
 
             toAddModels.forEach((d) => {
-                t.push(d);
+                model[property].push(d);
             });
 
-            model.refreshListArray(property, t);
-            return t.length == 1 ? t[0] : t;
+            if (!this.isInBackendMode() && this.__isAutosave) {
+                this.save().subscribe();
+            }
 
-        } else {
-            return null;
+
+            model.refreshListArray(property, model[property]);
+
+
         }
+
+        return this;
 
 
     }
@@ -1174,8 +1184,8 @@ export class PersistableModel {
         }
 
 
-        if (this._uuid.length == 0) {
-            this._uuid = UUID.UUID();
+        if (this.uuid.length == 0) {
+            this.uuid = UUID.UUID();
         }
         return this;
     }
@@ -1318,7 +1328,7 @@ export class PersistableModel {
 
         } else {
 
-            return (Object.keys(this.__edited).length)
+            return (Object.keys(this.__edited).length) ? true : false
 
         }
 
@@ -1338,6 +1348,7 @@ export class PersistableModel {
         json = typeof json == 'string' ? JSON.parse(json) : json;
 
         let model = <any>plainToClass(<any>this.constructor, json, {excludePrefixes: ["__"]});
+
 
         if (model) {
 
@@ -1359,18 +1370,28 @@ export class PersistableModel {
                 Object.keys(json).forEach((property) => {
                     if (property.substr(0, 2) !== '__' || property.substr(0, 5) == 'tmp__') {
                         if ((self.isInBackendMode() || self.__edited[property] === undefined || self.__edited[property] === null)) {
-                            self[property] = self.transformTypeFromMetadata(property, model[property]);
+
+                            if (property.substr(0, 5) == 'tmp__' || property.substr(0, 1) == '_') {
+                                self[property] = model[property];
+                            } else {
+                                self[property] = self.transformTypeFromMetadata(property, model[property]);
+                            }
+
                         }
 
                     }
                 });
 
-                self.refreshAllListArrays();
 
+                if (self.getParent()) {
+                    // update external changes to parent model
+                    self.getParent().save().subscribe();
+                }
+
+                self.refreshAllListArrays();
 
                 self.validate().then((success) => {
                     self.emit();
-
                 }).catch((error) => {
                     Object.keys(error).forEach((e: any) => {
                         self['__validationErrors'][e.property] = true;
@@ -1456,14 +1477,75 @@ export class PersistableModel {
                 value = tmp;
             }
 
-            if (value && value.length) {
-
+            if (self.isInBackendMode()) {
                 this[property] = [];
 
                 value.forEach((itemOriginal) => {
                     let uuid = itemOriginal[self.getMetadataValue(property, 'isList', null, 'usePropertyAsUuid')];
                     this.add(property, itemOriginal, uuid);
                 });
+
+            } else {
+
+                // merge lists values
+                let uuidsOld = {}, uuidsNew = {}, uuidToRemove = {};
+                value.forEach((i) => {
+                    if (i.uuid !== undefined) {
+                        uuidsNew[i.uuid] = true;
+                    }
+                });
+                this[property].forEach((i) => {
+
+                    if (i.uuid !== undefined) {
+                        uuidsOld[i.uuid] = i;
+                    }
+                    if (uuidsNew[i.uuid] === undefined) {
+                        uuidToRemove[i.uuid] = true;
+                    }
+
+                });
+                // add and update
+                value.forEach((itemOriginal) => {
+                    let uuid = itemOriginal[self.getMetadataValue(property, 'isList', null, 'usePropertyAsUuid')];
+                    if (uuid === undefined && itemOriginal.uuid !== undefined) {
+                        uuid = itemOriginal.uuid;
+                    }
+
+                    if (uuidsOld[uuid] !== undefined) {
+
+                        if (itemOriginal.__isPersistableModel === undefined) {
+
+                            Object.keys(itemOriginal).forEach((property) => {
+                                if (property.substr(0, 2) !== '__' || property.substr(0, 5) == 'tmp__') {
+                                    //uuidsOld[uuid][property] = uuidsOld[uuid].transformTypeFromMetadata(property, itemOriginal[property]);
+                                    uuidsOld[uuid].setProperty(property, uuidsOld[uuid].transformTypeFromMetadata(property, itemOriginal[property]));
+
+                                }
+                            });
+
+                        } else {
+                            uuidsOld[uuid] = itemOriginal;
+                        }
+
+
+                    } else {
+                        this.add(property, itemOriginal, uuid);
+                    }
+                });
+                // remove
+                this[property].forEach((item, i) => {
+                    if (uuidToRemove[item.uuid] === true) {
+                        this[property].splice(i, 1);
+                        try {
+                            delete this[property][item.uuid];
+                        } catch (e) {
+                            //
+                        }
+
+                    }
+                });
+
+
             }
 
             this.refreshListArray(property);
@@ -1497,21 +1579,32 @@ export class PersistableModel {
 
         }
 
-        return value;
+
+        return value === null ? '' : value;
 
     }
 
     /**
      * Transform all properties
+     * @param sync boolean
      * @returns {PersistableModel}
      */
-    public transformAllProperties() {
+    public transformAllProperties(sync?: boolean) {
 
         let self = this;
 
-        self.getPropertiesKeys().forEach((property) => {
-            self[property] = self.transformTypeFromMetadata(property, self.getPropertyValue(property));
-        });
+        if (self.isInBackendMode() || sync === true) {
+            self.getPropertiesKeys().forEach((property) => {
+                self[property] = self.transformTypeFromMetadata(property, self.getPropertyValue(property));
+            });
+        } else {
+            window.setTimeout(() => {
+                self.getPropertiesKeys().forEach((property) => {
+                    self[property] = self.transformTypeFromMetadata(property, self.getPropertyValue(property));
+                });
+            })
+        }
+
 
         return this;
 
@@ -1542,7 +1635,7 @@ export class PersistableModel {
      */
     public hasPendingChanges() {
 
-        return this._hasPendingChanges;
+        return this.__hasPendingChanges;
     }
 
     /**
@@ -1561,7 +1654,7 @@ export class PersistableModel {
             this.__persistenceManager.removePendingChanges(this);
         }
 
-        this._hasPendingChanges = state;
+        this.__hasPendingChanges = state;
 
         return this;
     }
@@ -1632,7 +1725,7 @@ export class PersistableModel {
         let has = false;
 
         this.__metadata.forEach((metadata) => {
-            if (!has && (metadata.type == type || metadata.constraints[0].type == type) && metadata.propertyName == property) {
+            if (!has && ((metadata && metadata.type == type) || (metadata.constraints && metadata.constraints[0] && metadata.constraints[0].type == type)) && metadata.propertyName == property) {
                 has = true;
             }
         });
@@ -1750,6 +1843,10 @@ export class PersistableModel {
     public getType(property) {
 
         let type = null;
+
+        if (property === 'uuid') {
+            return null;
+        }
 
         const typeMappings = {
 
@@ -2118,6 +2215,16 @@ export class PersistableModel {
     private getIsLoadedPromise() {
 
         return this.__isLoadedPromise;
+
+    }
+
+    /**
+     * get is loaded
+     * @returns {boolean}
+     */
+    private isLoaded() {
+
+        return this.__isLoaded;
 
     }
 

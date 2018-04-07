@@ -45,7 +45,7 @@ export declare class PersistableModel {
     private __isAutosave;
     private __observer;
     private __observable;
-    private _uuid;
+    private uuid;
     private __firebaseDatabase;
     private __firebaseDatabasePath;
     private __firebaseDatabaseRoot;
@@ -66,7 +66,7 @@ export declare class PersistableModel {
     private __hasValidationErrors;
     private __metadata;
     private __metadataCache;
-    private _hasPendingChanges;
+    private __hasPendingChanges;
     private __conditionBindings;
     private __conditionActionIfMatches;
     private __conditionActionIfMatchesAction;
@@ -300,9 +300,9 @@ export declare class PersistableModel {
      * @param property
      * @param data (json object, persistable model or array of those
      * @param uuid string
-     * @returns {PersistableModel} | null
+     * @returns {PersistableModel}
      */
-    add(property: any, data?: any, uuid?: string): any;
+    add(property: any, data?: any, uuid?: string): this;
     /**
      * remove a new list entry
      * @param property
@@ -356,7 +356,7 @@ export declare class PersistableModel {
      * @param {string} property as an optional argument
      * @returns {boolean}
      */
-    hasChanges(property?: any): number | boolean;
+    hasChanges(property?: any): boolean;
     /**
      * load json data
      * @param {object|string} stringified or real json object
@@ -380,9 +380,10 @@ export declare class PersistableModel {
     private transformTypeFromMetadataExecute(property, value);
     /**
      * Transform all properties
+     * @param sync boolean
      * @returns {PersistableModel}
      */
-    transformAllProperties(): this;
+    transformAllProperties(sync?: boolean): this;
     /**
      * Transform all properties by given type
      * @param type string
@@ -500,6 +501,11 @@ export declare class PersistableModel {
      * @returns {Promise<any>}
      */
     private getIsLoadedPromise();
+    /**
+     * get is loaded
+     * @returns {boolean}
+     */
+    private isLoaded();
     /**
      * Is loaded promise
      * @returns {Promise}
